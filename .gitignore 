@@ -1,0 +1,20 @@
+.idea/
+.vscode/
+.DS_store
+
+# Outputs of build stage
+output/
+
+# python
+*__pycache__*
+*.pyi
+
+# Virtual env
+.venv/
+
+monolith/.gradle
+monolith/build
+
+*.pyc
+*.swp
+*.swo

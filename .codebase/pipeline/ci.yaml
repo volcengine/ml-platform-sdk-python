@@ -1,0 +1,24 @@
+# Get Started with Codebase CI https://bytedance.feishu.cn/wiki/wikcnclt1VL6j2z0I0fFE6cdzwc
+name: SDK Operator CI
+trigger:
+  change:
+    types:
+      - create
+      - push
+jobs:
+  python_static_analysis_and_unit_test:
+    name: Python Static Analysis & Unit Test
+    image: hub.byted.org/base/toutiao.debian9.python3:latest
+    steps:
+      - commands:
+          # Environment setup
+          - apt-get update && apt-get install -y build-essential libsnappy-dev
+          - yes | apt-get install --assume-yes git
+          - pip3 install -i https://bytedpypi.byted.org/simple pylint yapf
+          - pip3 install -i https://bytedpypi.byted.org/simple -r services/data/requirements.txt
+
+          # Static analysis starts here
+          - bash -ex presubmit/py_static_analysis.sh presubmit "$CI_EVENT_CHANGE_TARGET_SHA" "$CI_EVENT_CHANGE_SOURCE_SHA"
+
+          # Unit test starts here
+          - bash -ex presubmit/py_unit_test.sh
