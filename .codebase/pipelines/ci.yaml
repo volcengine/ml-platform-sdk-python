@@ -14,6 +14,7 @@ jobs:
           # Environment setup
           - apt-get update && apt-get install -y build-essential libsnappy-dev
           - yes | apt-get install --assume-yes git
+          # install python packages
           - pip3 install -i https://bytedpypi.byted.org/simple pylint yapf
           - pip3 install -i https://bytedpypi.byted.org/simple -r operator_sdk/requirements.txt
 
