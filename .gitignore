@@ -12,9 +12,6 @@ output/
 # Virtual env
 .venv/
 
-monolith/.gradle
-monolith/build
-
 *.pyc
 *.swp
 *.swo

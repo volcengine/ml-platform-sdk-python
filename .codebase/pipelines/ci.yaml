@@ -15,7 +15,7 @@ jobs:
           - apt-get update && apt-get install -y build-essential libsnappy-dev
           - yes | apt-get install --assume-yes git
           - pip3 install -i https://bytedpypi.byted.org/simple pylint yapf
-          - pip3 install -i https://bytedpypi.byted.org/simple -r services/data/requirements.txt
+          - pip3 install -i https://bytedpypi.byted.org/simple -r operator_sdk/requirements.txt
 
           # Static analysis starts here
           - bash -ex presubmit/py_static_analysis.sh presubmit "$CI_EVENT_CHANGE_TARGET_SHA" "$CI_EVENT_CHANGE_SOURCE_SHA"
