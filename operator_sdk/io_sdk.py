@@ -1,17 +1,7 @@
 import os
-from tos_client import TOSClient
 
 
 class Slot:
-
-    def __init__(self):
-        self.tos_client = TOSClient()
-
-    def tos_upload(self, bucket):
-        """Upload dataset to TOS"""
-
-    def tos_download(self, bucket):
-        """Download dataset stored in TOS"""
 
     def output_path(self, slot_id) -> str:
         """Convert output slot_id to local storage path"""
