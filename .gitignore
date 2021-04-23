@@ -12,6 +12,7 @@ output/
 # Virtual env
 .venv/
 
+*.egg-info/
 *.pyc
 *.swp
 *.swo
