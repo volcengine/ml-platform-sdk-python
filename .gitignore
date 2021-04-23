@@ -4,6 +4,8 @@
 
 # Outputs of build stage
 output/
+dist/
+build/
 
 # python
 *__pycache__*
@@ -16,3 +18,4 @@ output/
 *.pyc
 *.swp
 *.swo
+
