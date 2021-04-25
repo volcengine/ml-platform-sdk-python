@@ -3,7 +3,7 @@ from operator_sdk import env
 
 class Slot:
 
-    def __init__(self, slot_index: int, io_type: str):
+    def __init__(self, io_type: str, slot_index: int):
         self._config = env.NodeConfig()
 
         if io_type not in ('input', 'output'):

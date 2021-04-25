@@ -11,12 +11,6 @@ class NodeConfig:
     def get_node_id(self):
         return self.config['id']
 
-    def get_tos_bucket(self):
-        return self.config['config']['parameters']['tos_bucket']
-
-    def get_tos_key(self):
-        return self.config['config']['parameters']['tos_key']
-
     def get_input_slots(self):
         return self.config['inputs']
 
