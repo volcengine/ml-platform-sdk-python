@@ -1,3 +1,4 @@
+import os
 from operator_sdk import env
 
 
@@ -29,6 +30,9 @@ class Slot:
                 self._property = s
                 break
 
+        self.local_path = self._property['path']
+        os.makedirs(self.local_path)
+
     def get_path(self) -> str:
         """return local storage path"""
-        return self._property['path']
+        return self.local_path
