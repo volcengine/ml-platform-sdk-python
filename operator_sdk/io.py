@@ -1,11 +1,11 @@
 import os
-from operator_sdk import env
+import env
 
 
 class Slot:
 
     def __init__(self, io_type: str, slot_index: int):
-        self._config = env.NodeConfig()
+        self._config = env.Config()
 
         if io_type not in ('input', 'output'):
             raise ValueError('io_type can only be "input" or "output"')
