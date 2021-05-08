@@ -4,7 +4,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from boto3.s3.transfer import TransferConfig
-import env
+from operator_sdk import env
 
 
 class TOSClient:
@@ -19,7 +19,7 @@ class TOSClient:
         config = env.Config()
         client = boto3.client(
             's3',
-            region_name=config.get_region_name(),
+            region_name=config.get_service_region(),
             endpoint_url=config.get_tos_endpoint_url(),
             aws_access_key_id=config.get_access_key_id(),
             aws_secret_access_key=config.get_secret_access_key(),

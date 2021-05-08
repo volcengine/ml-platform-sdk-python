@@ -1,5 +1,6 @@
+import logging
 import os
-import env
+from operator_sdk import env
 
 
 class Slot:
@@ -31,7 +32,13 @@ class Slot:
                 break
 
         self.local_path = self._property['path']
-        os.makedirs(self.local_path)
+
+        if io_type == 'output' and self.local_path != "":
+            try:
+                os.makedirs(self.local_path, exist_ok=True)
+            except OSError as e:
+                logging.warning('Cannot create output directory')
+                raise e
 
     def get_path(self) -> str:
         """return local storage path"""
