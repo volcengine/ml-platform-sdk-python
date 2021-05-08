@@ -4,6 +4,8 @@
 
 # Outputs of build stage
 output/
+dist/
+build/
 
 # python
 *__pycache__*
@@ -12,6 +14,8 @@ output/
 # Virtual env
 .venv/
 
+*.egg-info/
 *.pyc
 *.swp
 *.swo
+
