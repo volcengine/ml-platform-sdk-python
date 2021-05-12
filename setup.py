@@ -1,7 +1,7 @@
 import sys
 from setuptools import setup, find_packages
 
-require_list = []
+require_list = ['boto3']
 test_require_list = []
 
 
