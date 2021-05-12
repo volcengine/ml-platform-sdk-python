@@ -49,5 +49,9 @@ class Config:
         return os.environ['SERVICE_REGION']
 
     @staticmethod
+    def get_tos_region():
+        return os.environ['TOS_REGION']
+
+    @staticmethod
     def get_tos_endpoint_url():
         return os.environ['TOS_ENDPOINT_URL']
