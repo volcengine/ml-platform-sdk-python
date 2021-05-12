@@ -19,7 +19,7 @@ class TOSClient:
         config = env.Config()
         client = boto3.client(
             's3',
-            region_name=config.get_service_region(),
+            region_name=config.get_tos_region(),
             endpoint_url=config.get_tos_endpoint_url(),
             aws_access_key_id=config.get_access_key_id(),
             aws_secret_access_key=config.get_secret_access_key(),
@@ -67,7 +67,7 @@ class TOSClient:
 
         return a list of Object infos
         """
-        return self.s3_client.list_objects(Bucket=bucket)['Contents']
+        return self.s3_client.list_objects(Bucket=bucket)
 
     def put_object(self, bucket, key, body):
         """Upload single object, object size should not exceed 5MB"""
