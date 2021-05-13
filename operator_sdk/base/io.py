@@ -1,6 +1,6 @@
 import logging
 import os
-from operator_sdk import env
+from operator_sdk.base import env
 
 
 class Slot:

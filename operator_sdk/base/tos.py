@@ -4,7 +4,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from boto3.s3.transfer import TransferConfig
-from operator_sdk import env
+from operator_sdk.base import env
 
 
 class TOSClient:
