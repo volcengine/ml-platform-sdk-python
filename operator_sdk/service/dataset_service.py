@@ -1,4 +1,4 @@
-import logging
+import json
 
 from volcengine.ApiInfo import ApiInfo
 from volcengine.Credentials import Credentials
@@ -10,48 +10,89 @@ from operator_sdk.base import env
 
 class DatasetService(Service):
 
-    def __init__(self, action, name, method):
+    def __init__(self):
         config = env.Config()
         self.host = config.get_service_host()
         self.region = config.get_service_region()
         self.service = config.get_service_name()
         self.version = config.get_service_version()
-        self.action = action
-        self.name = name
-        self.method = method
-        self.ak = config.get_access_key_id()
-        self.sk = config.get_secret_access_key()
 
-        self.service_info = ServiceInfo(
-            self.host, {'Accept': 'application/json'},
-            Credentials('', '', self.service, self.region), 5, 5)
-        self.api_info = {
-            self.name:
-                ApiInfo(self.method, "/", {
-                    "Action": self.action,
+        self.service_info = self.get_service_info()
+        self.api_info = self.get_api_info()
+        super(DatasetService, self).__init__(self.service_info, self.api_info)
+        self.set_ak(config.get_access_key_id())
+        self.set_sk(config.get_secret_access_key())
+
+    def get_service_info(self):
+        return ServiceInfo(self.host, {'Accept': 'application/json'},
+                           Credentials('', '', self.service, self.region), 10,
+                           10, "https")
+
+    def get_api_info(self):
+        api_info = {
+            "CreateDataset":
+                ApiInfo("POST", "/", {
+                    "Action": "CreateDataset",
                     "Version": self.version
-                }, {}, {})
-        }
-        super(DatasetService, self).__init__(self.service_info,
-                                                self.api_info)
-
-    def update(self, action, name, method):
-        self.action = action
-        self.name = name
-        self.method = method
-
-        self.service_info = ServiceInfo(
-            self.host, {'Accept': 'application/json'},
-            Credentials('', '', self.service, self.region), 5, 5)
-        self.api_info = {
-            self.name:
-                ApiInfo(self.method, "/", {
-                    "Action": self.action,
+                }, {}, {}),
+            "UpdateDataset":
+                ApiInfo("POST", "/", {
+                    "Action": "UpdateDataset",
                     "Version": self.version
-                }, {}, {})
+                }, {}, {}),
+            "GetDataset":
+                ApiInfo("GET", "/", {
+                    "Action": "GetDataset",
+                    "Version": self.version
+                }, {}, {}),
+            "DeleteDataset":
+                ApiInfo("GET", "/", {
+                    "Action": "DeleteDataset",
+                    "Version": self.version
+                }, {}, {}),
+            "ListDatasets":
+                ApiInfo("GET", "/", {
+                    "Action": "ListDatasets",
+                    "Version": self.version
+                }, {}, {}),
         }
-        super(DatasetService, self).__init__(self.service_info,
-                                                self.api_info)
+        return api_info
 
-        self.set_ak(self.ak)
-        self.set_sk(self.sk)
+    def common_json_handler(self, api, body):
+        params = dict()
+        try:
+            body = json.dumps(body)
+            res = self.json(api, params, body)
+            res_json = json.loads(res)
+            return res_json
+        # pylint: disable=W0703
+        except Exception as e:
+            res = str(e)
+            res_json = json.loads(res)
+            return res_json
+
+
+def create_dataset(self, body):
+    try:
+        res_json = self.common_json_handler("CreateDataset", body)
+        return res_json
+    except Exception as e:
+        raise Exception('create_dataset failed') from e
+
+
+def update_dataset(self, body):
+    try:
+        res_json = self.common_json_handler("UpdateDataset", body)
+        return res_json
+    except Exception as e:
+        raise Exception('update_dataset failed') from e
+
+
+def get_dataset(self, dataset_id):
+    params = {'DatasetID': dataset_id}
+    try:
+        res = self.get(api='GetDataset', params=params)
+        res_json = json.loads(res)
+        return res_json
+    except Exception as e:
+        raise Exception('get_dataset failed') from e
