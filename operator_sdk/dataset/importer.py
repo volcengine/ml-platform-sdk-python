@@ -39,11 +39,14 @@ def download_file(url, target_dir, tos_client=None, chunk_size=8192):
     return file_path
 
 
-def download_dataset(dataset_id: str, output_dir: str):
+def download_dataset(dataset_id: str, output_dir: str, region: str, ak: str,
+                     sk: str):
     """download dataset with dataset id"""
+    output_dir = os.path.join(output_dir, dataset_id)
+    os.makedirs(output_dir, exist_ok=True)
     # get dataset info with TOP api
     try:
-        client = DatasetService()
+        client = DatasetService(region, ak, sk)
         resp = client.get_dataset(dataset_id=dataset_id)
     except Exception as e:
         logging.error('Failed to get dataset info, dataset_id: %s, error: %s',
@@ -54,34 +57,30 @@ def download_dataset(dataset_id: str, output_dir: str):
     resp_json = json.loads(resp)
     storage_url = resp_json['Result']['StoragePath']
 
-    tos_client = tos.TOSClient()
+    tos_client = tos.TOSClient(region, ak, sk)
 
     manifest_file_path = download_file(storage_url,
                                        output_dir,
                                        tos_client=tos_client)
-    manifest = list()
-    with open(manifest_file_path) as f:
-        for line in f:
-            manifest_line = json.loads(line)
-            data = manifest_line['data']
-            meta_type = 'Unknown'
-            if 'imageUrl' in data:
-                file_path = download_file(data['imageUrl'],
-                                          output_dir,
-                                          tos_client=tos_client)
-                data['filePath'] = file_path
-                meta_type = 'image_meta'
-            elif 'videoUrl' in data:
-                file_path = download_file(data['videoUrl'],
-                                          output_dir,
-                                          tos_client=tos_client)
-                data['filePath'] = file_path
-                meta_type = 'video_meta'
-            elif 'text' in data:
-                meta_type = 'text_meta'
-            else:
-                raise ValueError('file type is not supported')
-            manifest.append(data)
-        # create new local metadata file
-        with open(os.path.join(output_dir, 'metadata.json'), 'w+') as meta_file:
-            json.dump({meta_type: manifest}, meta_file)
+    with open(os.path.join(output_dir, 'local_metadata.manifest'),
+              'w+') as new_manifest_file:
+        with open(manifest_file_path) as f:
+            for line in f:
+                manifest_line = json.loads(line)
+                if 'imageUrl' in manifest_line['data']:
+                    file_path = download_file(manifest_line['data']['imageUrl'],
+                                              output_dir,
+                                              tos_client=tos_client)
+                    manifest_line['data']['filePath'] = file_path
+                elif 'videoUrl' in manifest_line['data']:
+                    file_path = download_file(manifest_line['data']['videoUrl'],
+                                              output_dir,
+                                              tos_client=tos_client)
+                    manifest_line['data']['filePath'] = file_path
+                elif 'text' in manifest_line['data']:
+                    pass
+                else:
+                    raise ValueError('file type is not supported')
+
+                # create new local metadata file
+                json.dump(manifest_line, new_manifest_file)

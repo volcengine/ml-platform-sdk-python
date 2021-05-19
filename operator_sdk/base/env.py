@@ -1,5 +1,11 @@
-import os
 import json
+import os
+
+SERVICE_NAME = 'ml_platform'
+SERVICE_VERSION = '2021-10-01'
+SERVICE_HOST = 'volcengineapi.byted.org'
+SERVICE_REGION = 'cn-north-1'
+TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao-inner.ivolces.com'
 
 
 class Config:
@@ -34,24 +40,38 @@ class Config:
 
     @staticmethod
     def get_service_name():
-        return os.environ['SERVICE_NAME']
+        if 'SERVICE_NAME' in os.environ:
+            return os.environ['SERVICE_NAME']
+        return SERVICE_NAME
 
     @staticmethod
     def get_service_version():
-        return os.environ['SERVICE_VERSION']
+        if 'SERVICE_VERSION' in os.environ:
+            return os.environ['SERVICE_VERSION']
+
+        return SERVICE_VERSION
 
     @staticmethod
     def get_service_host():
-        return os.environ['SERVICE_HOST']
+        if 'SERVICE_HOST' in os.environ:
+            return os.environ['SERVICE_HOST']
+
+        return SERVICE_HOST
 
     @staticmethod
     def get_service_region():
-        return os.environ['SERVICE_REGION']
+        if 'SERVICE_REGION' in os.environ:
+            return os.environ['SERVICE_REGION']
+        return SERVICE_REGION
 
     @staticmethod
     def get_tos_region():
-        return os.environ['TOS_REGION']
+        if 'TOS_REGION' in os.environ:
+            return os.environ['TOS_REGION']
+        return SERVICE_REGION
 
     @staticmethod
     def get_tos_endpoint_url():
-        return os.environ['TOS_ENDPOINT_URL']
+        if 'TOS_ENDPOINT_URL' in os.environ:
+            return os.environ['TOS_ENDPOINT_URL']
+        return TOS_ENDPOINT_URL

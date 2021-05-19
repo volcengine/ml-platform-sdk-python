@@ -10,18 +10,18 @@ from operator_sdk.base import env
 
 class DatasetService(Service):
 
-    def __init__(self):
+    def __init__(self, region: str, ak: str, sk: str):
         config = env.Config()
         self.host = config.get_service_host()
-        self.region = config.get_service_region()
+        self.region = region
         self.service = config.get_service_name()
         self.version = config.get_service_version()
 
         self.service_info = self.get_service_info()
         self.api_info = self.get_api_info()
         super(DatasetService, self).__init__(self.service_info, self.api_info)
-        self.set_ak(config.get_access_key_id())
-        self.set_sk(config.get_secret_access_key())
+        self.set_ak(ak)
+        self.set_sk(sk)
 
     def get_service_info(self):
         return ServiceInfo(self.host, {'Accept': 'application/json'},
@@ -71,28 +71,25 @@ class DatasetService(Service):
             res_json = json.loads(res)
             return res_json
 
+    def create_dataset(self, body):
+        try:
+            res_json = self.common_json_handler("CreateDataset", body)
+            return res_json
+        except Exception as e:
+            raise Exception('create_dataset failed') from e
 
-def create_dataset(self, body):
-    try:
-        res_json = self.common_json_handler("CreateDataset", body)
-        return res_json
-    except Exception as e:
-        raise Exception('create_dataset failed') from e
+    def update_dataset(self, body):
+        try:
+            res_json = self.common_json_handler("UpdateDataset", body)
+            return res_json
+        except Exception as e:
+            raise Exception('update_dataset failed') from e
 
-
-def update_dataset(self, body):
-    try:
-        res_json = self.common_json_handler("UpdateDataset", body)
-        return res_json
-    except Exception as e:
-        raise Exception('update_dataset failed') from e
-
-
-def get_dataset(self, dataset_id):
-    params = {'DatasetID': dataset_id}
-    try:
-        res = self.get(api='GetDataset', params=params)
-        res_json = json.loads(res)
-        return res_json
-    except Exception as e:
-        raise Exception('get_dataset failed') from e
+    def get_dataset(self, dataset_id):
+        params = {'DatasetID': dataset_id}
+        try:
+            res = self.get(api='GetDataset', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            raise Exception('get_dataset failed') from e

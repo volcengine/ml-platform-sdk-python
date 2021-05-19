@@ -1,28 +1,30 @@
 import logging
 import math
 import os
+
 import boto3
-from botocore.exceptions import ClientError
 from boto3.s3.transfer import TransferConfig
+from botocore.exceptions import ClientError
+
 from operator_sdk.base import env
 
 
 class TOSClient:
 
-    def __init__(self):
-        self.s3_client = self._init_boto3_client()
+    def __init__(self, region: str, ak: str, sk: str):
+        self.s3_client = self._init_boto3_client(region, ak, sk)
 
-    def _init_boto3_client(self):
+    def _init_boto3_client(self, region, ak, sk):
         # custom config
         # pylint: disable=C0301
         # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
         config = env.Config()
         client = boto3.client(
             's3',
-            region_name=config.get_tos_region(),
+            region_name=region,
             endpoint_url=config.get_tos_endpoint_url(),
-            aws_access_key_id=config.get_access_key_id(),
-            aws_secret_access_key=config.get_secret_access_key(),
+            aws_access_key_id=ak,
+            aws_secret_access_key=sk,
         )
         return client
 
