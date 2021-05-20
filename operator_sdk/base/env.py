@@ -1,18 +1,23 @@
 import json
+import logging
 import os
 
 SERVICE_NAME = 'ml_platform'
 SERVICE_VERSION = '2021-10-01'
 SERVICE_HOST = 'volcengineapi.byted.org'
 SERVICE_REGION = 'cn-north-1'
-TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao-inner.ivolces.com'
+# TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao-inner.ivolces.com'
+TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao.volces.com'
 
 
 class Config:
 
     def __init__(self):
-        config_str = os.environ['NODE_CONFIG']
-        self.config = json.loads(config_str)
+        if 'NODE_CONFIG' in os.environ:
+            config_str = os.environ['NODE_CONFIG']
+            self.config = json.loads(config_str)
+        else:
+            logging.error('NODE_CONFIG not found')
 
     def get_node_id(self):
         return self.config['id']
