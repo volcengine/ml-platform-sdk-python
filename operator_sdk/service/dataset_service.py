@@ -94,9 +94,11 @@ class DatasetService(Service):
         except Exception as e:
             raise Exception('get_dataset failed') from e
 
-ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
-sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='
-region = 'cn-north-1'
-
-client = DatasetService(region, ak, sk)
-print(client.get_dataset('d-20210511152528-j6mwv'))
+    def list_datasets(self):
+        params = {}
+        try:
+            res = self.get(api='ListDatasets', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            raise Exception('list_datasets failed') from e

@@ -4,7 +4,7 @@ import os
 
 SERVICE_NAME = 'ml_platform'
 SERVICE_VERSION = '2021-10-01'
-SERVICE_HOST = 'volcengineapi.byted.org'
+SERVICE_HOST = 'open.volcengineapi.com'
 SERVICE_REGION = 'cn-north-1'
 # TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao-inner.ivolces.com'
 TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao.volces.com'
@@ -53,14 +53,12 @@ class Config:
     def get_service_version():
         if 'SERVICE_VERSION' in os.environ:
             return os.environ['SERVICE_VERSION']
-
         return SERVICE_VERSION
 
     @staticmethod
     def get_service_host():
         if 'SERVICE_HOST' in os.environ:
             return os.environ['SERVICE_HOST']
-
         return SERVICE_HOST
 
     @staticmethod
