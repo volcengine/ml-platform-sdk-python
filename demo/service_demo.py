@@ -8,7 +8,7 @@ if __name__ == '__main__':
     client = DatasetService(region, ak, sk)
 
     # Get dataset info
-    print(client.get_dataset('d-20210511152528-j6mwv'))
+    print(client.get_dataset('d-20210512141706-mckhc'))
 
     # List datasets
     print(client.list_datasets())

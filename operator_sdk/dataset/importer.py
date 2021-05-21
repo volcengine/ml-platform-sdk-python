@@ -53,9 +53,7 @@ def download_dataset(dataset_id: str, output_dir: str, region: str, ak: str,
                       dataset_id, e)
         raise Exception('Failed to get dataset info with dataset_id: {}'.format(
             dataset_id)) from e
-
-    resp_json = json.loads(resp)
-    storage_url = resp_json['Result']['StoragePath']
+    storage_url = resp['Result']['StoragePath']
 
     tos_client = tos.TOSClient(region, ak, sk)
 
