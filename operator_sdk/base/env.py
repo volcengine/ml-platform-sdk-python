@@ -9,6 +9,8 @@ SERVICE_REGION = 'cn-north-1'
 # TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao-inner.ivolces.com'
 TOS_ENDPOINT_URL = 'http://tos-s3-cn-qingdao.volces.com'
 
+LOCAL_METADATA_FILENAME = 'local_metadata.manifest'
+
 
 class Config:
 

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from operator_sdk.base import tos
+from operator_sdk.base import tos, env
 from operator_sdk.service.dataset_service import DatasetService
 
 
@@ -60,7 +60,7 @@ def download_dataset(dataset_id: str, output_dir: str, region: str, ak: str,
     manifest_file_path = download_file(storage_url,
                                        output_dir,
                                        tos_client=tos_client)
-    with open(os.path.join(output_dir, 'local_metadata.manifest'),
+    with open(os.path.join(output_dir, env.LOCAL_METADATA_FILENAME),
               'w+') as new_manifest_file:
         with open(manifest_file_path) as f:
             for line in f:
@@ -82,3 +82,4 @@ def download_dataset(dataset_id: str, output_dir: str, region: str, ak: str,
 
                 # create new local metadata file
                 json.dump(manifest_line, new_manifest_file)
+                new_manifest_file.write('\n')

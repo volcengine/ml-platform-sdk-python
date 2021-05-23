@@ -6,6 +6,8 @@ import shutil
 
 import numpy as np
 
+from operator_sdk.base import env
+
 
 def move_dataset(metadata, input_dir, output_dir):
     file_path = metadata['data']['filePath']
@@ -24,10 +26,10 @@ def move_dataset(metadata, input_dir, output_dir):
     metadata['data']['filePath'] = target_file
 
     # store metadata
-    with open(os.path.join(output_dir, 'local_metadata.manifest'),
-              'w+') as meta_file:
-        line = json.dumps(metadata)
-        meta_file.write(line)
+    with open(os.path.join(output_dir, env.LOCAL_METADATA_FILENAME),
+              'a+') as meta_file:
+        json.dump(metadata, meta_file)
+        meta_file.write('\n')
 
 
 def split_dataset(input_dir,
@@ -36,7 +38,7 @@ def split_dataset(input_dir,
                   ratio=0.8,
                   random_state=0):
     line_count = 0
-    with open(os.path.join(input_dir, 'local_metadata.manifest')) as f:
+    with open(os.path.join(input_dir, env.LOCAL_METADATA_FILENAME)) as f:
         for line in f:
             line_count = line_count + 1
 
@@ -46,7 +48,7 @@ def split_dataset(input_dir,
                          math.floor(line_count * (1 - ratio)),
                          replace=False))
     index = 0
-    with open(os.path.join(input_dir, 'local_metadata.manifest')) as f:
+    with open(os.path.join(input_dir, env.LOCAL_METADATA_FILENAME)) as f:
         for line in f:
             manifest_line = json.loads(line)
             if index in test_index_set:

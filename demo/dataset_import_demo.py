@@ -11,4 +11,4 @@ output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           'test_import')
 
 if __name__ == '__main__':
-    download_dataset('d-20210512141706-mckhc', output_dir, region, ak, sk)
+    download_dataset('d-20210521174753-l4zsk', output_dir, region, ak, sk)

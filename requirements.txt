@@ -1,4 +1,4 @@
 boto3
 requests
 volcengine
-numpy
+numpy == 1.20.0
