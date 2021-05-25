@@ -46,44 +46,55 @@ class ModelService(Service):
     def get_api_info(self):
         api_info = {
             "CreateModel":
-                ApiInfo("POST", "/api/v1/model_versions/create", {
-                    "Action": "CreateModel",
-                    "Version": self.conf.get_service_version()
-                }, {}, {}),
+                ApiInfo(
+                    "POST", "/api/v1/model_versions/create", {
+                        "Action": "CreateModel",
+                        "Version": self.conf.get_service_version()
+                    }, {}, {}),
             "ListModels":
-                ApiInfo("GET", "/api/v1/models/list", {
-                    "Action": "ListModels",
-                    "Version": self.conf.get_service_version()
-                }, {}, {}),
+                ApiInfo(
+                    "GET", "/api/v1/models/list", {
+                        "Action": "ListModels",
+                        "Version": self.conf.get_service_version()
+                    }, {}, {}),
             "DeleteModel":
-                ApiInfo("GET", "/api/v1/models/delete", {
-                    "Action": "DeleteModel",
-                    "Version": self.conf.get_service_version()
-                }, {}, {}),
+                ApiInfo(
+                    "GET", "/api/v1/models/delete", {
+                        "Action": "DeleteModel",
+                        "Version": self.conf.get_service_version()
+                    }, {}, {}),
             "ListModelVersions":
-                ApiInfo("GET", "/api/v1/model_versions/list", {
-                    "Action": "ListModelVersions",
-                    "Version": self.conf.get_service_version()
-                }, {}, {}),
+                ApiInfo(
+                    "GET", "/api/v1/model_versions/list", {
+                        "Action": "ListModelVersions",
+                        "Version": self.conf.get_service_version()
+                    }, {}, {}),
             "GetModelVersion":
-                ApiInfo("GET", "/api/v1/model_versions/describe", {
-                    "Action": "GetModelVersion",
-                    "Version": self.conf.get_service_version()
-                }, {}, {}),
+                ApiInfo(
+                    "GET", "/api/v1/model_versions/describe", {
+                        "Action": "GetModelVersion",
+                        "Version": self.conf.get_service_version()
+                    }, {}, {}),
             "DeleteModelVersion":
-                ApiInfo("GET", "/api/v1/model_versions/delete", {
-                    "Action": "DeleteModelVersion",
-                    "Version": self.conf.get_service_version()
-                }, {}, {}),
+                ApiInfo(
+                    "GET", "/api/v1/model_versions/delete", {
+                        "Action": "DeleteModelVersion",
+                        "Version": self.conf.get_service_version()
+                    }, {}, {}),
             "UpdateModelVersion":
-                ApiInfo("POST", "/api/v1/model_versions/update", {
-                    "Action": "UpdateModelVersion",
-                    "Version": self.conf.get_service_version()
-                }, {}, {}),
+                ApiInfo(
+                    "POST", "/api/v1/model_versions/update", {
+                        "Action": "UpdateModelVersion",
+                        "Version": self.conf.get_service_version()
+                    }, {}, {}),
         }
         return api_info
 
-    def create_model(self, model_name, model_format, model_type, path,
+    def create_model(self,
+                     model_name,
+                     model_format,
+                     model_type,
+                     path,
                      create_new_model=False,
                      description=None,
                      source_type="TOS"):
@@ -99,7 +110,9 @@ class ModelService(Service):
             if description is not None:
                 body.update({"Description": description})
 
-            res = self.json(api="CreateModel", params=dict(), body=json.dumps(body))
+            res = self.json(api="CreateModel",
+                            params=dict(),
+                            body=json.dumps(body))
             res_json = json.loads(res)
             return res_json
         except Exception as e:
@@ -152,7 +165,10 @@ class ModelService(Service):
         except Exception as e:
             raise Exception('list_model_versions failed') from e
 
-    def get_model_version(self, model_name=None, model_version=None, model_version_id=None):
+    def get_model_version(self,
+                          model_name=None,
+                          model_version=None,
+                          model_version_id=None):
         params = dict()
         if model_name is not None:
             params['ModelName'] = model_name
@@ -168,7 +184,10 @@ class ModelService(Service):
         except Exception as e:
             raise Exception('get_model_version failed') from e
 
-    def delete_model_version(self, model_name=None, model_version=None, model_version_id=None):
+    def delete_model_version(self,
+                             model_name=None,
+                             model_version=None,
+                             model_version_id=None):
         params = dict()
         if model_name is not None:
             params['ModelName'] = model_name
@@ -191,7 +210,9 @@ class ModelService(Service):
         if description is not None:
             body.update({"Description": description})
         try:
-            res = self.json(api="UpdateModelVersion", params=dict(), body=json.dumps(body))
+            res = self.json(api="UpdateModelVersion",
+                            params=dict(),
+                            body=json.dumps(body))
             res_json = json.loads(res)
             return res_json
         except Exception as e:
