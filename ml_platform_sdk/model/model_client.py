@@ -116,7 +116,7 @@ class ModelClient(object):
             for d in dirs:
                 print("processing dir: {}".format(d), flush=True)
                 dest_pathname = os.path.join(local_dir,
-                                             os.path.relpath(d, prefix)+'/')
+                                             os.path.relpath(d, prefix) + '/')
                 print("dest_pathname: {}".format(dest_pathname))
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
