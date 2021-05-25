@@ -9,6 +9,7 @@ from ml_platform_sdk.model.model_service import ModelService
 
 
 class ModelClient(object):
+
     def __init__(self, ak, sk, region):
         self.ak = sk
         self.sk = sk
@@ -74,9 +75,14 @@ class ModelClient(object):
                 prefix += '/'
         return prefix
 
-    def upload_model(self, model_name, model_format, model_type,
-                     local_path, description=None,
-                     bucket_name=None, prefix=None,
+    def upload_model(self,
+                     model_name,
+                     model_format,
+                     model_type,
+                     local_path,
+                     description=None,
+                     bucket_name=None,
+                     prefix=None,
                      create_new_model=False):
         bucket_name = self._get_or_create_bucket(bucket_name, self.region)
         prefix = self._get_or_generate_prefix(prefix, model_name)
@@ -95,20 +101,22 @@ class ModelClient(object):
     def _download_dir(self, bucket, key, prefix, local_dir):
         marker = ''
         while True:
-            res = self.tos_client.s3_client.list_objects(
-                Bucket=bucket,
-                Delimiter="/",
-                EncodingType="",
-                Marker=marker,
-                MaxKeys=1000,
-                Prefix=key
-            )
+            res = self.tos_client.s3_client.list_objects(Bucket=bucket,
+                                                         Delimiter="/",
+                                                         EncodingType="",
+                                                         Marker=marker,
+                                                         MaxKeys=1000,
+                                                         Prefix=key)
             keys = [content["Key"] for content in res.get("Contents", list())]
-            dirs = [content["Prefix"] for content in res.get("CommonPrefixes", list())]
+            dirs = [
+                content["Prefix"]
+                for content in res.get("CommonPrefixes", list())
+            ]
 
             for d in dirs:
                 print("processing dir: {}".format(d), flush=True)
-                dest_pathname = os.path.join(local_dir, os.path.relpath(d, prefix)+'/')
+                dest_pathname = os.path.join(local_dir,
+                                             os.path.relpath(d, prefix)+'/')
                 print("dest_pathname: {}".format(dest_pathname))
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
@@ -117,14 +125,16 @@ class ModelClient(object):
 
             for k in keys:
                 print("processing file: {}".format(k), flush=True)
-                dest_pathname = os.path.join(local_dir, os.path.relpath(k, prefix))
+                dest_pathname = os.path.join(local_dir,
+                                             os.path.relpath(k, prefix))
                 print("dest_pathname: {}".format(dest_pathname))
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
                     print("make dir: {}".format(dest_pathname))
 
                 if not os.path.isdir(dest_pathname):
-                    self.tos_client.s3_client.download_file(bucket, k, dest_pathname)
+                    self.tos_client.s3_client.download_file(
+                        bucket, k, dest_pathname)
 
             if res['IsTruncated']:
                 marker = res['Contents'][-1]['Key']
@@ -139,7 +149,8 @@ class ModelClient(object):
         key = parse_result.path.lstrip('/')
 
         self._download_dir(bucket, key, key, local_dir)
-        return "Download model {} to {} success".format(model_version_id, local_dir)
+        return "Download model {} to {} success".format(model_version_id,
+                                                        local_dir)
 
     def list_models(self,
                     offset=0,
@@ -147,9 +158,8 @@ class ModelClient(object):
                     sort_by='CreateTime',
                     sort_order='Descend',
                     model_name_contains=None):
-        return self.api_client.list_models(
-            offset, page_size, sort_by, sort_order, model_name_contains
-        )
+        return self.api_client.list_models(offset, page_size, sort_by,
+                                           sort_order, model_name_contains)
 
     def delete_model(self, model_id):
         return self.api_client.delete_model(model_id)
@@ -157,18 +167,20 @@ class ModelClient(object):
     def list_model_versions(self, model_name=None, model_id=None):
         return self.api_client.list_model_versions(model_name, model_id)
 
-    def get_model_version(self, model_name=None, model_version=None, model_version_id=None):
-        return self.api_client.get_model_version(
-            model_name, model_version, model_version_id
-        )
+    def get_model_version(self,
+                          model_name=None,
+                          model_version=None,
+                          model_version_id=None):
+        return self.api_client.get_model_version(model_name, model_version,
+                                                 model_version_id)
 
-    def delete_model_version(self, model_name=None, model_version=None, model_version_id=None):
-        return self.api_client.delete_model_version(
-            model_name, model_version, model_version_id
-        )
+    def delete_model_version(self,
+                             model_name=None,
+                             model_version=None,
+                             model_version_id=None):
+        return self.api_client.delete_model_version(model_name, model_version,
+                                                    model_version_id)
 
     def update_model_version(self, model_version_id, description=None):
-        return self.api_client.update_model_version(
-            model_version_id,
-            description
-        )
+        return self.api_client.update_model_version(model_version_id,
+                                                    description)
