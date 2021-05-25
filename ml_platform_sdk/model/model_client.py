@@ -4,8 +4,8 @@ import uuid
 from datetime import datetime
 from six.moves import urllib
 
-from operator_sdk.base import tos
-from operator_sdk.service.model_service import ModelService
+from ml_platform_sdk.tos import tos
+from ml_platform_sdk.model.model_service import ModelService
 
 
 class ModelClient(object):
@@ -13,7 +13,9 @@ class ModelClient(object):
         self.ak = sk
         self.sk = sk
         self.region = region
-        self.api_client = ModelService(region, ak, sk)
+        self.api_client = ModelService(region)
+        self.api_client.set_ak(ak)
+        self.api_client.set_sk(sk)
         self.tos_client = tos.TOSClient(region, ak, sk)
 
     @staticmethod
