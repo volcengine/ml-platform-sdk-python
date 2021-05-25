@@ -4,7 +4,6 @@ ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
 sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='
 region = 'cn-north-1'
 
-
 if __name__ == '__main__':
     client = ModelClient(ak, sk, region)
 
@@ -42,10 +41,8 @@ if __name__ == '__main__':
     print("get model version result: {}".format(resp))
 
     # update model version
-    resp = client.update_model_version(
-        model_version_id=model_version_id,
-        description="modified description."
-    )
+    resp = client.update_model_version(model_version_id=model_version_id,
+                                       description="modified description.")
     print("update model version: {}".format(resp))
 
     resp = client.delete_model_version(model_name=model_name, model_version='1')
