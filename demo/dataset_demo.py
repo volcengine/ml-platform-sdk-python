@@ -19,5 +19,5 @@ if __name__ == '__main__':
     # manifest = client.download_dataset('d-20210524144453-tr6mp', './')
 
     # Split Dataset
-    client.split_dataset('./train_dataset', './test_dataset',
-                         'd-20210524144453-tr6mp')
+    client.download_and_split_dataset('./train_dataset', './test_dataset',
+                                      'd-20210524144453-tr6mp')

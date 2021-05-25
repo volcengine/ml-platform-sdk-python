@@ -1,8 +1,8 @@
 import json
-import threading
-import os
 import logging
+import os
 import tempfile
+import threading
 
 from volcengine.ApiInfo import ApiInfo
 from volcengine.Credentials import Credentials
@@ -156,25 +156,18 @@ class DatasetService(Service):
             raise Exception('download_dataset failed') from e
         return dataset
 
-    def split_dataset(self,
-                      training_dir,
-                      testing_dir,
-                      dataset_id='',
-                      dataset=None,
-                      ratio=0.8,
-                      random_state=0):
-        if dataset is None:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                try:
-                    dataset = self.download_dataset(dataset_id, tmpdir)
-                    dataset.split(training_dir, testing_dir, ratio,
-                                  random_state)
-                except Exception as e:
-                    logging.error('Failed to split dataset, error: %s', e)
-                    raise Exception('split_dataset failed') from e
-        else:
+    def download_and_split_dataset(self,
+                                   training_dir,
+                                   testing_dir,
+                                   dataset_id='',
+                                   ratio=0.8,
+                                   random_state=0):
+
+        with tempfile.TemporaryDirectory() as tmpdir:
             try:
-                dataset.split(training_dir, testing_dir, ratio, random_state)
+                dataset = self.download_dataset(dataset_id, tmpdir)
+                return dataset.split(training_dir, testing_dir, ratio,
+                                     random_state)
             except Exception as e:
                 logging.error('Failed to split dataset, error: %s', e)
                 raise Exception('split_dataset failed') from e

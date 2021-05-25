@@ -1,12 +1,12 @@
-import logging
 import json
+import logging
 import math
 import os
 import shutil
 from urllib.parse import urlparse
 
-import requests
 import numpy as np
+import requests
 
 from ml_platform_sdk.config import config
 from ml_platform_sdk.tos import tos
@@ -114,14 +114,23 @@ class Dataset:
         os.makedirs(training_dir, exist_ok=True)
 
         # generate training and testing dataset's manifest file
-        with open(
-                os.path.join(testing_dir,
-                             config.DATASET_LOCAL_METADATA_FILENAME),
-                'w') as testing_manifest_file:
-            with open(
-                    os.path.join(training_dir,
-                                 config.DATASET_LOCAL_METADATA_FILENAME),
-                    'w') as training_manifest_file:
+        train_metadata_path = os.path.join(
+            training_dir, config.DATASET_LOCAL_METADATA_FILENAME)
+        test_metadata_path = os.path.join(
+            testing_dir, config.DATASET_LOCAL_METADATA_FILENAME)
+
+        train_dataset = Dataset(ak=self.ak,
+                                sk=self.sk,
+                                region=self.region,
+                                remote_url=None,
+                                local_dir=train_metadata_path)
+        test_dataset = Dataset(ak=self.ak,
+                               sk=self.sk,
+                               region=self.region,
+                               remote_url=None,
+                               local_dir=train_metadata_path)
+        with open(test_metadata_path, 'w') as testing_manifest_file:
+            with open(train_metadata_path, 'w') as training_manifest_file:
                 index = 0
                 with open(
                         os.path.join(
@@ -140,3 +149,4 @@ class Dataset:
                             json.dump(manifest_line, training_manifest_file)
                             training_manifest_file.write('\n')
                         index = index + 1
+        return train_dataset, test_dataset
