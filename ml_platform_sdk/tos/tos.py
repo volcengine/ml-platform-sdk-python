@@ -7,7 +7,7 @@ import botocore
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 
-from operator_sdk.base import env
+from ml_platform_sdk.config import config
 
 
 class TOSClient:
@@ -19,11 +19,10 @@ class TOSClient:
         # custom config
         # pylint: disable=C0301
         # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
-        config = env.Config()
         client = boto3.client(
             's3',
             region_name=region,
-            endpoint_url=config.get_tos_endpoint_url(),
+            endpoint_url=config.Config.get_tos_endpoint_url(),
             aws_access_key_id=ak,
             aws_secret_access_key=sk,
         )
