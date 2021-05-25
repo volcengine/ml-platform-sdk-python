@@ -1,5 +1,3 @@
-import os
-
 from operator_sdk.model import ModelClient
 
 ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
@@ -55,4 +53,3 @@ if __name__ == '__main__':
 
     resp = client.delete_model(model_id=model_id)
     print("delete model result: {}".format(resp))
-
