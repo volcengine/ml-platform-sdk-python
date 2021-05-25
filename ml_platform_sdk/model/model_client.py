@@ -8,7 +8,7 @@ from ml_platform_sdk.tos import tos
 from ml_platform_sdk.model.model_service import ModelService
 
 
-class ModelClient(object):
+class ModelClient:
 
     def __init__(self, ak, sk, region):
         self.ak = sk
@@ -31,7 +31,7 @@ class ModelClient(object):
 
     def _upload_to_tos(self, local_path, bucket, prefix):
         if not os.path.exists(local_path):
-            logging.error("Local path {} not exists.".format(local_path))
+            logging.error("Local path %s not exists.", local_path)
 
         # upload file
         if os.path.isfile(local_path):
