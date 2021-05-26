@@ -1,4 +1,6 @@
 boto3
 requests
 volcengine
-numpy == 1.20.0
+numpy==1.20.0
+tqdm
+pillow==8.2.0
