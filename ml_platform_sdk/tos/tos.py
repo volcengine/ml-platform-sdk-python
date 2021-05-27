@@ -154,14 +154,20 @@ class TOSClient:
         if key is None:
             key = file_path
         # Set the desired multipart threshold value (20MB)
-        conf = TransferConfig(multipart_threshold=part_size)
+        transfer_config = TransferConfig(multipart_threshold=part_size)
 
         # Perform the transfer
-        self.s3_client.upload_file(file_path, bucket, key, Config=conf)
+        self.s3_client.upload_file(file_path,
+                                   bucket,
+                                   key,
+                                   Config=transfer_config)
 
     def download_file(self, file_path, bucket, key, max_concurrence=10):
         # To consume less downstream bandwidth, decrease the maximum concurrency
-        conf = TransferConfig(max_concurrency=max_concurrence)
+        transfer_config = TransferConfig(max_concurrency=max_concurrence)
 
         # Download an S3 object
-        self.s3_client.download_file(bucket, key, file_path, Config=conf)
+        self.s3_client.download_file(bucket,
+                                     key,
+                                     file_path,
+                                     Config=transfer_config)

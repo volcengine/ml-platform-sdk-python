@@ -1,8 +1,8 @@
 import json
-import threading
-import os
 import logging
+import os
 import tempfile
+import threading
 
 from volcengine.ApiInfo import ApiInfo
 from volcengine.Credentials import Credentials
@@ -133,7 +133,10 @@ class DatasetService(Service):
             logging.error('Failed to list datasets, error: %s', e)
             raise Exception('list_datasets failed') from e
 
-    def download_dataset(self, dataset_id: str, output_dir: str) -> Dataset:
+    def download_dataset(self,
+                         dataset_id: str,
+                         output_dir: str,
+                         limit=-1) -> Dataset:
         output_dir = os.path.join(output_dir, dataset_id)
         os.makedirs(output_dir, exist_ok=True)
         try:
@@ -148,7 +151,7 @@ class DatasetService(Service):
                           remote_url=resp['Result']['StoragePath'],
                           local_dir=output_dir)
         try:
-            dataset.download()
+            dataset.download(limit=limit)
         except Exception as e:
             logging.error(
                 'Failed to download dataset, dataset_id: %s, error: %s',
@@ -156,25 +159,19 @@ class DatasetService(Service):
             raise Exception('download_dataset failed') from e
         return dataset
 
-    def split_dataset(self,
-                      training_dir,
-                      testing_dir,
-                      dataset_id='',
-                      dataset=None,
-                      ratio=0.8,
-                      random_state=0):
-        if dataset is None:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                try:
-                    dataset = self.download_dataset(dataset_id, tmpdir)
-                    dataset.split(training_dir, testing_dir, ratio,
-                                  random_state)
-                except Exception as e:
-                    logging.error('Failed to split dataset, error: %s', e)
-                    raise Exception('split_dataset failed') from e
-        else:
+    def download_and_split_dataset(self,
+                                   training_dir,
+                                   testing_dir,
+                                   dataset_id,
+                                   limit=-1,
+                                   ratio=0.8,
+                                   random_state=0):
+
+        with tempfile.TemporaryDirectory() as tmpdir:
             try:
-                dataset.split(training_dir, testing_dir, ratio, random_state)
+                dataset = self.download_dataset(dataset_id, tmpdir, limit=limit)
+                return dataset.split(training_dir, testing_dir, ratio,
+                                     random_state)
             except Exception as e:
                 logging.error('Failed to split dataset, error: %s', e)
                 raise Exception('split_dataset failed') from e
