@@ -3,6 +3,7 @@ import math
 import os
 
 import boto3
+import botocore
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 
@@ -26,6 +27,20 @@ class TOSClient:
             aws_secret_access_key=sk,
         )
         return client
+
+    def bucket_exists(self, bucket_name):
+        """Check whether a bucket exists."""
+
+        exists = True
+        try:
+            self.s3_client.head_bucket(Bucket=bucket_name)
+        except botocore.exceptions.ClientError as e:
+            # If a client error is thrown, then check that it was a 404 error.
+            # If it was a 404 error, then the bucket does not exist.
+            error_code = e.response['Error']['Code']
+            if error_code == '404':
+                exists = False
+        return exists
 
     def create_bucket(self, bucket_name, region):
         """Create an S3 bucket in a specified region
