@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import threading
 import time
 
@@ -63,9 +62,3 @@ class STSTokenService(DirectService):
                     'GET', '/GetSTSToken', {}, {}, {}),
         }
         return api_info
-
-
-if __name__ == '__main__':
-    sts = STSTokenService(900)
-    os.environ['ENCRYPTED_KEY'] = '223ac4ee00606a3f16345c447afcdedd'
-    print(sts.get_sts_token())
