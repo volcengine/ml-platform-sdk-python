@@ -1,4 +1,5 @@
 class DirectApiInfo:
+
     def __init__(self, method, path, query, form, header):
         self.method = method
         self.path = path

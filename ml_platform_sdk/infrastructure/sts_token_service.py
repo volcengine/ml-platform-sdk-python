@@ -30,18 +30,14 @@ class STSTokenService(DirectService):
         if encrypted_key is None:
             raise Exception('no encrypted key in environment variable')
 
-        params = {
-            'EncryptCode': encrypted_key,
-            'Duration': self.duration
-        }
+        params = {'EncryptCode': encrypted_key, 'Duration': self.duration}
 
         try:
             resp = self.get(api='GetSTSToken', params=params)
             res_json = json.loads(resp)
             return res_json
         except Exception as e:
-            logging.error(
-                'Failed to get sts token, error: %s', e)
+            logging.error('Failed to get sts token, error: %s', e)
             raise Exception('get_sts_token failed') from e
 
     def get_service_info(self):
@@ -51,14 +47,12 @@ class STSTokenService(DirectService):
             'X-Top-Service': self.conf.get_service_name(),
             'X-Top-Region': self.conf.region
         }
-        return DirectServiceInfo(
-            self.conf.get_service_direct_host(), headers, 10, 10, "http")
+        return DirectServiceInfo(self.conf.get_service_direct_host(), headers,
+                                 10, 10, "http")
 
     @staticmethod
     def get_api_info():
         api_info = {
-            'GetSTSToken':
-                DirectApiInfo(
-                    'GET', '/GetSTSToken', {}, {}, {}),
+            'GetSTSToken': DirectApiInfo('GET', '/GetSTSToken', {}, {}, {}),
         }
         return api_info

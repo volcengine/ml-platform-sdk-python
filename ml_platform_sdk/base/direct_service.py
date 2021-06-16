@@ -12,7 +12,13 @@ from ml_platform_sdk.base.direct_request import DirectRequest
 
 
 class DirectServiceInfo:
-    def __init__(self, host, header, connection_timeout, socket_timeout, scheme='http'):
+
+    def __init__(self,
+                 host,
+                 header,
+                 connection_timeout,
+                 socket_timeout,
+                 scheme='http'):
         self.host = host
         self.header = header
         self.connection_timeout = connection_timeout
@@ -21,6 +27,7 @@ class DirectServiceInfo:
 
 
 class DirectService:
+
     def __init__(self, service_info, api_info):
         self.service_info = service_info
         self.api_info = api_info
@@ -40,8 +47,10 @@ class DirectService:
         r = self.prepare_request(api_info, params, doseq)
 
         url = r.build(doseq)
-        resp = self.session.get(url, headers=r.headers,
-                                timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout))
+        resp = self.session.get(url,
+                                headers=r.headers,
+                                timeout=(self.service_info.connection_timeout,
+                                         self.service_info.socket_timeout))
         if resp.status_code == 200:
             return resp.text
         else:
@@ -58,8 +67,11 @@ class DirectService:
 
         url = r.build()
 
-        resp = self.session.post(url, headers=r.headers, data=r.form,
-                                 timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout))
+        resp = self.session.post(url,
+                                 headers=r.headers,
+                                 data=r.form,
+                                 timeout=(self.service_info.connection_timeout,
+                                          self.service_info.socket_timeout))
         if resp.status_code == 200:
             return resp.text
         else:
@@ -74,8 +86,11 @@ class DirectService:
         r.body = body
 
         url = r.build()
-        resp = self.session.post(url, headers=r.headers, data=r.body,
-                                 timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout))
+        resp = self.session.post(url,
+                                 headers=r.headers,
+                                 data=r.body,
+                                 timeout=(self.service_info.connection_timeout,
+                                          self.service_info.socket_timeout))
         if resp.status_code == 200:
             return json.dumps(resp.json())
         else:

@@ -8,6 +8,7 @@ except ImportError:
 
 
 class DirectRequest:
+
     def __init__(self):
         self.schema = ''
         self.method = ''
@@ -48,4 +49,5 @@ class DirectRequest:
         self.socket_timeout = socket_timeout
 
     def build(self, doseq=0):
-        return self.schema + '://' + self.host + self.path + '?' + urlencode(self.query, doseq)
+        return self.schema + '://' + self.host + self.path + '?' + urlencode(
+            self.query, doseq)
