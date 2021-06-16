@@ -40,7 +40,7 @@ class DirectService:
         self.service_info.scheme = scheme
 
     def get(self, api, params, doseq=0):
-        if not (api in self.api_info):
+        if api not in self.api_info:
             raise Exception('no such api')
         api_info = self.api_info[api]
 
@@ -53,11 +53,10 @@ class DirectService:
                                          self.service_info.socket_timeout))
         if resp.status_code == 200:
             return resp.text
-        else:
-            raise Exception(resp.text)
+        raise Exception(resp.text)
 
     def post(self, api, params, form):
-        if not (api in self.api_info):
+        if api not in self.api_info:
             raise Exception('no such api')
         api_info = self.api_info[api]
         r = self.prepare_request(api_info, params)
@@ -74,11 +73,10 @@ class DirectService:
                                           self.service_info.socket_timeout))
         if resp.status_code == 200:
             return resp.text
-        else:
-            raise Exception(resp.text)
+        raise Exception(resp.text)
 
     def json(self, api, params, body):
-        if not (api in self.api_info):
+        if api not in self.api_info:
             raise Exception('no such api')
         api_info = self.api_info[api]
         r = self.prepare_request(api_info, params)
@@ -93,29 +91,26 @@ class DirectService:
                                           self.service_info.socket_timeout))
         if resp.status_code == 200:
             return json.dumps(resp.json())
-        else:
-            raise Exception(resp.text)
+        raise Exception(resp.text)
 
     def put(self, url, file_path, headers):
         with open(file_path, 'rb') as f:
             resp = self.session.put(url, headers=headers, data=f)
             if resp.status_code == 200:
                 return True, resp.text
-            else:
-                return False, resp.text
+            return False, resp.text
 
     def put_data(self, url, data, headers):
         resp = self.session.put(url, headers=headers, data=data)
         if resp.status_code == 200:
             return True, resp.text
-        else:
-            return False, resp.text
+        return False, resp.text
 
     def prepare_request(self, api_info, params, doseq=0):
         for key in params:
-            if type(params[key]) == int or type(params[key]) == float:
+            if isinstance(params[key], (float, int)):
                 params[key] = str(params[key])
-            elif type(params[key]) == list:
+            elif isinstance(params[key], list):
                 if not doseq:
                     params[key] = ','.join(params[key])
 
