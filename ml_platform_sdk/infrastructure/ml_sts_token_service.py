@@ -37,6 +37,7 @@ class MLSTSTokenService(Service):
         params = {'EncryptCode': encrypted_key, 'Duration': self.duration}
 
         try:
+            self.service_info.header = self.get_latest_header()
             resp = self.get(api='GetSTSToken', params=params)
             res_json = json.loads(resp)
             return res_json
@@ -45,16 +46,19 @@ class MLSTSTokenService(Service):
             raise Exception('get_sts_token failed') from e
 
     def get_service_info(self):
+        return ServiceInfo(
+            self.conf.get_service_direct_host(), self.get_latest_header(),
+            Credentials('', '', self.conf.get_service_name(),
+                        self.conf.get_service_region()), 10, 10, "http")
+
+    def get_latest_header(self):
         headers = {
             'Accept': 'application/json',
             'X-Top-Request-Id': '%d' % time.time(),
             'X-Top-Service': self.conf.get_service_name(),
             'X-Top-Region': self.conf.region
         }
-        return ServiceInfo(
-            self.conf.get_service_direct_host(), headers,
-            Credentials('', '', self.conf.get_service_name(),
-                        self.conf.get_service_region()), 10, 10, "http")
+        return headers
 
     @staticmethod
     def get_api_info():
