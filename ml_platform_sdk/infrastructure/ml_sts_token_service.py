@@ -39,8 +39,24 @@ class MLSTSTokenService(Service):
         try:
             self.service_info.header = self.get_latest_header()
             resp = self.get(api='GetSTSToken', params=params)
-            res_json = json.loads(resp)
-            return res_json
+            resp_json = json.loads(resp)
+            resp_ret = {
+                'ResponseMetadata': {
+                    'RequestId': resp_json['ResponseMetadata']['RequestId'],
+                    'Action': resp_json['ResponseMetadata']['Action'],
+                    'Version': resp_json['ResponseMetadata']['Version'],
+                    'Service': resp_json['ResponseMetadata']['Service'],
+                    'Region': resp_json['ResponseMetadata']['Region']
+                },
+                'Result': {
+                    'ExpiredTime': resp_json['Result']['ExpiredTime'],
+                    'CurrentTime': resp_json['Result']['CurrentTime'],
+                    'AccessKeyId': resp_json['Result']['AccessKeyId'],
+                    'SecretAccessKey': resp_json['Result']['SecretAccessKey'],
+                    'SessionToken': resp_json['Result']['SessionToken']
+                }
+            }
+            return resp_ret
         except Exception as e:
             logging.error('Failed to get sts token, error: %s', e)
             raise Exception('get_sts_token failed') from e
