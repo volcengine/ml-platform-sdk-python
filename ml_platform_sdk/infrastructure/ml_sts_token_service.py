@@ -3,12 +3,15 @@ import logging
 import threading
 import time
 
-from ml_platform_sdk.base.direct_apiinfo import DirectApiInfo
-from ml_platform_sdk.base.direct_service import DirectService, DirectServiceInfo
+from volcengine.ApiInfo import ApiInfo
+from volcengine.Credentials import Credentials
+from volcengine.ServiceInfo import ServiceInfo
+from volcengine.base.Service import Service
+
 from ml_platform_sdk.config import config
 
 
-class STSTokenService(DirectService):
+class MLSTSTokenService(Service):
     _instance_lock = threading.Lock()
 
     def __new__(cls, *args, **kwargs):
@@ -23,7 +26,8 @@ class STSTokenService(DirectService):
         self.duration = duration
         self.api_info = self.get_api_info()
         self.service_info = self.get_service_info()
-        super().__init__(self.service_info, self.api_info)
+        super(MLSTSTokenService, self).__init__(self.service_info,
+                                                self.api_info)
 
     def get_sts_token(self):
         encrypted_key = self.conf.get_encrypted_key()
@@ -47,12 +51,14 @@ class STSTokenService(DirectService):
             'X-Top-Service': self.conf.get_service_name(),
             'X-Top-Region': self.conf.region
         }
-        return DirectServiceInfo(self.conf.get_service_direct_host(), headers,
-                                 10, 10, "http")
+        return ServiceInfo(
+            self.conf.get_service_direct_host(), headers,
+            Credentials('', '', self.conf.get_service_name(),
+                        self.conf.get_service_region()), 10, 10, "http")
 
     @staticmethod
     def get_api_info():
         api_info = {
-            'GetSTSToken': DirectApiInfo('GET', '/GetSTSToken', {}, {}, {}),
+            'GetSTSToken': ApiInfo('GET', '/GetSTSToken', {}, {}, {}),
         }
         return api_info
