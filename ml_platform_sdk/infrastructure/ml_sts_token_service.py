@@ -11,6 +11,36 @@ from ml_platform_sdk.config import config
 from ml_platform_sdk.util import reqid
 
 
+class MLSTSTokenResponse:
+
+    class ResponseMetadata:
+
+        def __init__(self, resp_json_meta):
+            self.RequestId = resp_json_meta['RequestId']
+            self.Action = resp_json_meta['Action']
+            self.Version = resp_json_meta['Version']
+            self.Service = resp_json_meta['Service']
+            self.Region = resp_json_meta['Region']
+
+    class Result:
+
+        def __init__(self, resp_json_result):
+            self.ExpiredTime = resp_json_result['ExpiredTime']
+            self.CurrentTime = resp_json_result['CurrentTime']
+            self.AccessKeyId = resp_json_result['AccessKeyId']
+            self.SecretAccessKey = resp_json_result['SecretAccessKey']
+            self.SessionToken = resp_json_result['SessionToken']
+
+    def __init__(self, resp_json):
+        self.resp_json = resp_json
+        self.ResponseMetadata = self.ResponseMetadata(
+            resp_json['ResponseMetadata'])
+        self.Result = self.Result(resp_json['Result'])
+
+    def get_raw_json(self):
+        return self.resp_json
+
+
 class MLSTSTokenService(Service):
     _instance_lock = threading.Lock()
 
@@ -40,22 +70,7 @@ class MLSTSTokenService(Service):
             self.service_info.header = self.get_latest_header()
             resp = self.get(api='GetSTSToken', params=params)
             resp_json = json.loads(resp)
-            resp_ret = {
-                'ResponseMetadata': {
-                    'RequestId': resp_json['ResponseMetadata']['RequestId'],
-                    'Action': resp_json['ResponseMetadata']['Action'],
-                    'Version': resp_json['ResponseMetadata']['Version'],
-                    'Service': resp_json['ResponseMetadata']['Service'],
-                    'Region': resp_json['ResponseMetadata']['Region']
-                },
-                'Result': {
-                    'ExpiredTime': resp_json['Result']['ExpiredTime'],
-                    'CurrentTime': resp_json['Result']['CurrentTime'],
-                    'AccessKeyId': resp_json['Result']['AccessKeyId'],
-                    'SecretAccessKey': resp_json['Result']['SecretAccessKey'],
-                    'SessionToken': resp_json['Result']['SessionToken']
-                }
-            }
+            resp_ret = MLSTSTokenResponse(resp_json)
             return resp_ret
         except Exception as e:
             logging.error('Failed to get sts token, error: %s', e)
