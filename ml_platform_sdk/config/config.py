@@ -9,7 +9,7 @@ SERVICE_VERSION = '2021-10-01'
 SERVICE_HOST = 'open.volcengineapi.com'
 SERVICE_REGION = 'cn-north-1'
 
-SERVICE_DIRECT_HOST = '10.227.77.219:4213'
+SERVICE_DIRECT_HOST = '10.228.109.27:30008'
 
 TOS_REGION_ENDPOINT_URL = {'cn-north-1': 'http://tos-s3-cn-qingdao.volces.com'}
 
