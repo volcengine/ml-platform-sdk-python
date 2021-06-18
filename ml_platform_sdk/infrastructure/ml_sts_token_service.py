@@ -1,7 +1,6 @@
 import json
 import logging
 import threading
-import time
 
 from volcengine.ApiInfo import ApiInfo
 from volcengine.Credentials import Credentials
@@ -9,6 +8,7 @@ from volcengine.ServiceInfo import ServiceInfo
 from volcengine.base.Service import Service
 
 from ml_platform_sdk.config import config
+from ml_platform_sdk.util import reqid
 
 
 class MLSTSTokenService(Service):
@@ -70,7 +70,7 @@ class MLSTSTokenService(Service):
     def get_latest_header(self):
         headers = {
             'Accept': 'application/json',
-            'X-Top-Request-Id': '%d' % time.time(),
+            'X-Top-Request-Id': reqid.gen_req_id(),
             'X-Top-Service': self.conf.get_service_name(),
             'X-Top-Region': self.conf.region
         }
