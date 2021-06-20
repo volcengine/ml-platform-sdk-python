@@ -9,7 +9,11 @@ SERVICE_VERSION = '2021-10-01'
 SERVICE_HOST = 'open.volcengineapi.com'
 SERVICE_REGION = 'cn-north-1'
 
+SERVICE_DIRECT_HOST = '10.228.109.27:30008'
+
 TOS_REGION_ENDPOINT_URL = {'cn-north-1': 'http://tos-s3-cn-qingdao.volces.com'}
+
+ENCRYPTED_KEY_ENV_NAME = 'ENCRYPTED_KEY'
 
 
 class Config:
@@ -41,6 +45,14 @@ class Config:
         if 'SERVICE_REGION' in os.environ:
             return os.environ['SERVICE_REGION']
         return SERVICE_REGION
+
+    @staticmethod
+    def get_encrypted_key():
+        return os.getenv(ENCRYPTED_KEY_ENV_NAME)
+
+    @staticmethod
+    def get_service_direct_host():
+        return SERVICE_DIRECT_HOST
 
     @staticmethod
     def get_session_token():
