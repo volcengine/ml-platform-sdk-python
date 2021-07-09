@@ -2,11 +2,13 @@ import logging
 import os
 import uuid
 from datetime import datetime
+from typing import List
 from six.moves import urllib
 from _typeshed import StrPath
 
 from ml_platform_sdk.tos import tos
 from ml_platform_sdk.model.model_service import ModelRepoService
+from ml_platform_sdk.model.model import Model
 
 
 class ModelClient:
@@ -75,47 +77,6 @@ class ModelClient:
                 prefix += '/'
         return prefix
 
-    def upload_model(
-        self,
-        model_name: str,
-        model_format: str,
-        model_type: str,
-        bucket_name: str,
-        prefix: str,
-        local_path: StrPath,
-        model_id=None,
-        description=None,
-    ) -> dict:
-        """upload local model to TOS and register with model repository service
-
-        Args:
-            model_name (str): model name
-            model_format (str): model format, can be one of SavedModel', 'GraphDef','TorchScript','PTX',
-                    'CaffeModel','NetDef','MXNetParams','Scikit_Learn','XGBoost','TensorRT','ONNX',or 'Custom'
-            model_type (str): The type of the ModelVersion, examples: 'TensorFlow:2.0'
-            bucket_name (str): tos bucket
-            prefix (str): prefix for tos keys
-            local_path (StrPath): local path of model files
-            model_id (str, optional): model_id, a new model will be created if not given. Defaults to None.
-            description (str, optional): description to the model. Defaults to None.
-
-        Returns:
-            dict of json response
-        """
-        bucket_name = self._get_or_create_bucket(bucket_name, self.region)
-        prefix = self._get_or_generate_prefix(prefix, model_name)
-        tos_path = self._upload_to_tos(local_path, bucket_name, prefix)
-
-        print('>>>tos_path:{}'.format(tos_path))
-        return self.api_client.create_model(
-            model_name=model_name,
-            model_format=model_format,
-            model_type=model_type,
-            path=tos_path,
-            model_id=model_id,
-            description=description,
-        )
-
     def _download_dir(self, bucket, key, prefix, local_dir):
         marker = ''
         while True:
@@ -173,7 +134,7 @@ class ModelClient:
         """
         resp = self.get_model_version(model_id=model_id,
                                       model_version_id=model_version_id)
-        tos_path = resp['Result']['Path']
+        tos_path = resp.version_info.path
         parse_result = urllib.parse.urlparse(tos_path)
         bucket = parse_result.hostname
         key = parse_result.path.lstrip('/')
@@ -182,13 +143,56 @@ class ModelClient:
         return 'Download model {} to {} success'.format(model_version_id,
                                                         local_dir)
 
+    def upload_model(
+        self,
+        model_name: str,
+        model_format: str,
+        model_type: str,
+        bucket_name: str,
+        prefix: str,
+        local_path: StrPath,
+        model_id=None,
+        description=None,
+    ) -> tuple(str, str):
+        """upload local model to TOS and register with model repository service
+
+        Args:
+            model_name (str): model name
+            model_format (str): model format, can be one of SavedModel', 'GraphDef','TorchScript','PTX',
+                    'CaffeModel','NetDef','MXNetParams','Scikit_Learn','XGBoost','TensorRT','ONNX',or 'Custom'
+            model_type (str): The type of the ModelVersion, examples: 'TensorFlow:2.0'
+            bucket_name (str): tos bucket
+            prefix (str): prefix for tos keys
+            local_path (StrPath): local path of model files
+            model_id (str, optional): model_id, a new model will be created if not given. Defaults to None.
+            description (str, optional): description to the model. Defaults to None.
+
+        Returns:
+            model_id (str): example: model-20210624174426-x9nqh
+            model_version_id (str): example: model-version-20210624180756-mdmq4
+        """
+        bucket_name = self._get_or_create_bucket(bucket_name, self.region)
+        prefix = self._get_or_generate_prefix(prefix, model_name)
+        tos_path = self._upload_to_tos(local_path, bucket_name, prefix)
+
+        print('>>>tos_path:{}'.format(tos_path))
+        resp = self.api_client.create_model(
+            model_name=model_name,
+            model_format=model_format,
+            model_type=model_type,
+            path=tos_path,
+            model_id=model_id,
+            description=description,
+        )
+        return resp['Result']['ModelID'], resp['Result']['ModelVersionID']
+
     def list_models(self,
                     model_name=None,
                     model_name_contains=None,
                     offset=0,
                     page_size=10,
                     sort_by='CreateTime',
-                    sort_order='Descend'):
+                    sort_order='Descend') -> List[Model]:
         """list models
 
         Args:
@@ -201,11 +205,23 @@ class ModelClient:
             sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
 
         Returns:
-            json response
+            list of models
         """
-        return self.api_client.list_models(model_name, model_name_contains,
+        resp = self.api_client.list_models(model_name, model_name_contains,
                                            offset, page_size, sort_by,
                                            sort_order)
+        models = []
+        for m in resp['Result']['List']:
+            models.append(
+                Model(model_name=m['ModelName'],
+                      model_id=m['ModelId'],
+                      version_id=m['VersionInfo']['ModelVersionID'],
+                      version_index=m['VersionInfo']['ModelVersion'],
+                      model_format=m['VersionInfo']['ModelFormat'],
+                      model_type=m['VersionInfo']['ModelType'],
+                      path=m['VersionInfo']['Path'],
+                      description=m['VersionInfo']['Description'],
+                      source_type=m['VersionInfo']['SourceType']))
 
     def delete_model(self, model_id):
         """delete model with given model id
@@ -218,17 +234,33 @@ class ModelClient:
         """
         return self.api_client.delete_model(model_id)
 
-    def list_model_versions(self, model_id: str):
+    def list_model_versions(self, model_id: str) -> List[Model]:
         """list model versions with given model_id
 
         Args:
             model_id (str): model id
         Returns:
-            json response
+            list of Models with distinct versions
         """
-        return self.api_client.list_model_versions(model_id)
+        # request for list of versions info
+        resp = self.api_client.list_model_versions(model_id)
+        # request for model name
+        model_name = self.api_client.get_model(model_id)['Result']['ModelName']
+        models = []
+        for m in resp['Result']['List']:
+            models.append(
+                Model(model_name=model_name,
+                      model_id=model_id,
+                      version_id=m['ModelVersionID'],
+                      version_index=m['ModelVersion'],
+                      model_format=m['ModelFormat'],
+                      model_type=m['ModelType'],
+                      path=m['Path'],
+                      description=m['Description'],
+                      source_type=m['SourceType']))
+        return models
 
-    def get_model_version(self, model_id: str, model_version_id: str):
+    def get_model_version(self, model_id: str, model_version_id: str) -> Model:
         """get certain version of a model
 
         Args:
@@ -236,9 +268,20 @@ class ModelClient:
             model_version_id (str): model version id
 
         Returns:
-            json response
+            Model
         """
-        return self.api_client.get_model_version(model_id, model_version_id)
+        resp = self.api_client.get_model_version(model_id, model_version_id)
+        m = resp['Result']
+        model_name = self.api_client.get_model(model_id)['Result']['ModelName']
+        return Model(model_name=model_name,
+                     model_id=model_id,
+                     version_id=m['ModelVersionID'],
+                     version_index=m['ModelVersion'],
+                     model_format=m['ModelFormat'],
+                     model_type=m['ModelType'],
+                     path=m['Path'],
+                     description=m['Description'],
+                     source_type=m['SourceType'])
 
     def delete_model_version(self, model_id: str, model_version_id: str):
         """delete certain version of a model

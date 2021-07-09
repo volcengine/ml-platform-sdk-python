@@ -19,7 +19,7 @@ class ModelRepoService(Service):
                     cls._instance = object.__new__(cls)
         return cls._instance
 
-    def __init__(self, region='cn-north-1'):
+    def __init__(self, region='cn-beijing'):
         self.conf = config.Config(region)
         self.service_info = self.get_service_info()
         self.api_info = self.get_api_info()
