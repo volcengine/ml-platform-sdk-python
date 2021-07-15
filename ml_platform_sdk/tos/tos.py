@@ -1,32 +1,37 @@
 import logging
 import math
 import os
+from typing import Optional
 
 import boto3
 import botocore
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 
-from ml_platform_sdk.config import config
+from ml_platform_sdk import initializer
+from ml_platform_sdk.config import credential as auth_credential, constants
+
+
+def _init_boto3_client(credential: Optional[auth_credential.Credential] = None):
+    # custom config
+    # pylint: disable=C0301
+    # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
+    if credential is None:
+        credential = initializer.global_config.get_credential()
+    client = boto3.client(
+        's3',
+        region_name=credential.get_region(),
+        endpoint_url=constants.TOS_REGION_ENDPOINT_URL[credential.get_region()],
+        aws_access_key_id=credential.get_access_key_id(),
+        aws_secret_access_key=credential.get_secret_access_key(),
+    )
+    return client
 
 
 class TOSClient:
 
-    def __init__(self, region: str, ak: str, sk: str):
-        self.s3_client = self._init_boto3_client(region, ak, sk)
-
-    def _init_boto3_client(self, region, ak, sk):
-        # custom config
-        # pylint: disable=C0301
-        # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
-        client = boto3.client(
-            's3',
-            region_name=region,
-            endpoint_url=config.Config.get_tos_endpoint_url(),
-            aws_access_key_id=ak,
-            aws_secret_access_key=sk,
-        )
-        return client
+    def __init__(self, credential: auth_credential.Credential):
+        self.s3_client = _init_boto3_client(credential)
 
     def bucket_exists(self, bucket_name):
         """Check whether a bucket exists."""
@@ -78,12 +83,23 @@ class TOSClient:
         """
         return self.s3_client.list_buckets()['Buckets']
 
-    def list_objects(self, bucket) -> list:
+    def list_objects(self,
+                     bucket,
+                     delimiter=None,
+                     encoding_type=None,
+                     marker=None,
+                     max_keys=None,
+                     prefix=None):
         """List S3 objects with given object
 
         return a list of Object infos
         """
-        return self.s3_client.list_objects(Bucket=bucket)
+        return self.s3_client.list_objects(Bucket=bucket,
+                                           Delimiter=delimiter,
+                                           EncodingType=encoding_type,
+                                           Marker=marker,
+                                           MaxKeys=max_keys,
+                                           Prefix=prefix)
 
     def put_object(self, bucket, key, body):
         """Upload single object, object size should not exceed 5MB"""

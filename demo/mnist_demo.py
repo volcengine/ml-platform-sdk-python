@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from ml_platform_sdk.dataset.dataset_service import DatasetService
+from ml_platform_sdk.datasets.dataset_service import DatasetService
 
 ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
 sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='

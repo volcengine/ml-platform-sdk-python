@@ -1,28 +1,17 @@
-from ml_platform_sdk.dataset.dataset_service import DatasetService
+from ml_platform_sdk.datasets.image_dataset import ImageDataset
+from ml_platform_sdk.config import credential as auth_credential
+import ml_platform_sdk
 
 ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
 sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='
-region = 'cn-north-1'
-train_path = './train_dataset'
-test_path = './test_dataset'
-dataset_id = 'd-20210524180444-5fhsl'
+region = 'cn-qingdao'
 
 if __name__ == '__main__':
-    client = DatasetService()
-    client.set_ak(ak)
-    client.set_sk(sk)
+    ml_platform_sdk.init(auth_credential.Credential(ak, sk, region))
+    dataset = ImageDataset(dataset_id='d-20210713202131-ps49q')
 
-    # List Datasets
-    # print(client.list_datasets())
+    dataset.create(local_path='./demo_dataset')
 
-    # Get Dataset
-    # print(client.get_dataset('d-20210524144453-tr6mp'))
-
-    # Download Dataset
-    # manifest = client.download_dataset('d-20210524144453-tr6mp', './')
-
-    # Split Dataset
-    client.download_and_split_dataset(train_path,
-                                      test_path,
-                                      dataset_id,
-                                      limit=100)
+    dataset.split(training_dir='./demo_dataset/train',
+                  testing_dir='./demo_dataset/test',
+                  ratio=0.5)

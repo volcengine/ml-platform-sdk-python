@@ -7,7 +7,7 @@ from volcengine.Credentials import Credentials
 from volcengine.ServiceInfo import ServiceInfo
 from volcengine.base.Service import Service
 
-from ml_platform_sdk.config import config
+from ml_platform_sdk.config import constants
 from ml_platform_sdk.util import reqid
 
 
@@ -52,7 +52,7 @@ class MLSTSTokenService(Service):
         return cls._instance
 
     def __init__(self, duration, region='cn-north-1'):
-        self.conf = config.Config(region)
+        self.conf = constants.Config(region)
         self.duration = duration
         self.api_info = self.get_api_info()
         self.service_info = self.get_service_info()
