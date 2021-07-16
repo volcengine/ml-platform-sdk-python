@@ -241,6 +241,60 @@ class APIClient(Service):
                         "Action": "GetSTSToken",
                         "Version": env.Env.get_service_version()
                     }, {}, {}),
+            'ListAnnotationSets':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "ListAnnotationSets",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'UpdateAnnotationLabel':
+                ApiInfo(
+                    "POST", "/", {
+                        "Action": "UpdateAnnotationLabel",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'GetAnnotationSet':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "GetAnnotationSet",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'DeleteAnnotationSet':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "DeleteAnnotationSet",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'CreateAnnotaionSet':
+                ApiInfo(
+                    "POST", "/", {
+                        "Action": "CreateAnnotaionSet",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'UpdateAnnotationData':
+                ApiInfo(
+                    "POST", "/", {
+                        "Action": "UpdateAnnotationData",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'ListAnnotationDatas':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "ListAnnotationDatas",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'TryDeleteAnnotationLabel':
+                ApiInfo(
+                    "POST", "/", {
+                        "Action": "TryDeleteAnnotationLabel",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'ListAnnotationLabel':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "ListAnnotationLabel",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
         }
         return api_info
 
@@ -757,8 +811,6 @@ class APIClient(Service):
             'Price': price,
             'Region': region
         }
-        if flavor_id:
-            body.update({'FlavorID': flavor_id})
         try:
             res_json = self.common_json_handler("CreateResource", body)
             return handle_res.handle_res(res_json)
@@ -792,7 +844,7 @@ class APIClient(Service):
                       name=None,
                       name_contains=None,
                       types=None,
-                      tag=None,
+                      tag: list = None,
                       offset=0,
                       page_size=10,
                       sort_by='CreateTime',
@@ -820,8 +872,10 @@ class APIClient(Service):
             logging.error('Failed to list resource, error: %s', e)
             raise Exception('list_resource failed') from e
 
-    def get_sts_token(self, encrypt_code: str, duration=10):
-        params = {'EncryptCode': encrypt_code, 'Duration': duration}
+    def get_sts_token(self, encrypt_code: str, duration: int = None):
+        params = {'EncryptCode': encrypt_code}
+        if duration:
+            params.update({'Duration': duration})
         try:
             res = self.get(api='GetSTSToken', params=params)
             res_json = json.loads(res)
@@ -831,3 +885,130 @@ class APIClient(Service):
                 'Failed to get sts token, encrypt_code: %s, error: %s',
                 encrypt_code, e)
             raise Exception('get_sts_token failed') from e
+
+    def list_annotation_sets(self, dataset_id: str):
+        params = {'DatasetID': dataset_id}
+        try:
+            res = self.get(api='ListAnnotationSets', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to list annotation sets, error: %s', e)
+            raise Exception('list_annotation_sets failed') from e
+
+    def update_annotation_label(self,
+                                annotation_id: str,
+                                labels: list,
+                                default_label=None):
+        body = {
+            'AnnotationID': annotation_id,
+            'Labels': labels,
+        }
+        if default_label:
+            body.update({'DefaultLabel': default_label})
+        try:
+            res_json = self.common_json_handler("UpdateAnnotationLabel", body)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to update annotation label, error: %s', e)
+            raise Exception('update_annotation_label failed') from e
+
+    def get_annotation_set(self, dataset_id: str, annotation_id: str):
+        params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
+        try:
+            res = self.get(api='GetAnnotationSet', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to get annotation set, error: %s', e)
+            raise Exception('get_annotation_set failed') from e
+
+    def delete_annotation_set(self, dataset_id: str, annotation_id: str):
+        params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
+        try:
+            res = self.get(api='DeleteAnnotationSet', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to delete annotation set, error: %s', e)
+            raise Exception('delete_annotation_set failed') from e
+
+    def create_annotation_set(self,
+                              dataset_id: str,
+                              annotation_type: str,
+                              annotation_name: str,
+                              annotation_id: str = None,
+                              storage_path: str = None,
+                              annotation_status: str = None,
+                              default_label: str = None,
+                              labels: list = None,
+                              DisplayDatas: list = None,
+                              create_time: str = None,
+                              update_time: str = None):
+        body = {
+            'DatasetID': dataset_id,
+            'AnnotationType': annotation_type,
+            'AnnotationName': annotation_name
+        }
+        if default_label:
+            body.update({'DefaultLabel': default_label})
+        if labels:
+            body.update({'Labels': labels})
+        try:
+            res_json = self.common_json_handler("CreateAnnotataionSet", body)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to create annotation set, error: %s', e)
+            raise Exception('create_annotation_set failed') from e
+
+    def update_annotation_data(self, annotation_id: str, datas: list):
+        body = {'AnnotationID': annotation_id, 'Datas': datas}
+        try:
+            res_json = self.common_json_handler("UpdateAnnotationData", body)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to update annotation data, error: %s', e)
+            raise Exception('update_annotation_data failed') from e
+
+    def list_annotation_datas(self,
+                              annotation_id: str,
+                              label_names: list = None,
+                              status: int = None,
+                              offset=0,
+                              page_size=10):
+        params = {
+            'AnnotationID': annotation_id,
+            'Offset': offset,
+            'Limit': page_size,
+        }
+        if status:
+            params.update({'Status': status})
+        if label_names:
+            params.update({'LabelNames': label_names})
+        try:
+            res = self.get(api='ListAnnotationDatas', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to list annotation datas, error: %s', e)
+            raise Exception('list_annotation_datas failed') from e
+
+    def try_delete_annotation_label(self, annotation_id: str, label: object):
+        body = {'AnnotationID': annotation_id, 'Label': label}
+        try:
+            res_json = self.common_json_handler("TryDeleteAnnotationLabel",
+                                                body)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to try delete annotation label, error: %s', e)
+            raise Exception('try_delete_annotation_label failed') from e
+
+    def list_annotation_label(self, dataset_id: str, annotation_id: str):
+        params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
+        try:
+            res = self.get(api='ListAnnotationLabel', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to list annotation label, error: %s', e)
+            raise Exception('list_annotation_label failed') from e
