@@ -1,8 +1,11 @@
-boto3
-requests
+boto3~=1.17.111
+requests~=2.26.0
 six
-volcengine
+volcengine~=1.0.17
 numpy==1.20.0
-tqdm
+tqdm~=4.61.2
 pillow==8.2.0
 six
+setuptools~=57.1.0
+botocore~=1.20.111
+prettytable~=2.1.0
