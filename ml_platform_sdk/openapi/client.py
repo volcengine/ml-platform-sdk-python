@@ -210,6 +210,36 @@ class APIClient(Service):
                         'Action': 'GetTOSUploadPath',
                         'Version': env.Env.get_service_version()
                     }, {}, {}),
+            'CreateResource':
+                ApiInfo(
+                    'POST', '/', {
+                        'Action': 'CreateResource',
+                        'Version': env.Env.get_service_version()
+                    }, {}, {}),
+            'GetResource':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "GetResource",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'DeleteResource':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "DeleteResource",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'ListResource':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "ListResource",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
+            'GetSTSToken':
+                ApiInfo(
+                    "GET", "/", {
+                        "Action": "GetSTSToken",
+                        "Version": env.Env.get_service_version()
+                    }, {}, {}),
         }
         return api_info
 
@@ -261,6 +291,16 @@ class APIClient(Service):
                 'Failed to get datasets info, dataset_id: %s, error: %s',
                 dataset_id, e)
             raise Exception('get_dataset failed') from e
+
+    def delete_dataset(self, dataset_id: str):
+        params = {'DatasetID': dataset_id}
+        try:
+            res = self.get(api='DeleteDataset', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            logging.error('Failed to get dataset, error: %s', e)
+            raise Exception('delete_dataset failed') from e
 
     def list_datasets(self):
         params = {}
@@ -540,66 +580,59 @@ class APIClient(Service):
         except Exception as e:
             raise Exception('update_model_version failed') from e
 
-    def create_service(self,
-                       service_name: str,
-                       model_name: str,
-                       model_id: str,
-                       model_version_id: str,
-                       image_url: str,
-                       flavor_id: str,
-                       envs: list,
-                       model_version: Optional[int] = None,
-                       model_path: Optional[str] = None,
-                       model_type: Optional[str] = None,
-                       replica: Optional[int] = 1,
-                       description: Optional[str] = None) -> dict:
-        """create inference service for model
-
-        Args:
-            service_name (str): service name
-            model (Model): Model object
-            image_url (str): container image url
-            flavor_id (str): hardward standard id
-            envs (list): environment variables
-            replica (int, optional): replica number. Defaults to 1.
-            description (str, optional): description of service. Defaults to None.
-
-        Raises:
-            Exception: create_service failed
-
-        Returns:
-            json response
-        """
-        try:
-            body = {
-                'ServiceName': service_name,
-                'ServiceDeployment': {
-                    'Replicas': replica,
-                    'FlavorID': flavor_id,
-                    'Model': {
-                        'ModelID': model_id,
-                        'ModelVersionID': model_version_id,
-                        'Name': model_name,
-                        'Version': model_version,
-                        'Path': model_path,
-                        'Type': model_type,
-                    },
-                    'Image': {
-                        'URL': image_url,
-                    },
-                    'Envs': envs
-                }
-            }
-            if description is not None:
-                body['ServiceDeployment'].update({'Description': description})
-
-            res = self.json(api='CreateService',
-                            params=dict(),
-                            body=json.dumps(body))
-            res_json = json.loads(res)
-            return res_json
-        except Exception as e:
-            raise Exception('create_service failed') from e
+    # def create_service(self,
+    #                    service_name: str,
+    #                    model: model.Model,
+    #                    image_url: str,
+    #                    flavor_id: str,
+    #                    env: list,
+    #                    replica=1,
+    #                    description=None) -> dict:
+    #     """create inference service for model
+    #
+    #     Args:
+    #         service_name (str): service name
+    #         model (Model): Model object
+    #         image_url (str): container image url
+    #         flavor_id (str): hardward standard id
+    #         env (list): environment variables
+    #         replica (int, optional): replica number. Defaults to 1.
+    #         description (str, optional): description of service. Defaults to None.
+    #
+    #     Raises:
+    #         Exception: create_service failed
+    #
+    #     Returns:
+    #         json response
+    #     """
+    #     try:
+    #         body = {
+    #             'ServiceName': service_name,
+    #             'ServiceDeployment': {
+    #                 'Replicas': replica,
+    #                 'FlavorID': flavor_id,
+    #                 'Model': {
+    #                     'Name': model.model_name,
+    #                     'Version': model.version_info.version_index,
+    #                     'Type': model.version_info.type,
+    #                     'Path': model.version_info.path,
+    #                 },
+    #                 'Image': {
+    #                     'URL': image_url,
+    #                 },
+    #                 'Envs': env
+    #             }
+    #         }
+    #         if description is not None:
+    #             body['ServiceDeployment'].update({'Description': description})
+    #
+    #         res = self.json(api='CreateService',
+    #                         params=dict(),
+    #                         body=json.dumps(body))
+    #         res_json = json.loads(res)
+    #         return res_json
+    #     except Exception as e:
+    #         raise Exception('create_service failed') from e
 
     def delete_service(self, service_id: str) -> dict:
         """delete service with service id
@@ -700,3 +733,89 @@ class APIClient(Service):
 
     def update_service_version_description(self):
         pass
+
+    def create_resource(self, name: str, flavor_id: str, types: str,
+                        v_cpu: float, memory: str, gpu_type: str,
+                        gpu_num: float, price: float, region: str):
+        body = {
+            'Name': name,
+            'FlavorID': flavor_id,
+            'Type': types,
+            'vCPU': v_cpu,
+            'Memory': memory,
+            'GPUType': gpu_type,
+            'GPUNum': gpu_num,
+            'Price': price,
+            'Region': region
+        }
+        try:
+            res_json = self.common_json_handler("CreateResource", body)
+            return res_json
+        except Exception as e:
+            logging.error('Failed to create resource, error: %s', e)
+            raise Exception('create_resource failed') from e
+
+    def get_resource(self, flavor_id: str):
+        params = {'FlavorID': flavor_id}
+        try:
+            res = self.get(api='GetResource', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            logging.error(
+                'Failed to get resource info, flavor_id: %s, error: %s',
+                flavor_id, e)
+            raise Exception('get_resource failed') from e
+
+    def delete_resource(self, flavor_id: str):
+        params = {'FlavorID': flavor_id}
+        try:
+            res = self.get(api='DeleteResource', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            logging.error('Failed to delete resource, error: %s', e)
+            raise Exception('delete_resource failed') from e
+
+    def list_resource(self,
+                      name=None,
+                      name_contains=None,
+                      types=None,
+                      tag=None,
+                      offset=0,
+                      page_size=10,
+                      sort_by='CreateTime',
+                      sort_order='Descend'):
+
+        params = {
+            'Offset': offset,
+            'Limit': page_size,
+            'SortBy': sort_by,
+            'SortOrder': sort_order,
+        }
+        if name:
+            params.update({'Name': name})
+        if name_contains:
+            params.update({'NameContains': name_contains})
+        if types:
+            params.update({'Type': types})
+        if tag:
+            params.update({'Tag': tag})
+        try:
+            res = self.get(api='ListResource', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            logging.error('Failed to list resource, error: %s', e)
+            raise Exception('list_resource failed') from e
+
+    def get_sts_token(self, encrypt_code: str, duration=10):
+        params = {'EncryptCode': encrypt_code, 'Duration': duration}
+        try:
+            res = self.get(api='GetSTSToken', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            logging.error('Failed to get sts token, encrypt_code: %s, error: %s',
+                          encrypt_code, e)
+            raise Exception('get_sts_token failed') from e
