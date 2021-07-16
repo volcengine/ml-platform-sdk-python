@@ -1,7 +1,7 @@
 import logging
 import os
 from urllib.parse import urlparse
-from typing import Optional
+from typing import Optional, Tuple
 
 from prettytable import PrettyTable
 from tqdm import tqdm
@@ -98,7 +98,7 @@ class Model:
                 logging.warning(
                     'model name is diff from origin, use old model_name')
 
-    def _require_model_tos_storage(self) -> (str, str):
+    def _require_model_tos_storage(self) -> Tuple[str, str]:
         response = self.api_client.get_tos_upload_path(service_name='dataset',
                                                        path=['from-sdk-repo'])
         return response['Result']['Bucket'], response['Result']['KeyPrefix']

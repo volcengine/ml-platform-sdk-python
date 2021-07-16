@@ -1,8 +1,9 @@
 import logging
 import os
 import shutil
-from typing import Optional
+from typing import Optional, Tuple, List
 from urllib.parse import urlparse
+import json
 import requests
 
 from ml_platform_sdk import initializer
@@ -40,6 +41,7 @@ class _Dataset:
                  credential: Optional[auth_credential.Credential] = None):
         self.dataset_id = dataset_id
         self.local_path = local_path
+        self.tabular_path = None
         self.tos_source = tos_source
         self.created = False
         self.data_count = 0
@@ -95,3 +97,32 @@ class _Dataset:
             raise requests.exceptions.InvalidURL
 
         return file_path
+
+    def get_paths(self, offset=0, limit=-1) -> Tuple[List, List]:
+        """get filepaths of dataset files
+
+        Args:
+            offset (int, optional): num of images to skip. Defaults to 0.
+            limit (int, optional): num of images to load. Defaults to -1.
+
+        Returns:
+            list of paths. Single tabular_path will be returned if it is a TabularDataset
+            list of annotations. No annotations for TabularDataset
+        """
+        if not self.tabular_path:
+            return [self.tabular_path], None
+        paths = []
+        annotations = []
+
+        with open(self._manifest_path()) as f:
+            for i, line in enumerate(f):
+                manifest_line = json.loads(line)
+                if i < offset:
+                    continue
+                if limit != -1 and i >= offset + limit:
+                    break
+                file_path = manifest_line['data']['FilePath']
+                paths.append(file_path)
+                annotations.append(manifest_line['annotation'])
+
+        return paths, annotations

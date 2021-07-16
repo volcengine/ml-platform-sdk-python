@@ -1,39 +1,35 @@
 import numpy as np
 import tensorflow as tf
 
-from ml_platform_sdk.datasets.dataset_service import DatasetService
+import ml_platform_sdk
+from ml_platform_sdk.datasets import ImageDataset
+from ml_platform_sdk.config import credential as auth_credential
 
 ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
 sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='
-region = 'cn-north-1'
+region = 'cn-qingdao'
 train_path = './train_dataset'
 test_path = './test_dataset'
 dataset_id = 'd-20210524180450-m592h'
 
 if __name__ == '__main__':
-    client = DatasetService()
-    client.set_ak(ak)
-    client.set_sk(sk)
+    ml_platform_sdk.init(auth_credential.Credential(ak, sk, region))
 
-    # List Datasets
-    # print(client.list_datasets())
+    dataset = ImageDataset(dataset_id=dataset_id)
 
-    # Get Dataset
-    # print(client.get_dataset('d-20210524144453-tr6mp'))
+    dataset.create(local_path='./demo_dataset')
 
-    # Download Dataset
-    # manifest = client.download_dataset('d-20210524144453-tr6mp', './')
-
-    # download and split Dataset
-    training_dataset, testing_dataset = client.download_and_split_dataset(
-        train_path, test_path, dataset_id, limit=1000)
+    # split Dataset
+    training_dataset, testing_dataset = dataset.split(training_dir=train_path,
+                                                      testing_dir=test_path,
+                                                      ratio=0.8)
 
     # prepare training data
-    X_train, annotations = training_dataset.load_images_np()
+    X_train, annotations = training_dataset.load_as_np()
     y_train = np.array(
         [int(x['result'][0]['data'][0]['label']) for x in annotations])
 
-    X_test, annotations = testing_dataset.load_images_np()
+    X_test, annotations = testing_dataset.load_as_np()
     y_test = np.array(
         [int(x['result'][0]['data'][0]['label']) for x in annotations])
 
