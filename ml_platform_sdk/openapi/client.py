@@ -10,6 +10,7 @@ from volcengine.base.Service import Service
 
 from ml_platform_sdk import initializer
 from ml_platform_sdk.config import credential as auth_credential, env
+from ml_platform_sdk.util import handle_res
 
 
 class APIClient(Service):
@@ -260,14 +261,14 @@ class APIClient(Service):
         try:
             res = self.get(api='GetTOSUploadPath', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('get_model_next_version failed') from e
 
     def create_dataset(self, body):
         try:
             res_json = self.common_json_handler("CreateDataset", body)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error('Failed to create datasets, error: %s', e)
             raise Exception('create_dataset failed') from e
@@ -275,7 +276,7 @@ class APIClient(Service):
     def update_dataset(self, body):
         try:
             res_json = self.common_json_handler("UpdateDataset", body)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error('Failed to update datasets, error: %s', e)
             raise Exception('update_dataset failed') from e
@@ -285,7 +286,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetDataset', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get datasets info, dataset_id: %s, error: %s',
@@ -297,7 +298,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteDataset', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error('Failed to get dataset, error: %s', e)
             raise Exception('delete_dataset failed') from e
@@ -307,7 +308,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListDatasets', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list datasets, error: %s', e)
             raise Exception('list_datasets failed') from e
@@ -358,7 +359,7 @@ class APIClient(Service):
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('create_model failed') from e
 
@@ -378,7 +379,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetModelNextVersion', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('get_model_next_version failed') from e
 
@@ -421,7 +422,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListModels', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('list_models failed') from e
 
@@ -443,7 +444,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteModel', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('delete_model failed') from e
 
@@ -465,7 +466,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetModel', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('get_model failed') from e
 
@@ -505,7 +506,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListModelVersions', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('list_model_versions failed') from e
 
@@ -527,7 +528,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetModelVersion', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('get_model_version failed') from e
 
@@ -549,7 +550,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteModelVersion', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('delete_model_version failed') from e
 
@@ -576,7 +577,7 @@ class APIClient(Service):
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('update_model_version failed') from e
 
@@ -630,7 +631,7 @@ class APIClient(Service):
     #                         params=dict(),
     #                         body=json.dumps(body))
     #         res_json = json.loads(res)
-    #         return res_json
+    #         return handle_res.handle_res(res_json)
     #     except Exception as e:
     #         raise Exception('create_service failed') from e
 
@@ -650,7 +651,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteService', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('delete_service failed') from e
 
@@ -670,7 +671,7 @@ class APIClient(Service):
         try:
             res = self.get(api='StartService', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('start_service failed') from e
 
@@ -690,7 +691,7 @@ class APIClient(Service):
         try:
             res = self.get(api='StopService', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('start_service failed') from e
 
@@ -723,7 +724,7 @@ class APIClient(Service):
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             raise Exception('scale_service failed') from e
 
@@ -734,12 +735,20 @@ class APIClient(Service):
     def update_service_version_description(self):
         pass
 
-    def create_resource(self, name: str, flavor_id: str, types: str,
-                        v_cpu: float, memory: str, gpu_type: str,
-                        gpu_num: float, price: float, region: str):
+    def create_resource(
+        self,
+        name: str,
+        types: str,
+        v_cpu: float,
+        memory: str,
+        gpu_type: str,
+        gpu_num: float,
+        price: float,
+        region: str,
+        flavor_id: str = None,
+    ):
         body = {
             'Name': name,
-            'FlavorID': flavor_id,
             'Type': types,
             'vCPU': v_cpu,
             'Memory': memory,
@@ -748,9 +757,11 @@ class APIClient(Service):
             'Price': price,
             'Region': region
         }
+        if flavor_id:
+            body.update({'FlavorID': flavor_id})
         try:
             res_json = self.common_json_handler("CreateResource", body)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error('Failed to create resource, error: %s', e)
             raise Exception('create_resource failed') from e
@@ -760,7 +771,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetResource', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get resource info, flavor_id: %s, error: %s',
@@ -772,7 +783,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteResource', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error('Failed to delete resource, error: %s', e)
             raise Exception('delete_resource failed') from e
@@ -804,7 +815,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListResource', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list resource, error: %s', e)
             raise Exception('list_resource failed') from e
@@ -814,8 +825,9 @@ class APIClient(Service):
         try:
             res = self.get(api='GetSTSToken', params=params)
             res_json = json.loads(res)
-            return res_json
+            return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to get sts token, encrypt_code: %s, error: %s',
-                          encrypt_code, e)
+            logging.error(
+                'Failed to get sts token, encrypt_code: %s, error: %s',
+                encrypt_code, e)
             raise Exception('get_sts_token failed') from e
