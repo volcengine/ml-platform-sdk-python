@@ -210,8 +210,29 @@ class APIClient(Service):
                         'Action': 'GetTOSUploadPath',
                         'Version': env.Env.get_service_version()
                     }, {}, {}),
+            'ListResource':
+                ApiInfo(
+                    'GET', '/', {
+                        'Action': 'ListResource',
+                        'Version': env.Env.get_service_version()
+                    }, {}, {}),
         }
         return api_info
+
+    def list_resource(self,
+                      name: Optional[str] = None,
+                      name_contains: Optional[str] = None):
+        params = {}
+        if name:
+            params.update({'Name': name})
+        if name_contains:
+            params.update({'NameContains': name_contains})
+        try:
+            res = self.get(api='ListResource', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            raise Exception('list_resource failed') from e
 
     def get_tos_upload_path(self, service_name: str, path=None):
         """
@@ -552,6 +573,7 @@ class APIClient(Service):
                        model_path: Optional[str] = None,
                        model_type: Optional[str] = None,
                        replica: Optional[int] = 1,
+                       cluster_id: Optional[str] = 'cc3gpncvqtofppg3tqam0',
                        description: Optional[str] = None) -> dict:
         """create inference service for model
 
@@ -573,6 +595,7 @@ class APIClient(Service):
         try:
             body = {
                 'ServiceName': service_name,
+                'ClusterID': cluster_id,
                 'ServiceDeployment': {
                     'Replicas': replica,
                     'FlavorID': flavor_id,
@@ -592,7 +615,6 @@ class APIClient(Service):
             }
             if description is not None:
                 body['ServiceDeployment'].update({'Description': description})
-
             res = self.json(api='CreateService',
                             params=dict(),
                             body=json.dumps(body))

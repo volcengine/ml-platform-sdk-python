@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 import logging
 
@@ -47,7 +48,7 @@ class _Inference:
 
         try:
             self.api_client.create_service(
-                service_name=self.service_name,
+                service_name='sdk-create-{}'.format(int(time.time())),
                 image_url=self.image_url,
                 flavor_id=self.flavor_id,
                 envs=self.envs,

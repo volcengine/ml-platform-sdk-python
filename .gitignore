@@ -20,3 +20,4 @@ venv/
 *.swp
 *.swo
 
+demo/demo_*
