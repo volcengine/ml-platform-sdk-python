@@ -310,21 +310,6 @@ class APIClient(Service):
         }
         return api_info
 
-    def list_resource(self,
-                      name: Optional[str] = None,
-                      name_contains: Optional[str] = None):
-        params = {}
-        if name:
-            params.update({'Name': name})
-        if name_contains:
-            params.update({'NameContains': name_contains})
-        try:
-            res = self.get(api='ListResource', params=params)
-            res_json = json.loads(res)
-            return res_json
-        except Exception as e:
-            raise Exception('list_resource failed') from e
-
     def get_tos_upload_path(self, service_name: str, path=None):
         """
 
@@ -883,67 +868,69 @@ class APIClient(Service):
                           service_id, e)
             raise Exception('scale_service failed') from e
 
-    def update_service(
-        self,
-        service_id: str,
-        replicas: int,
-        flavor_id: str,
-        model_id: str,
-        model_version_id: str,
-        img_url: str,
-        envs: list,
-        change_type: str,
-        img_description: str = None,
-        img_version: str = None,
-        img_type: str = None,
-        service_description: str = None,
-        model_name: str = None,
-        model_version: int = None,
-        model_type: str = None,
-        model_path: str = None,
-    ):
-        body = {
-            'ServiceID': service_id,
-            'Replicas': replicas,
-            'FlavorID': flavor_id,
-            'Model': {
-                'ModelID': model_id,
-                'ModelVersionID': model_version_id,
-            },
-            'Image': {
-                'URL': img_url,
-            },
-            'Envs': envs,
-            'ChangeType': change_type
-        }
-        if service_description:
-            body.update({'Description': service_description})
-        if model_name:
-            body['Model'].update({'Name': model_name})
-        if model_version:
-            body['Model'].update({'Version': model_version})
-        if model_type:
-            body['Model'].update({'Type': model_type})
-        if model_path:
-            body['Model'].update({'Path': model_path})
+    # TODO
+    # def update_service(
+    #     self,
+    #     service_id: str,
+    #     replicas: int,
+    #     flavor_id: str,
+    #     model_id: str,
+    #     model_version_id: str,
+    #     img_url: str,
+    #     envs: list,
+    #     change_type: str,
+    #     img_description: str = None,
+    #     img_version: str = None,
+    #     img_type: str = None,
+    #     service_description: str = None,
+    #     model_name: str = None,
+    #     model_version: int = None,
+    #     model_type: str = None,
+    #     model_path: str = None,
+    # ):
+    #     body = {
+    #         'ServiceID': service_id,
+    #         'Replicas': replicas,
+    #         'FlavorID': flavor_id,
+    #         'Model': {
+    #             'ModelID': model_id,
+    #             'ModelVersionID': model_version_id,
+    #         },
+    #         'Image': {
+    #             'URL': img_url,
+    #         },
+    #         'Envs': envs,
+    #         'ChangeType': change_type
+    #     }
+    #     if service_description:
+    #         body.update({'Description': service_description})
+    #     if model_name:
+    #         body['Model'].update({'Name': model_name})
+    #     if model_version:
+    #         body['Model'].update({'Version': model_version})
+    #     if model_type:
+    #         body['Model'].update({'Type': model_type})
+    #     if model_path:
+    #         body['Model'].update({'Path': model_path})
 
-        if img_description:
-            body['Image'].update({'Description': img_description})
-        if img_version:
-            body['Image'].update({'Version': img_version})
-        if img_type:
-            body['Image'].update({'Type': img_type})
-        try:
-            res = self.json(api='UpdateService',
-                            params=dict(),
-                            body=json.dumps(body))
-            res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
-        except Exception as e:
-            logging.error('Failed to update service, service_id: %s, error: %s',
-                          service_id, e)
-            raise Exception('update_service failed') from e
+    #     if img_description:
+    #         body['Image'].update({'Description': img_description})
+    #     if img_version:
+    #         body['Image'].update({'Version': img_version})
+    #     if img_type:
+    #         body['Image'].update({'Type': img_type})
+    #     try:
+    #         res = self.json(api='UpdateService',
+    #                         params=dict(),
+    #                         body=json.dumps(body))
+    #         res_json = json.loads(res)
+    #         return handle_res.handle_res(res_json)
+    #     except Exception as e:
+    #         logging.error('Failed to update service, service_id: %s, error: %s',
+    #                       service_id, e)
+    #         raise Exception('update_service failed') from e
 
+    # TODO
     def update_service_version_description(self):
         pass
 
