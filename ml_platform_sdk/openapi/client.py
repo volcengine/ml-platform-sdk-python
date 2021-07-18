@@ -127,6 +127,12 @@ class APIClient(Service):
                         'Action': 'GetModelVersion',
                         'Version': env.Env.get_service_version()
                     }, {}, {}),
+            'UpdateModel':
+                ApiInfo(
+                    'POST', '/', {
+                        'Action': 'UpdateModel',
+                        'Version': env.Env.get_service_version()
+                    }, {}, {}),
             'UpdateService':
                 ApiInfo(
                     'POST', '/', {
@@ -323,6 +329,7 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to get model next version, error: %s', e)
             raise Exception('get_model_next_version failed') from e
 
     def create_dataset(self, body):
@@ -360,11 +367,31 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to get dataset, error: %s', e)
+            logging.error('Failed to delete dataset, dataset_id: %s, error: %s',
+                          dataset_id, e)
             raise Exception('delete_dataset failed') from e
 
-    def list_datasets(self):
-        params = {}
+    def list_datasets(self,
+                      name=None,
+                      name_contains=None,
+                      status=None,
+                      offset=0,
+                      page_size=10,
+                      sort_by='CreateTime',
+                      sort_order='Descend'):
+        params = {
+            'Offset': offset,
+            'Limit': page_size,
+            'SortBy': sort_by,
+            'SortOrder': sort_order,
+        }
+        if name:
+            params.update({'Name': name})
+        if name_contains:
+            params.update({'NameContains': name_contains})
+        if status:
+            params.update({'Status': status})
+
         try:
             res = self.get(api='ListDatasets', params=params)
             res_json = json.loads(res)
@@ -421,6 +448,7 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to create model, error: %s', e)
             raise Exception('create_model failed') from e
 
     def get_model_next_version(self, model_id=None):
@@ -441,6 +469,9 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error(
+                'Failed to get model next version, model_id: %s, error: %s',
+                model_id, e)
             raise Exception('get_model_next_version failed') from e
 
     def list_models(self,
@@ -484,6 +515,7 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to list models, error: %s', e)
             raise Exception('list_models failed') from e
 
     def delete_model(self, model_id: str):
@@ -506,6 +538,8 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to delete model, model_id: %s, error: %s',
+                          model_id, e)
             raise Exception('delete_model failed') from e
 
     def get_model(self, model_id: str):
@@ -528,6 +562,8 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to get model, model_id: %s, error: %s',
+                          model_id, e)
             raise Exception('get_model failed') from e
 
     def list_model_versions(self,
@@ -568,13 +604,15 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error(
+                'Failed to list model versions, model_id: %s, error: %s',
+                model_id, e)
             raise Exception('list_model_versions failed') from e
 
-    def get_model_version(self, model_id: str, model_version_id: str):
+    def get_model_version(self, model_version_id: str):
         """get certain version of a model
 
         Args:
-            model_id (str): model id
             model_version_id (str): model version id
 
         Raises:
@@ -583,20 +621,22 @@ class APIClient(Service):
         Returns:
             json response
         """
-        params = {'ModelID': model_id, 'ModelVersionID': model_version_id}
+        params = {'ModelVersionID': model_version_id}
 
         try:
             res = self.get(api='GetModelVersion', params=params)
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error(
+                'Failed to get model version, model_version_id: %s, error: %s',
+                model_version_id, e)
             raise Exception('get_model_version failed') from e
 
-    def delete_model_version(self, model_id: str, model_version_id: str):
+    def delete_model_version(self, model_version_id: str):
         """delete certain version of a model
 
         Args:
-            model_id (str): model id
             model_version_id (str): model version id
 
         Raises:
@@ -605,13 +645,16 @@ class APIClient(Service):
         Returns:
             json response
         """
-        params = {'ModelID': model_id, 'ModelVersionID': model_version_id}
+        params = {'ModelVersionID': model_version_id}
 
         try:
             res = self.get(api='DeleteModelVersion', params=params)
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error(
+                'Failed to delete model version, model_version_id: %s, error: %s',
+                model_version_id, e)
             raise Exception('delete_model_version failed') from e
 
     def update_model_version(self, model_version_id, description=None):
@@ -639,61 +682,90 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error(
+                'Failed to update model version, model_version_id: %s, error: %s',
+                model_version_id, e)
             raise Exception('update_model_version failed') from e
 
-    # def create_service(self,
-    #                    service_name: str,
-    #                    model: model.Model,
-    #                    image_url: str,
-    #                    flavor_id: str,
-    #                    env: list,
-    #                    replica=1,
-    #                    description=None) -> dict:
-    #     """create inference service for model
-    #
-    #     Args:
-    #         service_name (str): service name
-    #         model (Model): Model object
-    #         image_url (str): container image url
-    #         flavor_id (str): hardward standard id
-    #         env (list): environment variables
-    #         replica (int, optional): replica number. Defaults to 1.
-    #         description (str, optional): description of service. Defaults to None.
-    #
-    #     Raises:
-    #         Exception: create_service failed
-    #
-    #     Returns:
-    #         json response
-    #     """
-    #     try:
-    #         body = {
-    #             'ServiceName': service_name,
-    #             'ServiceDeployment': {
-    #                 'Replicas': replica,
-    #                 'FlavorID': flavor_id,
-    #                 'Model': {
-    #                     'Name': model.model_name,
-    #                     'Version': model.version_info.version_index,
-    #                     'Type': model.version_info.type,
-    #                     'Path': model.version_info.path,
-    #                 },
-    #                 'Image': {
-    #                     'URL': image_url,
-    #                 },
-    #                 'Envs': env
-    #             }
-    #         }
-    #         if description is not None:
-    #             body['ServiceDeployment'].update({'Description': description})
-    #
-    #         res = self.json(api='CreateService',
-    #                         params=dict(),
-    #                         body=json.dumps(body))
-    #         res_json = json.loads(res)
-    #         return handle_res.handle_res(res_json)
-    #     except Exception as e:
-    #         raise Exception('create_service failed') from e
+    def update_model(self, model_id, model_name=None):
+        body = {
+            'ModelID': model_id,
+        }
+        if model_name is not None:
+            body.update({'ModelName': model_name})
+        try:
+            res = self.json(api='UpdateModel',
+                            params=dict(),
+                            body=json.dumps(body))
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to update model, model_id: %s, error: %s',
+                          model_id, e)
+            raise Exception('update_model failed') from e
+
+    def create_service(self,
+                       service_name: str,
+                       model_name: str,
+                       model_id: str,
+                       model_version_id: str,
+                       image_url: str,
+                       flavor_id: str,
+                       envs: list,
+                       model_version: Optional[int] = None,
+                       model_path: Optional[str] = None,
+                       model_type: Optional[str] = None,
+                       replica: Optional[int] = 1,
+                       cluster_id: Optional[str] = 'cc3gpncvqtofppg3tqam0',
+                       description: Optional[str] = None) -> dict:
+        """create inference service for model
+
+        Args:
+            service_name (str): service name
+            model (Model): Model object
+            image_url (str): container image url
+            flavor_id (str): hardward standard id
+            envs (list): environment variables
+            replica (int, optional): replica number. Defaults to 1.
+            description (str, optional): description of service. Defaults to None.
+
+        Raises:
+            Exception: create_service failed
+
+        Returns:
+            json response
+        """
+        try:
+            body = {
+                'ServiceName': service_name,
+                'ClusterID': cluster_id,
+                'ServiceDeployment': {
+                    'Replicas': replica,
+                    'FlavorID': flavor_id,
+                    'Model': {
+                        'ModelID': model_id,
+                        'ModelVersionID': model_version_id,
+                        'Name': model_name,
+                        'Version': model_version,
+                        'Path': model_path,
+                        'Type': model_type,
+                    },
+                    'Image': {
+                        'URL': image_url,
+                    },
+                    'Envs': envs
+                }
+            }
+            if description is not None:
+                body['ServiceDeployment'].update({'Description': description})
+            res = self.json(api='CreateService',
+                            params=dict(),
+                            body=json.dumps(body))
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            logging.error('Failed to create service, error: %s', e)
+            raise Exception('create_service failed') from e
 
     def delete_service(self, service_id: str) -> dict:
         """delete service with service id
@@ -713,6 +785,8 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to delete service, service_id: %s, error: %s',
+                          service_id, e)
             raise Exception('delete_service failed') from e
 
     def start_service(self, service_id: str) -> dict:
@@ -733,6 +807,8 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to start service, service_id: %s, error: %s',
+                          service_id, e)
             raise Exception('start_service failed') from e
 
     def stop_service(self, service_id: str) -> dict:
@@ -753,7 +829,9 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            raise Exception('start_service failed') from e
+            logging.error('Failed to stop service, service_id: %s, error: %s',
+                          service_id, e)
+            raise Exception('stop_service failed') from e
 
     def scale_service(self, service_id: str, replicas: int,
                       flavor_id: str) -> dict:
@@ -786,11 +864,70 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
+            logging.error('Failed to scale service, service_id: %s, error: %s',
+                          service_id, e)
             raise Exception('scale_service failed') from e
 
-    # TODO
-    def update_service(self):
-        pass
+    def update_service(
+        self,
+        service_id: str,
+        replicas: int,
+        flavor_id: str,
+        model_id: str,
+        model_version_id: str,
+        img_url: str,
+        envs: list,
+        change_type: str,
+        img_description: str = None,
+        img_version: str = None,
+        img_type: str = None,
+        service_description: str = None,
+        model_name: str = None,
+        model_version: int = None,
+        model_type: str = None,
+        model_path: str = None,
+    ):
+        body = {
+            'ServiceID': service_id,
+            'Replicas': replicas,
+            'FlavorID': flavor_id,
+            'Model': {
+                'ModelID': model_id,
+                'ModelVersionID': model_version_id,
+            },
+            'Image': {
+                'URL': img_url,
+            },
+            'Envs': envs,
+            'ChangeType': change_type
+        }
+        if service_description:
+            body.update({'Description': service_description})
+        if model_name:
+            body['Model'].update({'Name': model_name})
+        if model_version:
+            body['Model'].update({'Version': model_version})
+        if model_type:
+            body['Model'].update({'Type': model_type})
+        if model_path:
+            body['Model'].update({'Path': model_path})
+
+        if img_description:
+            body['Image'].update({'Description': img_description})
+        if img_version:
+            body['Image'].update({'Version': img_version})
+        if img_type:
+            body['Image'].update({'Type': img_type})
+        try:
+            res = self.json(api='UpdateService',
+                            params=dict(),
+                            body=json.dumps(body))
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to update service, service_id: %s, error: %s',
+                          service_id, e)
+            raise Exception('update_service failed') from e
 
     def update_service_version_description(self):
         pass
@@ -802,7 +939,8 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to get service, error: %s', e)
+            logging.error('Failed to get service, service_id: %s, error: %s',
+                          service_id, e)
             raise Exception('get_service failed') from e
 
     def list_service_images(self,
@@ -810,15 +948,15 @@ class APIClient(Service):
                             model_version_id: str,
                             name: str = None,
                             version: int = None,
-                            types: str = None,
+                            service_type: str = None,
                             path: str = None):
         params = {'ModelID': model_id, 'ModelVersionID': model_version_id}
         if name:
             params.update({'Name': name})
         if version:
             params.update({'Version': version})
-        if types:
-            params.update({'Type': types})
+        if service_type:
+            params.update({'Type': service_type})
         if path:
             params.update({'Path': path})
 
@@ -845,7 +983,6 @@ class APIClient(Service):
         }
         if service_name:
             params.update({'ServiceName': service_name})
-
         if service_name_contains:
             params.update({'ServiceNameContains': service_name_contains})
 
@@ -876,7 +1013,9 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to list service versions, error: %s', e)
+            logging.error(
+                'Failed to list service versions, service_id: %s, error: %s',
+                service_id, e)
             raise Exception('list_service_versions failed') from e
 
     def rollback_service_version(self, service_id: str,
@@ -890,7 +1029,9 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to rollback service version, error: %s', e)
+            logging.error(
+                'Failed to rollback service version, service_id: %s, service_version_id: %s, error: %s',
+                service_id, service_version_id, e)
             raise Exception('rollback_service_version failed') from e
 
     def list_model_service_instances(self,
@@ -912,8 +1053,9 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to list model service instances, error: %s',
-                          e)
+            logging.error(
+                'Failed to list model service instances, service_id: %s, error: %s',
+                service_id, e)
             raise Exception('list_model_service_instances failed') from e
 
     def get_model_service_instance_status(self, service_id: str,
@@ -926,24 +1068,24 @@ class APIClient(Service):
             return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error(
-                'Failed to get model service instance status, error: %s', e)
+                'Failed to get model service instance status, service_id: %s, error: %s',
+                service_id, e)
             raise Exception('get_model_service_instance_status failed') from e
 
     def create_resource(
         self,
         name: str,
-        types: str,
+        resource_type: str,
         v_cpu: float,
         memory: str,
         gpu_type: str,
         gpu_num: float,
         price: float,
         region: str,
-        flavor_id: str = None,
     ):
         body = {
             'Name': name,
-            'Type': types,
+            'Type': resource_type,
             'vCPU': v_cpu,
             'Memory': memory,
             'GPUType': gpu_type,
@@ -980,13 +1122,14 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to delete resource, error: %s', e)
+            logging.error('Failed to delete resource, flavor_id: %s, error: %s',
+                          flavor_id, e)
             raise Exception('delete_resource failed') from e
 
     def list_resource(self,
                       name=None,
                       name_contains=None,
-                      types=None,
+                      resource_type=None,
                       tag: list = None,
                       offset=0,
                       page_size=10,
@@ -1004,8 +1147,8 @@ class APIClient(Service):
             params.update({'Name': name})
         if name_contains:
             params.update({'NameContains': name_contains})
-        if types:
-            params.update({'Type': types})
+        if resource_type:
+            params.update({'Type': resource_type})
         if tag:
             params.update({'Tag': tag})
 
@@ -1041,7 +1184,9 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to list annotation sets, error: %s', e)
+            logging.error(
+                'Failed to list annotation sets, dataset_id: %s, error: %s',
+                dataset_id, e)
             raise Exception('list_annotation_sets failed') from e
 
     def update_annotation_label(self,
@@ -1059,7 +1204,9 @@ class APIClient(Service):
             res_json = self.common_json_handler("UpdateAnnotationLabel", body)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to update annotation label, error: %s', e)
+            logging.error(
+                'Failed to update annotation label, annotation_id: %s, error: %s',
+                annotation_id, e)
             raise Exception('update_annotation_label failed') from e
 
     def get_annotation_set(self, dataset_id: str, annotation_id: str):
@@ -1070,7 +1217,9 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to get annotation set, error: %s', e)
+            logging.error(
+                'Failed to get annotation set, dataset_id: %s, annotation_id: %s, error: %s',
+                dataset_id, annotation_id, e)
             raise Exception('get_annotation_set failed') from e
 
     def delete_annotation_set(self, dataset_id: str, annotation_id: str):
@@ -1081,21 +1230,19 @@ class APIClient(Service):
             res_json = json.loads(res)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to delete annotation set, error: %s', e)
+            logging.error(
+                'Failed to delete annotation set, dataset_id: %s, annotation_id: %s, error: %s',
+                dataset_id, annotation_id, e)
             raise Exception('delete_annotation_set failed') from e
 
-    def create_annotation_set(self,
-                              dataset_id: str,
-                              annotation_type: str,
-                              annotation_name: str,
-                              annotation_id: str = None,
-                              storage_path: str = None,
-                              annotation_status: str = None,
-                              default_label: str = None,
-                              labels: list = None,
-                              DisplayDatas: list = None,
-                              create_time: str = None,
-                              update_time: str = None):
+    def create_annotation_set(
+        self,
+        dataset_id: str,
+        annotation_type: str,
+        annotation_name: str,
+        default_label: str = None,
+        labels: list = None,
+    ):
         body = {
             'DatasetID': dataset_id,
             'AnnotationType': annotation_type,
@@ -1120,7 +1267,9 @@ class APIClient(Service):
             res_json = self.common_json_handler("UpdateAnnotationData", body)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to update annotation data, error: %s', e)
+            logging.error(
+                'Failed to update annotation data, annotation_id: %s, error: %s',
+                annotation_id, e)
             raise Exception('update_annotation_data failed') from e
 
     def list_annotation_datas(self,
@@ -1155,7 +1304,9 @@ class APIClient(Service):
                                                 body)
             return handle_res.handle_res(res_json)
         except Exception as e:
-            logging.error('Failed to try delete annotation label, error: %s', e)
+            logging.error(
+                'Failed to try delete annotation label, annotation_id: %s, error: %s',
+                annotation_id, e)
             raise Exception('try_delete_annotation_label failed') from e
 
     def list_annotation_label(self, dataset_id: str, annotation_id: str):
@@ -1169,6 +1320,19 @@ class APIClient(Service):
             logging.error('Failed to list annotation label, error: %s', e)
             raise Exception('list_annotation_label failed') from e
 
-    # TODO
-    def modify_service(self):
-        pass
+    def modify_service(self, service_name: str, service_id: str,
+                       cluster_id: str):
+        params = {
+            'ServiceName': service_name,
+            'ServiceID': service_id,
+            'ClusterID': cluster_id
+        }
+        try:
+            res = self.get(api='ModifyService', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error(
+                'Failed to modify service, service_id: %s, cluster_id: %s, error: %s',
+                service_id, cluster_id, e)
+            raise Exception('modify_service failed') from e
