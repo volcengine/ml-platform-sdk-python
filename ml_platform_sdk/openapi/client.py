@@ -310,6 +310,21 @@ class APIClient(Service):
         }
         return api_info
 
+    def list_resource(self,
+                      name: Optional[str] = None,
+                      name_contains: Optional[str] = None):
+        params = {}
+        if name:
+            params.update({'Name': name})
+        if name_contains:
+            params.update({'NameContains': name_contains})
+        try:
+            res = self.get(api='ListResource', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            raise Exception('list_resource failed') from e
+
     def get_tos_upload_path(self, service_name: str, path=None):
         """
 

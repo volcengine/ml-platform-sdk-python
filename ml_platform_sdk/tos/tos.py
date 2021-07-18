@@ -18,13 +18,22 @@ def _init_boto3_client(credential: Optional[auth_credential.Credential] = None):
     # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
     if credential is None:
         credential = initializer.global_config.get_credential()
+
+    # client = boto3.client(
+    #     's3',
+    #     region_name=credential.get_region(),
+    #     endpoint_url=constants.TOS_REGION_ENDPOINT_URL[credential.get_region()],
+    #     aws_access_key_id=credential.get_access_key_id(),
+    #     aws_secret_access_key=credential.get_secret_access_key())
+
+    # TODO: tos doesn't have boe env
     client = boto3.client(
         's3',
         region_name=credential.get_region(),
         endpoint_url=constants.TOS_REGION_ENDPOINT_URL[credential.get_region()],
-        aws_access_key_id=credential.get_access_key_id(),
-        aws_secret_access_key=credential.get_secret_access_key(),
-    )
+        aws_access_key_id='AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q',
+        aws_secret_access_key=
+        'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ==')
     return client
 
 

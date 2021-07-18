@@ -108,7 +108,17 @@ class ImageDataset(_Dataset):
         test_dataset.created = True
         return train_dataset, test_dataset
 
-    def load_images_np(self, offset=0, limit=-1):
+    def load_as_np(self, offset=0, limit=-1):
+        """load images as numpy array
+
+        Args:
+            offset (int, optional): num of images to skip. Defaults to 0.
+            limit (int, optional): num of images to load. Defaults to -1.
+
+        Returns:
+            np array of images
+            list of annotations
+        """
         images = []
         annotations = []
 

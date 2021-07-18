@@ -1,7 +1,7 @@
 import logging
 import os
 from urllib.parse import urlparse
-from typing import Optional
+from typing import Optional, Tuple
 
 from prettytable import PrettyTable
 from tqdm import tqdm
@@ -45,8 +45,8 @@ class Model:
                 'ModelVersionID']
             self.remote_path = response['Result']['VersionInfo']['Path']
             self.model_name = response['Result']['ModelName']
-            self.model_format = response['Result']['ModelFormat']
-            self.model_type = response['Result']['ModelType']
+            self.model_format = response['Result']['VersionInfo']['ModelFormat']
+            self.model_type = response['Result']['VersionInfo']['ModelType']
         else:
             response = self.api_client.list_model_versions(
                 model_id=self.model_id, model_version=self.model_version)
@@ -57,7 +57,8 @@ class Model:
             self.model_version_id = response['Result']['List'][0][
                 'ModelVersionID']
             self.remote_path = response['Result']['List'][0]['Path']
-            self.model_name = response['Result']['List'][0]['ModelName']
+            self.model_name = self.api_client.get_model(
+                model_id=self.model_id)['Result']['ModelName']
             self.model_format = response['Result']['List'][0]['ModelFormat']
             self.model_type = response['Result']['List'][0]['ModelType']
 
@@ -98,7 +99,7 @@ class Model:
                 logging.warning(
                     'model name is diff from origin, use old model_name')
 
-    def _require_model_tos_storage(self) -> (str, str):
+    def _require_model_tos_storage(self) -> Tuple[str, str]:
         response = self.api_client.get_tos_upload_path(service_name='dataset',
                                                        path=['from-sdk-repo'])
         return response['Result']['Bucket'], response['Result']['KeyPrefix']
@@ -124,7 +125,7 @@ class Model:
                     else:
                         key = '{}{}/{}'.format(prefix, rel_path, file)
                     self.tos_client.upload_file(file_path, bucket, key=key)
-        self.remote_path = 'tos://{}/{}'.format(bucket, prefix[:-1])
+        self.remote_path = 'tos://{}/{}'.format(bucket, prefix)
 
     def _download_tos(self, bucket, key, prefix):
         marker = ''
@@ -214,6 +215,7 @@ class Model:
         if self.model_id is None:
             logging.warning('Model can not be download, model_id is empty')
             raise ValueError
+        self._sync()
 
         try:
             self._download_model()
@@ -269,17 +271,23 @@ class Model:
             logging.warning('Model failed to explain')
             raise Exception('Model is invalid') from e
 
-    def deploy(self,
-               image_url: str,
-               flavor_id: str,
-               force: False,
-               model_version: Optional[int] = None,
-               envs=None,
-               replica: int = 1,
-               description: Optional[str] = None) -> _Inference:
+    def deploy(
+            self,
+            force: Optional[bool] = False,
+            flavor: Optional[str] = 'ml.highcpu.large',
+            image_url:
+        Optional[
+            str] = 'cr-stg-cn-beijing.ivolces.com/machinelearning/cuda10:1.0.10',
+            model_version: Optional[int] = None,
+            envs=None,
+            replica: Optional[int] = 1,
+            description: Optional[str] = None) -> _Inference:
         if model_version:
             self.model_version = model_version
         self._sync()
+
+        flavor_id = self.api_client.list_resource(
+            name=flavor)['Result']['List'][0]['FlavorID']
 
         if self.model_version in self.inference_service.keys():
             if not force:
@@ -288,20 +296,19 @@ class Model:
             logging.warning(
                 'model deploy force, the old inference_service will lost')
 
-        inference_service = _Inference(
-            service_name='model-{}-deployed-by-sdk'.format(self.model_name),
-            image_url=image_url,
-            flavor_id=flavor_id,
-            model_name=self.model_name,
-            model_id=self.model_id,
-            model_version_id=self.model_version_id,
-            model_version=self.model_version,
-            model_path=self.remote_path,
-            model_type=self.model_type,
-            envs=envs,
-            replica=replica,
-            description=description,
-            credential=self.credential)
+        inference_service = _Inference(service_name=self.model_name,
+                                       image_url=image_url,
+                                       flavor_id=flavor_id,
+                                       model_name=self.model_name,
+                                       model_id=self.model_id,
+                                       model_version_id=self.model_version_id,
+                                       model_version=self.model_version,
+                                       model_path=self.remote_path,
+                                       model_type=self.model_type,
+                                       envs=envs,
+                                       replica=replica,
+                                       description=description,
+                                       credential=self.credential)
         self.inference_service.update({self.model_version: inference_service})
         inference_service.create()
         return inference_service
