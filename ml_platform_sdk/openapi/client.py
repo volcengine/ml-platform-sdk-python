@@ -196,13 +196,19 @@ class APIClient(Service):
             'ListModelServiceInstances':
                 ApiInfo(
                     'GET', '/', {
-                        'Action': 'RollbackServiceVersion',
+                        'Action': 'ListModelServiceInstances',
                         'Version': env.Env.get_service_version()
                     }, {}, {}),
             'GetModelServiceInstanceStatus':
                 ApiInfo(
                     'GET', '/', {
-                        'Action': 'RollbackServiceVersion',
+                        'Action': 'GetModelServiceInstanceStatus',
+                        'Version': env.Env.get_service_version()
+                    }, {}, {}),
+            'ModifyService':
+                ApiInfo(
+                    'GET', '/', {
+                        'Action': 'ModifyService',
                         'Version': env.Env.get_service_version()
                     }, {}, {}),
             'GetTOSUploadPath':
@@ -789,6 +795,140 @@ class APIClient(Service):
     def update_service_version_description(self):
         pass
 
+    def get_service(self, service_id: str):
+        params = {'ServiceID': service_id}
+        try:
+            res = self.get(api='GetService', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to get service, error: %s', e)
+            raise Exception('get_service failed') from e
+
+    def list_service_images(self,
+                            model_id: str,
+                            model_version_id: str,
+                            name: str = None,
+                            version: int = None,
+                            types: str = None,
+                            path: str = None):
+        params = {'ModelID': model_id, 'ModelVersionID': model_version_id}
+        if name:
+            params.update({'Name': name})
+        if version:
+            params.update({'Version': version})
+        if types:
+            params.update({'Type': types})
+        if path:
+            params.update({'Path': path})
+
+        try:
+            res = self.get(api='ListServiceImages', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to list service images, error: %s', e)
+            raise Exception('list_service_images failed') from e
+
+    def list_services(self,
+                      service_name: str = None,
+                      service_name_contains: str = None,
+                      offset=0,
+                      page_size=10,
+                      sort_by='CreateTime',
+                      sort_order='Descend'):
+        params = {
+            'Offset': offset,
+            'Limit': page_size,
+            'SortBy': sort_by,
+            'SortOrder': sort_order,
+        }
+        if service_name:
+            params.update({'ServiceName': service_name})
+
+        if service_name_contains:
+            params.update({'ServiceNameContains': service_name_contains})
+
+        try:
+            res = self.get(api='ListServices', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to list services, error: %s', e)
+            raise Exception('list_services failed') from e
+
+    def list_service_versions(self,
+                              service_id: str,
+                              offset=0,
+                              page_size=10,
+                              sort_by='CreateTime',
+                              sort_order='Descend'):
+        params = {
+            'ServiceID': service_id,
+            'Offset': offset,
+            'Limit': page_size,
+            'SortBy': sort_by,
+            'SortOrder': sort_order,
+        }
+
+        try:
+            res = self.get(api='ListServiceVersions', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to list service versions, error: %s', e)
+            raise Exception('list_service_versions failed') from e
+
+    def rollback_service_version(self, service_id: str,
+                                 service_version_id: str):
+        params = {
+            'ServiceID': service_id,
+            'ServiceVersionID': service_version_id
+        }
+        try:
+            res = self.get(api='RollbackServiceVersion', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to rollback service version, error: %s', e)
+            raise Exception('rollback_service_version failed') from e
+
+    def list_model_service_instances(self,
+                                     service_id: str,
+                                     offset=0,
+                                     page_size=10,
+                                     sort_by='CreateTime',
+                                     sort_order='Descend'):
+        params = {
+            'ServiceID': service_id,
+            'Offset': offset,
+            'Limit': page_size,
+            'SortBy': sort_by,
+            'SortOrder': sort_order,
+        }
+
+        try:
+            res = self.get(api='ListModelServiceInstances', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error('Failed to list model service instances, error: %s',
+                          e)
+            raise Exception('list_model_service_instances failed') from e
+
+    def get_model_service_instance_status(self, service_id: str,
+                                          instance_id_list: list):
+        params = {'ServiceID': service_id, 'InstanceIDList': instance_id_list}
+
+        try:
+            res = self.get(api='GetModelServiceInstanceStatus', params=params)
+            res_json = json.loads(res)
+            return handle_res.handle_res(res_json)
+        except Exception as e:
+            logging.error(
+                'Failed to get model service instance status, error: %s', e)
+            raise Exception('get_model_service_instance_status failed') from e
+
     def create_resource(
         self,
         name: str,
@@ -811,6 +951,7 @@ class APIClient(Service):
             'Price': price,
             'Region': region
         }
+
         try:
             res_json = self.common_json_handler("CreateResource", body)
             return handle_res.handle_res(res_json)
@@ -820,6 +961,7 @@ class APIClient(Service):
 
     def get_resource(self, flavor_id: str):
         params = {'FlavorID': flavor_id}
+
         try:
             res = self.get(api='GetResource', params=params)
             res_json = json.loads(res)
@@ -832,6 +974,7 @@ class APIClient(Service):
 
     def delete_resource(self, flavor_id: str):
         params = {'FlavorID': flavor_id}
+
         try:
             res = self.get(api='DeleteResource', params=params)
             res_json = json.loads(res)
@@ -856,6 +999,7 @@ class APIClient(Service):
             'SortBy': sort_by,
             'SortOrder': sort_order,
         }
+
         if name:
             params.update({'Name': name})
         if name_contains:
@@ -864,6 +1008,7 @@ class APIClient(Service):
             params.update({'Type': types})
         if tag:
             params.update({'Tag': tag})
+
         try:
             res = self.get(api='ListResource', params=params)
             res_json = json.loads(res)
@@ -874,8 +1019,10 @@ class APIClient(Service):
 
     def get_sts_token(self, encrypt_code: str, duration: int = None):
         params = {'EncryptCode': encrypt_code}
+
         if duration:
             params.update({'Duration': duration})
+
         try:
             res = self.get(api='GetSTSToken', params=params)
             res_json = json.loads(res)
@@ -888,6 +1035,7 @@ class APIClient(Service):
 
     def list_annotation_sets(self, dataset_id: str):
         params = {'DatasetID': dataset_id}
+
         try:
             res = self.get(api='ListAnnotationSets', params=params)
             res_json = json.loads(res)
@@ -906,6 +1054,7 @@ class APIClient(Service):
         }
         if default_label:
             body.update({'DefaultLabel': default_label})
+
         try:
             res_json = self.common_json_handler("UpdateAnnotationLabel", body)
             return handle_res.handle_res(res_json)
@@ -915,6 +1064,7 @@ class APIClient(Service):
 
     def get_annotation_set(self, dataset_id: str, annotation_id: str):
         params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
+
         try:
             res = self.get(api='GetAnnotationSet', params=params)
             res_json = json.loads(res)
@@ -925,6 +1075,7 @@ class APIClient(Service):
 
     def delete_annotation_set(self, dataset_id: str, annotation_id: str):
         params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
+
         try:
             res = self.get(api='DeleteAnnotationSet', params=params)
             res_json = json.loads(res)
@@ -954,6 +1105,7 @@ class APIClient(Service):
             body.update({'DefaultLabel': default_label})
         if labels:
             body.update({'Labels': labels})
+
         try:
             res_json = self.common_json_handler("CreateAnnotataionSet", body)
             return handle_res.handle_res(res_json)
@@ -963,6 +1115,7 @@ class APIClient(Service):
 
     def update_annotation_data(self, annotation_id: str, datas: list):
         body = {'AnnotationID': annotation_id, 'Datas': datas}
+
         try:
             res_json = self.common_json_handler("UpdateAnnotationData", body)
             return handle_res.handle_res(res_json)
@@ -985,6 +1138,7 @@ class APIClient(Service):
             params.update({'Status': status})
         if label_names:
             params.update({'LabelNames': label_names})
+
         try:
             res = self.get(api='ListAnnotationDatas', params=params)
             res_json = json.loads(res)
@@ -995,6 +1149,7 @@ class APIClient(Service):
 
     def try_delete_annotation_label(self, annotation_id: str, label: object):
         body = {'AnnotationID': annotation_id, 'Label': label}
+
         try:
             res_json = self.common_json_handler("TryDeleteAnnotationLabel",
                                                 body)
@@ -1005,6 +1160,7 @@ class APIClient(Service):
 
     def list_annotation_label(self, dataset_id: str, annotation_id: str):
         params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
+
         try:
             res = self.get(api='ListAnnotationLabel', params=params)
             res_json = json.loads(res)
@@ -1012,3 +1168,7 @@ class APIClient(Service):
         except Exception as e:
             logging.error('Failed to list annotation label, error: %s', e)
             raise Exception('list_annotation_label failed') from e
+
+    # TODO
+    def modify_service(self):
+        pass
