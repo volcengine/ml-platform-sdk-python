@@ -1,4 +1,5 @@
 import json
+
 import threading
 import logging
 from typing import Optional
@@ -10,7 +11,7 @@ from volcengine.base.Service import Service
 
 from ml_platform_sdk import initializer
 from ml_platform_sdk.config import credential as auth_credential, env
-from ml_platform_sdk.util import handle_res
+from ml_platform_sdk.openapi.handle_res import handle_res
 
 
 class APIClient(Service):
@@ -1323,14 +1324,13 @@ class APIClient(Service):
 
     def modify_service(self, service_name: str, service_id: str,
                        cluster_id: str):
-        params = {
+        body = {
             'ServiceName': service_name,
             'ServiceID': service_id,
             'ClusterID': cluster_id
         }
         try:
-            res = self.get(api='ModifyService', params=params)
-            res_json = json.loads(res)
+            res_json = self.common_json_handler("ModifyService", body)
             return handle_res.handle_res(res_json)
         except Exception as e:
             logging.error(
