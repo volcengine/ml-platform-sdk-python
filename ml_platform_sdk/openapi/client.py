@@ -350,6 +350,16 @@ class APIClient(Service):
             raise Exception('update_dataset failed') from e
 
     def get_dataset(self, dataset_id):
+        """Get a Dataset.
+
+        Args:
+            dataset_id (str, required): The unique ID of the Dataset
+        Raises:
+            Exception: failed to get dataset
+        Returns:
+            Dataset: json response
+
+        """
         params = {'DatasetID': dataset_id}
         try:
             res = self.get(api='GetDataset', params=params)
@@ -362,6 +372,16 @@ class APIClient(Service):
             raise Exception('get_dataset failed') from e
 
     def delete_dataset(self, dataset_id: str):
+        """Delete a Dataset.
+
+        Args:
+            dataset_id (str, required): The unique ID of the Dataset
+        Raises:
+            Exception: failed to delete dataset
+        Returns:
+            Dataset: json response
+
+        """
         params = {'DatasetID': dataset_id}
         try:
             res = self.get(api='DeleteDataset', params=params)
@@ -380,6 +400,23 @@ class APIClient(Service):
                       page_size=10,
                       sort_by='CreateTime',
                       sort_order='Descend'):
+        """list datasets
+
+        Args:
+            name (str, optional): dataset name
+            name_contains (str, optional): filter option, check if
+                                dataset name contains given string. Defaults to None.
+            offset (int, optional): offset of database. Defaults to 0.
+            page_size (int, optional): number of results to fetch. Defaults to 10.
+            sort_by (str, optional): sort by 'DatasetlName' or 'CreateTime'. Defaults to 'CreateTime'.
+            sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
+
+        Raises:
+            Exception: list datasets exception
+
+        Returns:
+            json response
+        """
         params = {
             'Offset': offset,
             'Limit': page_size,
@@ -453,14 +490,15 @@ class APIClient(Service):
             raise Exception('create_model failed') from e
 
     def get_model_next_version(self, model_id=None):
-        """
+        """get next model version with given model_id
 
         Args:
-            model_id:
+            model_id (str, required): The unique ID of the Model. 1 will return if not given
 
         Returns:
-
+            next_version(int): The next version of the Model
         """
+
         params = {}
         if model_id:
             params.update({'ModelID': model_id})
@@ -485,10 +523,10 @@ class APIClient(Service):
         """list models
 
         Args:
-            model_name (str, optional): model name
+            model_name (str, optional): certern model with return if given model name. Defaults to None.
             model_name_contains (str, optional): filter option, check if
                                 model name contains given string. Defaults to None.
-            offset (int, optional): offset of database. Defaults to 0.
+            offset (int, optional): offset of database. Defaults to None.
             page_size (int, optional): number of results to fetch. Defaults to 10.
             sort_by (str, optional): sort by 'ModelName' or 'CreateTime'. Defaults to 'CreateTime'.
             sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
@@ -523,7 +561,7 @@ class APIClient(Service):
         """delete model with given model id
 
         Args:
-            model_id (str): model id
+            model_id (str): The unique ID of the Model
 
         Raises:
             Exception: raise on delete_model failed
@@ -547,7 +585,7 @@ class APIClient(Service):
         """get model with given model id
 
         Args:
-            model_id (str): model id
+            model_id (str): The unique ID of the Model
 
         Raises:
             Exception: raise on get_model failed
@@ -577,8 +615,8 @@ class APIClient(Service):
         """list model versions with given model_id
 
         Args:
-            model_id (str): model id
-            model_version:
+            model_id (str): The unique ID of the Model
+            model_version: filter option, the certain ModelVersion of Model. Defaults to None.
             offset (int, optional): offset of database. Defaults to 0.
             page_size (int, optional): number of results to fetch. Defaults to 10.
             sort_by (str, optional): sort by 'ModelVersion' or 'CreateTime'. Defaults to 'CreateTime'.
@@ -614,7 +652,7 @@ class APIClient(Service):
         """get certain version of a model
 
         Args:
-            model_version_id (str): model version id
+            model_version_id (str): The unique ID of the ModelVersion
 
         Raises:
             Exception: get_model_version failed
@@ -638,7 +676,7 @@ class APIClient(Service):
         """delete certain version of a model
 
         Args:
-            model_version_id (str): model version id
+            model_version_id (str): The unique ID of the ModelVersion
 
         Raises:
             Exception: delete_model_version failed
@@ -689,6 +727,18 @@ class APIClient(Service):
             raise Exception('update_model_version failed') from e
 
     def update_model(self, model_id, model_name=None):
+        """update model_name with given model_id
+
+        Args:
+            model_id (str, required): The unique ID of the Model
+            model_name(str, optional): New ModelName of the Model. Defaults to None.
+
+        Raises:
+            Exception: failed to update model
+
+        Returns:
+            Dataset: json response
+        """
         body = {
             'ModelID': model_id,
         }
@@ -935,6 +985,17 @@ class APIClient(Service):
         pass
 
     def get_service(self, service_id: str):
+        """get service with given service_id
+
+        Args:
+            service_id (str): The unique ID of the Service
+
+        Raises:
+            Exception: raise on get_service failed
+
+        Returns:
+            json response
+        """
         params = {'ServiceID': service_id}
         try:
             res = self.get(api='GetService', params=params)
@@ -977,6 +1038,23 @@ class APIClient(Service):
                       page_size=10,
                       sort_by='CreateTime',
                       sort_order='Descend'):
+        """list services
+
+        Args:
+            service_name (str, optional): service name
+            service_name_contains (str, optional): filter option, check if
+                                service name contains given string. Defaults to None.
+            offset (int, optional): offset of database. Defaults to 0.
+            page_size (int, optional): number of results to fetch. Defaults to 10.
+            sort_by (str, optional): sort by 'ServicelName' or 'CreateTime'. Defaults to 'CreateTime'.
+            sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
+
+        Raises:
+            Exception: list datasets exception
+
+        Returns:
+            json response
+        """
         params = {
             'Offset': offset,
             'Limit': page_size,
@@ -1002,6 +1080,21 @@ class APIClient(Service):
                               page_size=10,
                               sort_by='CreateTime',
                               sort_order='Descend'):
+        """list service versions with given service_id
+
+        Args:
+            service_id (str): The unique ID of the Service
+            offset (int, optional): offset of database. Defaults to 0.
+            page_size (int, optional): number of results to fetch. Defaults to 10.
+            sort_by (str, optional): sort by 'ServiceVersion' or 'CreateTime'. Defaults to 'CreateTime'.
+            sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
+
+        Raises:
+            Exception: list_service_versions failed
+
+        Returns:
+            json response
+        """
         params = {
             'ServiceID': service_id,
             'Offset': offset,
@@ -1022,6 +1115,18 @@ class APIClient(Service):
 
     def rollback_service_version(self, service_id: str,
                                  service_version_id: str):
+        """Rollback a ServiceVersion with ServiceID and ServiceVersionID
+
+        Args:
+            service_id (str, required): The unique ID of the Service
+            service_version_id(str, required): The unique ID of the ServiceVersion
+
+        Raises:
+            Exception: failed to rollback service version
+
+        Returns:
+            Dataset: json response
+        """
         params = {
             'ServiceID': service_id,
             'ServiceVersionID': service_version_id
@@ -1042,6 +1147,21 @@ class APIClient(Service):
                                      page_size=10,
                                      sort_by='CreateTime',
                                      sort_order='Descend'):
+        """list model service instances
+
+        Args:
+            service_id (str, optional): The unique ID of Service
+            offset (int, optional): offset of service. Defaults to 0.
+            page_size (int, optional): number of results to fetch. Defaults to 10.
+            sort_by (str, optional): sort by 'ModelServiceInstanceName' or 'CreateTime'. Defaults to 'CreateTime'.
+            sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
+
+        Raises:
+            Exception: list datasets exception
+
+        Returns:
+            json response
+        """
         params = {
             'ServiceID': service_id,
             'Offset': offset,
@@ -1062,6 +1182,18 @@ class APIClient(Service):
 
     def get_model_service_instance_status(self, service_id: str,
                                           instance_id_list: list):
+        """get the status of model service instance
+
+        Args:
+            service_id (str, required): The unique ID of Service
+            offset (list, required): instance id list
+
+        Raises:
+            Exception: get model service instance status exception
+
+        Returns:
+            json response
+        """
         params = {'ServiceID': service_id, 'InstanceIDList': instance_id_list}
 
         try:
@@ -1085,6 +1217,24 @@ class APIClient(Service):
         price: float,
         region: str,
     ):
+        """create resource
+
+        Args:
+            name (str): resource name
+            resource_type : The type of resource
+            v_cpu (str): The cpu num of resource
+            memory (str): resource memory
+            gpu_type (str): The gpu type of resource
+            gpu_num (float): The gpu num of resource
+            price (float): resource price
+            region (str): The region of resource
+
+        Raises:
+            Exception: create_resource failed
+
+        Returns:
+            json response
+        """
         body = {
             'Name': name,
             'Type': resource_type,
@@ -1104,6 +1254,17 @@ class APIClient(Service):
             raise Exception('create_resource failed') from e
 
     def get_resource(self, flavor_id: str):
+        """get resource with given flavor_id
+
+        Args:
+            flavor_id (str): The unique ID of the Resource
+
+        Raises:
+            Exception: raise on get_resource failed
+
+        Returns:
+            json response
+        """
         params = {'FlavorID': flavor_id}
 
         try:
@@ -1117,6 +1278,17 @@ class APIClient(Service):
             raise Exception('get_resource failed') from e
 
     def delete_resource(self, flavor_id: str):
+        """delete resource with given flavor id
+
+        Args:
+            flavor_id (str): The unique ID of the Resource
+
+        Raises:
+            Exception: raise on delete_resource failed
+
+        Returns:
+            json response
+        """
         params = {'FlavorID': flavor_id}
 
         try:
@@ -1137,7 +1309,27 @@ class APIClient(Service):
                       page_size=10,
                       sort_by='CreateTime',
                       sort_order='Descend'):
+        """list resource with given service_id
 
+        Args:
+            name (str, optional): resource name
+            name_contains (str, optional): filter option, check if
+                                resource name contains given string. Defaults to None.
+            resource_type (str, optional): filter option, check if
+                                resource type equals to given string. Defaults to None.
+            tag (list, optional): filter option, check if
+                                resource tag in given list. Defaults to None.
+            offset (int, optional): offset of database. Defaults to 0.
+            page_size (int, optional): number of results to fetch. Defaults to 10.
+            sort_by (str, optional): sort by 'ResourceName' or 'CreateTime'. Defaults to 'CreateTime'.
+            sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
+
+        Raises:
+            Exception: list_resource failed
+
+        Returns:
+            json response
+        """
         params = {
             'Offset': offset,
             'Limit': page_size,
@@ -1179,6 +1371,17 @@ class APIClient(Service):
             raise Exception('get_sts_token failed') from e
 
     def list_annotation_sets(self, dataset_id: str):
+        """list annotation set with given dataset_id
+
+        Args:
+            dataset_id (str): The unique ID of Dataset
+
+        Raises:
+            Exception: list annotation sets exception
+
+        Returns:
+            json response
+        """
         params = {'DatasetID': dataset_id}
 
         try:
@@ -1212,6 +1415,18 @@ class APIClient(Service):
             raise Exception('update_annotation_label failed') from e
 
     def get_annotation_set(self, dataset_id: str, annotation_id: str):
+        """get annotation with given dataset_id and annotation_id
+
+        Args:
+            dataset_id (str, required): The unique ID of the Dataset.
+            annotation_id (str, required): The unique ID of the Annotation.
+
+        Raises:
+            Exception: failed to get annotation
+
+        Returns:
+            json response
+        """
         params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
 
         try:
@@ -1225,6 +1440,18 @@ class APIClient(Service):
             raise Exception('get_annotation_set failed') from e
 
     def delete_annotation_set(self, dataset_id: str, annotation_id: str):
+        """delete annotation set with given dataset_id and annotation_id
+
+        Args:
+            dataset_id (str, required): The unique ID of the Dataset.
+            annotation_id (str, required): The unique ID of the Annotation.
+
+        Raises:
+            Exception: delete_annotation_set failed
+
+        Returns:
+            json response
+        """
         params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
 
         try:
@@ -1245,6 +1472,21 @@ class APIClient(Service):
         default_label: str = None,
         labels: list = None,
     ):
+        """create annotation for dataset
+
+        Args:
+            dataset_id (str): The unique ID of Dataset
+            annotation_type (Model): annotation type
+            annotation_name (str): annotation name
+            default_label (str, optional): default label of annotataion. Defaults fo None
+            labels (list): labels of annotataion. Defaults fo None
+
+        Raises:
+            Exception: create_annotation_set failed
+
+        Returns:
+            json response
+        """
         body = {
             'DatasetID': dataset_id,
             'AnnotationType': annotation_type,
@@ -1263,6 +1505,19 @@ class APIClient(Service):
             raise Exception('create_annotation_set failed') from e
 
     def update_annotation_data(self, annotation_id: str, datas: list):
+        """update annotation_data with given annotation_id
+
+        Args:
+            annotation_id (str, required): The unique ID of the Annotation
+            datas(str, required): New datas of the Annotation.
+
+        Raises:
+            Exception: failed to update annotataion_data
+
+        Returns:
+            Dataset: json response
+
+        """
         body = {'AnnotationID': annotation_id, 'Datas': datas}
 
         try:
@@ -1280,6 +1535,21 @@ class APIClient(Service):
                               status: int = None,
                               offset=0,
                               page_size=10):
+        """list annotation datas with given annotation_id
+
+        Args:
+            annotation_id (str): The unique ID of annotation
+            label_names (list, optional): filter option, label_names. Defaults to None.
+            status (str, optional): filter option, status.Defaults to None.
+            offset (int, optional): offset of database. Defaults to 0.
+            page_size (int, optional): number of results to fetch. Defaults to 10.
+
+        Raises:
+            Exception: list_annotation_datas failed
+
+        Returns:
+            json response
+        """
         params = {
             'AnnotationID': annotation_id,
             'Offset': offset,
@@ -1312,6 +1582,19 @@ class APIClient(Service):
             raise Exception('try_delete_annotation_label failed') from e
 
     def list_annotation_label(self, dataset_id: str, annotation_id: str):
+        """list annotation label set with given dataset_id and annotation_id
+
+        Args:
+            dataset_id (str, required): The unique ID of the Dataset.
+            annotation_id (str, required): The unique ID of the Annotation.
+
+        Raises:
+            Exception: list_annotation_label failed
+
+        Returns:
+            json response
+
+        """
         params = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
 
         try:
@@ -1324,6 +1607,19 @@ class APIClient(Service):
 
     def modify_service(self, service_name: str, service_id: str,
                        cluster_id: str):
+        """Modify ServiceName with given ServiceID and ClusterID
+
+        Args:
+            service_name(str, required): New Name of the Service
+            service_id (str, required): The unique ID of the Service
+            cluster_id (str, required): The unique ID of the Cluster
+
+        Raises:
+            Exception: list datasets exception
+
+        Returns:
+            json response
+        """
         body = {
             'ServiceName': service_name,
             'ServiceID': service_id,
