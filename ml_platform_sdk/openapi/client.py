@@ -166,7 +166,7 @@ class APIClient(Service):
                     }, {}, {}),
             'StopService':
                 ApiInfo(
-                    'POST', '/', {
+                    'GET', '/', {
                         'Action': 'StopService',
                         'Version': env.Env.get_service_version()
                     }, {}, {}),
@@ -1633,3 +1633,6 @@ class APIClient(Service):
                 'Failed to modify service, service_id: %s, cluster_id: %s, error: %s',
                 service_id, cluster_id, e)
             raise Exception('modify_service failed') from e
+            return res_json
+        except Exception as e:
+            raise Exception('get_service failed') from e

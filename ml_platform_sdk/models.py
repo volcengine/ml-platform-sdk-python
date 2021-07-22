@@ -248,7 +248,7 @@ class Model:
             raise Exception('Model is invalid') from e
         self._restore()
 
-    def explain(self):
+    def print(self):
         if self.model_id is None:
             logging.warning('Model has not been registered')
             raise ValueError
@@ -286,9 +286,6 @@ class Model:
             self.model_version = model_version
         self._sync()
 
-        flavor_id = self.api_client.list_resource(
-            name=flavor)['Result']['List'][0]['FlavorID']
-
         if self.model_version in self.inference_service.keys():
             if not force:
                 logging.warning('model has been deployed')
@@ -296,19 +293,27 @@ class Model:
             logging.warning(
                 'model deploy force, the old inference_service will lost')
 
-        inference_service = _Inference(service_name=self.model_name,
-                                       image_url=image_url,
-                                       flavor_id=flavor_id,
-                                       model_name=self.model_name,
-                                       model_id=self.model_id,
-                                       model_version_id=self.model_version_id,
-                                       model_version=self.model_version,
-                                       model_path=self.remote_path,
-                                       model_type=self.model_type,
-                                       envs=envs,
-                                       replica=replica,
-                                       description=description,
-                                       credential=self.credential)
-        self.inference_service.update({self.model_version: inference_service})
+        inference_service = _Inference(
+            service_name=self.model_name,
+            image_url=image_url,
+            flavor_id=self.api_client.list_resource(
+                name=flavor)['Result']['List'][0]['FlavorID'],
+            model_name=self.model_name,
+            model_id=self.model_id,
+            model_version_id=self.model_version_id,
+            model_version=self.model_version,
+            model_path=self.remote_path,
+            model_type=self.model_type,
+            envs=envs,
+            replica=replica,
+            description=description,
+            credential=self.credential)
         inference_service.create()
+        self.inference_service.update({self.model_version: inference_service})
         return inference_service
+
+    def undeploy(self):
+        if self.model_version in self.inference_service.keys():
+            self.inference_service[self.model_version].stop()
+        else:
+            logging.warning('model has not been deployed')
