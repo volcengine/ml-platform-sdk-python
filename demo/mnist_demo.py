@@ -7,7 +7,7 @@ from ml_platform_sdk.config import credential as auth_credential
 
 ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
 sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='
-region = 'cn-qingdao'
+region = 'cn-north-1'
 train_path = './train_dataset'
 test_path = './test_dataset'
 dataset_id = 'd-20210524180450-m592h'
@@ -25,13 +25,13 @@ if __name__ == '__main__':
                                                       ratio=0.8)
 
     # prepare training data
-    X_train, annotations = training_dataset.load_as_np()
+    x_train, annotations = training_dataset.load_as_np()
     y_train = np.array(
-        [int(x['result'][0]['data'][0]['label']) for x in annotations])
+        [int(x['Result'][0]['Data'][0]['Label']) for x in annotations])
 
-    X_test, annotations = testing_dataset.load_as_np()
+    x_test, annotations = testing_dataset.load_as_np()
     y_test = np.array(
-        [int(x['result'][0]['data'][0]['label']) for x in annotations])
+        [int(x['Result'][0]['Data'][0]['Label']) for x in annotations])
 
     # config model
     model = tf.keras.models.Sequential([
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
 
-    model.fit(X_train, y_train, epochs=5)
+    model.fit(x_train, y_train, epochs=5)
 
     print('test loss, test acc:')
-    model.evaluate(X_test, y_test, verbose=2)
+    model.evaluate(x_test, y_test, verbose=2)

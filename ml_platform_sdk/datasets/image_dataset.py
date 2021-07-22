@@ -129,9 +129,9 @@ class ImageDataset(_Dataset):
                     continue
                 if limit != -1 and i >= offset + limit:
                     break
-                file_path = manifest_line['data']['filePath']
+                file_path = manifest_line['Data']['FilePath']
                 image = Image.open(file_path)
                 images.append(np.asarray(image))
-                annotations.append(manifest_line['annotation'])
+                annotations.append(manifest_line['Annotation'])
 
         return np.array(images), annotations

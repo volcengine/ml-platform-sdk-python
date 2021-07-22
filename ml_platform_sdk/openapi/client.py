@@ -158,7 +158,7 @@ class APIClient(Service):
                     }, {}, {}),
             'StopService':
                 ApiInfo(
-                    'POST', '/', {
+                    'GET', '/', {
                         'Action': 'StopService',
                         'Version': env.Env.get_service_version()
                     }, {}, {}),
@@ -681,7 +681,7 @@ class APIClient(Service):
             res_json = json.loads(res)
             return res_json
         except Exception as e:
-            raise Exception('start_service failed') from e
+            raise Exception('stop_service failed') from e
 
     def scale_service(self, service_id: str, replicas: int,
                       flavor_id: str) -> dict:
@@ -722,3 +722,12 @@ class APIClient(Service):
 
     def update_service_version_description(self):
         pass
+
+    def get_service(self, service_id: str):
+        params = {'ServiceID': service_id}
+        try:
+            res = self.get(api='GetService', params=params)
+            res_json = json.loads(res)
+            return res_json
+        except Exception as e:
+            raise Exception('get_service failed') from e
