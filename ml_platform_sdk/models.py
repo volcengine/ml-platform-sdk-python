@@ -231,7 +231,7 @@ class Model:
         self._sync()
         try:
             self.api_client.delete_model_version(
-                model_id=self.model_id, model_version_id=self.model_version_id)
+                model_version_id=self.model_version_id)
         except Exception as e:
             logging.warning('Model failed to unregister')
             raise Exception('Model is invalid') from e
