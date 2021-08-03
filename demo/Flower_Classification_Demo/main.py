@@ -319,6 +319,10 @@ if __name__ == '__main__':
                   metrics=['sparse_categorical_accuracy'])
     model.summary()
 
+    # tensorboard
+    log_dir = os.getenv("TENSORBOARD_LOG_PATH", default="/tensorboard_logs")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_images=False, histogram_freq=1)
+
     # train model
     STEPS_PER_EPOCH = 1
     EPOCHS = 1
@@ -327,7 +331,8 @@ if __name__ == '__main__':
                         steps_per_epoch=STEPS_PER_EPOCH,
                         epochs=EPOCHS,
                         validation_data=get_validation_dataset(),
-                        validation_steps=VALIDATION_STEPS)
+                        validation_steps=VALIDATION_STEPS,
+                        callbacks = [tensorboard_callback])
 
     SAVED_MODEL_PATH = "/root/code/Flower_Classification_Demo/tf-keras_save/1"
     model.save(SAVED_MODEL_PATH)
