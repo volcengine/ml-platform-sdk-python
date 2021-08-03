@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 .DS_store
+.ipynb_checkpoints
 
 # Outputs of build stage
 output/
