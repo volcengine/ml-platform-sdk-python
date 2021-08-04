@@ -1,7 +1,8 @@
+import json
+
 from ml_platform_sdk.modelrepo.models import Model
 from ml_platform_sdk.config import credential as auth_credential
 import ml_platform_sdk
-import json
 
 # # online account id ak/sk
 # ak = 'AKLTMTFjMzZlNmY5MWZkNDc4NmJjZWM1NDJjMWMwZThmMWE'
