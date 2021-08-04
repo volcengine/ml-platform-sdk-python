@@ -1,6 +1,6 @@
 import time
 
-from ml_platform_sdk.models import Model
+from ml_platform_sdk.modelrepo.models import Model
 from ml_platform_sdk.config import credential as auth_credential
 import ml_platform_sdk
 

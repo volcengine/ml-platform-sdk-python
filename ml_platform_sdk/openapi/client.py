@@ -41,7 +41,7 @@ class APIClient(Service):
             Credentials(self.credential.get_access_key_id(),
                         self.credential.get_secret_access_key(),
                         env.Env.get_service_name(),
-                        self.credential.get_region()), 10, 10, "https")
+                        self.credential.get_region()), 10, 10, "http")
 
     def get_api_info(self):
         api_info = {
@@ -328,7 +328,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetTOSUploadPath', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to get model next version, error: %s', e)
             raise Exception('get_model_next_version failed') from e
@@ -336,7 +336,7 @@ class APIClient(Service):
     def create_dataset(self, body):
         try:
             res_json = self.common_json_handler("CreateDataset", body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to create datasets, error: %s', e)
             raise Exception('create_dataset failed') from e
@@ -344,7 +344,7 @@ class APIClient(Service):
     def update_dataset(self, body):
         try:
             res_json = self.common_json_handler("UpdateDataset", body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to update datasets, error: %s', e)
             raise Exception('update_dataset failed') from e
@@ -364,7 +364,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetDataset', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get datasets info, dataset_id: %s, error: %s',
@@ -386,7 +386,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteDataset', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to delete dataset, dataset_id: %s, error: %s',
                           dataset_id, e)
@@ -433,7 +433,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListDatasets', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list datasets, error: %s', e)
             raise Exception('list_datasets failed') from e
@@ -445,6 +445,8 @@ class APIClient(Service):
                      path: str,
                      model_id=None,
                      description=None,
+                     tensor_config=None,
+                     model_metrics=None,
                      source_type='TOS'):
         """create model
 
@@ -456,6 +458,8 @@ class APIClient(Service):
             path (str): source storage path
             model_id (str, optional): model_id, a new model will be created if not given. Defaults to None.
             description (str, optional): description to the model. Defaults to None.
+            tensor_config (dict, optional): tensor config of the model.
+            model_metrics (list, optional): list of model metrics.
             source_type (str, optional): storage type. Defaults to 'TOS'.
 
         Raises:
@@ -471,7 +475,7 @@ class APIClient(Service):
                     'ModelFormat': model_format,
                     'ModelType': model_type,
                     'Path': path,
-                    'SourceType': source_type,
+                    'SourceType': source_type
                 }
             }
             if description is not None:
@@ -480,11 +484,17 @@ class APIClient(Service):
             if model_id is not None:
                 body.update({'ModelID': model_id})
 
+            if tensor_config is not None:
+                body['VersionInfo'].update({'TensorConfig': tensor_config})
+
+            if model_metrics is not None:
+                body['VersionInfo'].update({'MetricsList': model_metrics})
+
             res = self.json(api='CreateModel',
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to create model, error: %s', e)
             raise Exception('create_model failed') from e
@@ -506,7 +516,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetModelNextVersion', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get model next version, model_id: %s, error: %s',
@@ -552,7 +562,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListModels', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list models, error: %s', e)
             raise Exception('list_models failed') from e
@@ -575,7 +585,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteModel', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to delete model, model_id: %s, error: %s',
                           model_id, e)
@@ -599,7 +609,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetModel', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to get model, model_id: %s, error: %s',
                           model_id, e)
@@ -641,7 +651,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListModelVersions', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to list model versions, model_id: %s, error: %s',
@@ -665,7 +675,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetModelVersion', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get model version, model_version_id: %s, error: %s',
@@ -689,7 +699,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteModelVersion', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to delete model version, model_version_id: %s, error: %s',
@@ -719,7 +729,7 @@ class APIClient(Service):
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to update model version, model_version_id: %s, error: %s',
@@ -749,7 +759,7 @@ class APIClient(Service):
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to update model, model_id: %s, error: %s',
                           model_id, e)
@@ -834,7 +844,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteService', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to delete service, service_id: %s, error: %s',
                           service_id, e)
@@ -856,7 +866,7 @@ class APIClient(Service):
         try:
             res = self.get(api='StartService', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to start service, service_id: %s, error: %s',
                           service_id, e)
@@ -878,7 +888,7 @@ class APIClient(Service):
         try:
             res = self.get(api='StopService', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to stop service, service_id: %s, error: %s',
                           service_id, e)
@@ -913,7 +923,7 @@ class APIClient(Service):
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to scale service, service_id: %s, error: %s',
                           service_id, e)
@@ -974,7 +984,7 @@ class APIClient(Service):
                             params=dict(),
                             body=json.dumps(body))
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to update service, service_id: %s, error: %s',
                           service_id, e)
@@ -1000,7 +1010,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetService', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to get service, service_id: %s, error: %s',
                           service_id, e)
@@ -1026,7 +1036,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListServiceImages', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list service images, error: %s', e)
             raise Exception('list_service_images failed') from e
@@ -1069,7 +1079,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListServices', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list services, error: %s', e)
             raise Exception('list_services failed') from e
@@ -1106,7 +1116,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListServiceVersions', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to list service versions, service_id: %s, error: %s',
@@ -1134,7 +1144,7 @@ class APIClient(Service):
         try:
             res = self.get(api='RollbackServiceVersion', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to rollback service version, service_id: %s, service_version_id: %s, error: %s',
@@ -1173,7 +1183,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListModelServiceInstances', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to list model service instances, service_id: %s, error: %s',
@@ -1199,7 +1209,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetModelServiceInstanceStatus', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get model service instance status, service_id: %s, error: %s',
@@ -1248,7 +1258,7 @@ class APIClient(Service):
 
         try:
             res_json = self.common_json_handler("CreateResource", body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to create resource, error: %s', e)
             raise Exception('create_resource failed') from e
@@ -1270,7 +1280,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetResource', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get resource info, flavor_id: %s, error: %s',
@@ -1294,7 +1304,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteResource', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to delete resource, flavor_id: %s, error: %s',
                           flavor_id, e)
@@ -1349,7 +1359,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListResource', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list resource, error: %s', e)
             raise Exception('list_resource failed') from e
@@ -1363,7 +1373,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetSTSToken', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get sts token, encrypt_code: %s, error: %s',
@@ -1387,7 +1397,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListAnnotationSets', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to list annotation sets, dataset_id: %s, error: %s',
@@ -1407,7 +1417,7 @@ class APIClient(Service):
 
         try:
             res_json = self.common_json_handler("UpdateAnnotationLabel", body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to update annotation label, annotation_id: %s, error: %s',
@@ -1432,7 +1442,7 @@ class APIClient(Service):
         try:
             res = self.get(api='GetAnnotationSet', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to get annotation set, dataset_id: %s, annotation_id: %s, error: %s',
@@ -1457,7 +1467,7 @@ class APIClient(Service):
         try:
             res = self.get(api='DeleteAnnotationSet', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to delete annotation set, dataset_id: %s, annotation_id: %s, error: %s',
@@ -1499,7 +1509,7 @@ class APIClient(Service):
 
         try:
             res_json = self.common_json_handler("CreateAnnotataionSet", body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to create annotation set, error: %s', e)
             raise Exception('create_annotation_set failed') from e
@@ -1522,7 +1532,7 @@ class APIClient(Service):
 
         try:
             res_json = self.common_json_handler("UpdateAnnotationData", body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to update annotation data, annotation_id: %s, error: %s',
@@ -1563,7 +1573,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListAnnotationDatas', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list annotation datas, error: %s', e)
             raise Exception('list_annotation_datas failed') from e
@@ -1574,7 +1584,7 @@ class APIClient(Service):
         try:
             res_json = self.common_json_handler("TryDeleteAnnotationLabel",
                                                 body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to try delete annotation label, annotation_id: %s, error: %s',
@@ -1600,7 +1610,7 @@ class APIClient(Service):
         try:
             res = self.get(api='ListAnnotationLabel', params=params)
             res_json = json.loads(res)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error('Failed to list annotation label, error: %s', e)
             raise Exception('list_annotation_label failed') from e
@@ -1627,7 +1637,7 @@ class APIClient(Service):
         }
         try:
             res_json = self.common_json_handler("ModifyService", body)
-            return handle_res.handle_res(res_json)
+            return handle_res(res_json)
         except Exception as e:
             logging.error(
                 'Failed to modify service, service_id: %s, cluster_id: %s, error: %s',
