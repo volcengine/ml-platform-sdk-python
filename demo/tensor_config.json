@@ -1,0 +1,28 @@
+{
+    "Inputs": [
+        {
+            "TensorName": "input_ids_1:0",
+            "Dtype": "INT32",
+            "Shape": {
+                "MaxShape": [8, 256],
+                "MinShape": [1, 256]
+            }
+        },
+        {
+            "TensorName": "input_mask_1:0",
+            "Dtype": "INT32",
+            "Shape": {
+                "MaxShape": [8, 256],
+                "MinShape": [1, 256]
+            }
+        },
+        {
+            "TensorName": "segment_ids_1:0",
+            "Dtype": "INT32",
+            "Shape": {
+                "MaxShape": [8, 256],
+                "MinShape": [1, 256]
+            }
+        }
+    ]
+}

@@ -11,7 +11,7 @@ from ml_platform_sdk.config import credential as auth_credential
 from ml_platform_sdk.tos import tos
 from ml_platform_sdk.openapi import client
 from ml_platform_sdk.inferences import _Inference
-
+from ml_platform_sdk.modelrepo import validation
 
 class Model:
 
@@ -27,6 +27,8 @@ class Model:
         self.model_type = None
         self.local_path = local_path
         self.remote_path = None
+        self.tensor_config = None
+        self.model_metrics = None
         self.credential = credential or initializer.global_config.get_credential(
         )
         self.tos_client = tos.TOSClient(credential)
@@ -74,7 +76,9 @@ class Model:
     def _register_validate_and_preprocess(self,
                                           model_name: Optional[str] = None,
                                           model_format: Optional[str] = None,
-                                          model_type: Optional[str] = None):
+                                          model_type: Optional[str] = None,
+                                          tensor_config: Optional[dict] = None,
+                                          model_metrics: Optional[list] = None):
         if self.local_path is None:
             logging.warning('Model local_path is empty')
             raise ValueError
@@ -98,6 +102,15 @@ class Model:
             if model_name != self.model_name:
                 logging.warning(
                     'model name is diff from origin, use old model_name')
+        try:
+            validation.validate_tensor_config(tensor_config)
+        except Exception as e:
+            raise Exception('Invalid tensor config.') from e
+
+        try:
+            validation.validate_metrics(model_metrics)
+        except Exception as e:
+            raise Exception('Invalid model metrics.') from e
 
     def _require_model_tos_storage(self) -> Tuple[str, str]:
         response = self.api_client.get_tos_upload_path(service_name='dataset',
@@ -184,13 +197,17 @@ class Model:
                  model_name: Optional[str] = None,
                  model_format: Optional[str] = None,
                  model_type: Optional[str] = None,
-                 description: Optional[str] = None):
+                 description: Optional[str] = None,
+                 tensor_config: Optional[dict] = None,
+                 model_metrics: Optional[list] = None):
         self.model_name = model_name
         self.model_format = model_format
         self.model_type = model_type
+        self.tensor_config = tensor_config
+        self.model_metrics = model_metrics
         try:
-            self._register_validate_and_preprocess(model_name, model_format,
-                                                   model_type)
+            self._register_validate_and_preprocess(model_name, model_format, model_type,
+                                                   tensor_config, model_metrics)
             self._upload_tos()
             response = self.api_client.create_model(
                 model_name=self.model_name,
@@ -198,7 +215,10 @@ class Model:
                 model_type=self.model_type,
                 model_id=self.model_id,
                 path=self.remote_path,
-                description=description)
+                description=description,
+                tensor_config=tensor_config,
+                model_metrics=model_metrics
+            )
             self.model_version = response['Result']['ModelVersion']
             self.model_id = response['Result']['ModelID']
         except Exception as e:
@@ -257,11 +277,12 @@ class Model:
             response = self.api_client.list_model_versions(
                 model_id=self.model_id, page_size=20)
             table = PrettyTable([
-                'Version', 'Format', 'Type', 'RemotePath', 'Description',
+                'ID', 'Version', 'Format', 'Type', 'RemotePath', 'Description',
                 'CreateTime'
             ])
             for model in response['Result']['List']:
                 table.add_row([
+                    model['ModelVersionID'],
                     model['ModelVersion'], model['ModelFormat'],
                     model['ModelType'], model['Path'], model['Description'],
                     model['CreateTime']
@@ -297,7 +318,7 @@ class Model:
             service_name=self.model_name,
             image_url=image_url,
             flavor_id=self.api_client.list_resource(
-                name=flavor)['Result']['List'][0]['FlavorID'],
+                name=flavor, sort_by='vCPU')['Result']['List'][0]['FlavorID'],
             model_name=self.model_name,
             model_id=self.model_id,
             model_version_id=self.model_version_id,

@@ -1,5 +1,5 @@
 from ml_platform_sdk import initializer
-from ml_platform_sdk.models import Model
+from ml_platform_sdk.modelrepo.models import Model
 from ml_platform_sdk.datasets import (
     VideoDataset,
     ImageDataset,
