@@ -29,7 +29,7 @@ if __name__ == '__main__':
     tensor_config = None
     with open("tensor_config.json") as f:
         tensor_config = json.loads(f.read())
-    
+
     model.register(model_name='wangchen-test-model1',
                    model_format='SavedModel',
                    model_type='TensorFlow:1.14',
