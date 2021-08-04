@@ -126,3 +126,10 @@ class _Dataset:
                 annotations.append(manifest_line['annotation'])
 
         return paths, annotations
+
+    def get_manifest_info(self, parse_func):
+        # download manifest
+        assert self.tos_source is not None and self.local_path is not None
+        manifest_file_path = self._download_file(self.tos_source,
+                                                 self.local_path)
+        return parse_func(manifest_file_path)

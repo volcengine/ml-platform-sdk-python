@@ -2,6 +2,7 @@ import json
 import math
 import os
 from typing import Optional
+from collections.abc import Callable
 
 import numpy as np
 from PIL import Image
@@ -9,6 +10,7 @@ from tqdm import tqdm
 
 from ml_platform_sdk.config import constants
 from ml_platform_sdk.datasets.dataset import _Dataset, dataset_copy_file
+from ml_platform_sdk.io.tos_files_io import TorchTOSDataset
 
 
 class ImageDataset(_Dataset):
@@ -135,3 +137,28 @@ class ImageDataset(_Dataset):
                 annotations.append(manifest_line['Annotation'])
 
         return np.array(images), annotations
+
+    def parse_image_manifest(self, manifest_file_path):
+        # parse manifest
+        manifest_info = {'buckets': [], 'keys': [], 'annotations': []}
+        with open(manifest_file_path) as f:
+            for _, line in enumerate(f):
+                manifest_line = json.loads(line)
+                url = manifest_line['Data']['ImageURL']
+                bucket = url.split('//')[1].split('/')[0]
+                key = url.split(f'{bucket}/')[1]
+                manifest_info['buckets'].append(bucket)
+                manifest_info['keys'].append(key)
+                manifest_info['annotations'].append(manifest_line['Annotation'])
+        return manifest_info
+
+    def init_torch_dataset(self,
+                           transform: Optional[Callable] = None,
+                           target_transform: Optional[Callable] = None):
+        manifest_info = self.get_manifest_info(self.parse_image_manifest)
+        torch_dataset = TorchTOSDataset(manifest_info=manifest_info,
+                                        transform=transform,
+                                        target_transform=target_transform,
+                                        credential=self.credential)
+
+        return torch_dataset
