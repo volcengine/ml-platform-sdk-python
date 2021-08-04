@@ -486,7 +486,7 @@ class APIClient(Service):
 
             if tensor_config is not None:
                 body['VersionInfo'].update({'TensorConfig': tensor_config})
-            
+
             if model_metrics is not None:
                 body['VersionInfo'].update({'MetricsList': model_metrics})
 
