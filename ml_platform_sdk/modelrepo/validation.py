@@ -119,10 +119,10 @@ if __name__ == '__main__':
 
     validate_tensor_config(conf)
 
-    metrics = [{
+    data = [{
         "MetricsType": "ImageClassification",
         "Params": '{"hardware": "ml.standard.xlarge"}',
         "MetricsData": '{"qps": 10, "latency": 0.3}'
     }]
 
-    validate_metrics(metrics)
+    validate_metrics(data)
