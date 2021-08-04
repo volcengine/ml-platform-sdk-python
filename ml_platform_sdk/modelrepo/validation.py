@@ -2,13 +2,7 @@ import json
 
 import jsonschema
 
-_shape_schema = {
-    'type': 'array',
-    'items': {
-        'type': 'integer'
-    },
-    'minItems': 1
-}
+_shape_schema = {'type': 'array', 'items': {'type': 'integer'}, 'minItems': 1}
 
 _tensor_schema = {
     'type': 'object',
@@ -25,9 +19,12 @@ _tensor_schema = {
             'required': ['MinShape', 'MaxShape']
         },
         'Dtype': {
-            'type': 'string',
-            'enum': ['FP32', 'FP16', 'INT8', 'INT16', 'INT32', 'INT64',
-                     'UINT8', 'UINT16', 'UINT32', 'UINT64', 'FP64', 'STRING'],
+            'type':
+                'string',
+            'enum': [
+                'FP32', 'FP16', 'INT8', 'INT16', 'INT32', 'INT64', 'UINT8',
+                'UINT16', 'UINT32', 'UINT64', 'FP64', 'STRING'
+            ],
         },
     },
     'required': ['TensorName', 'Shape', 'Dtype']
@@ -52,9 +49,12 @@ _metrics_schema = {
     'type': 'object',
     'properties': {
         'MetricsType': {
-            'type': 'string',
-            'enum': ['ImageClassification', 'TextClassification', 'TabularClassification',
-                     'TabularRegression', 'Perf'],
+            'type':
+                'string',
+            'enum': [
+                'ImageClassification', 'TextClassification',
+                'TabularClassification', 'TabularRegression', 'Perf'
+            ],
         },
         'Params': {
             'type': 'string'
@@ -63,12 +63,11 @@ _metrics_schema = {
             'type': 'string'
         }
     }
-
 }
 
 _model_metrics_schema = {
     'type': 'array',
-    'items':  _metrics_schema,
+    'items': _metrics_schema,
     'minItems': 1
 }
 
@@ -94,40 +93,36 @@ def validate_metrics(model_metrics):
 
 if __name__ == '__main__':
     conf = {
-        "Inputs": [
-            {
-                "TensorName": "input_ids_1:0",
-                "Dtype": "INT32",
-                "Shape": {
-                    "MaxShape": [8, 256],
-                    "MinShape": [1, 256]
-                }
-            },
-            {
-                "TensorName": "input_mask_1:0",
-                "Dtype": "INT32",
-                "Shape": {
-                    "MaxShape": [8, 256],
-                    "MinShape": [1, 256]
-                }
-            },
-            {
-                "TensorName": "segment_ids_1:0",
-                "Dtype": "INT32",
-                "Shape": {
-                    "MaxShape": [8, 256],
-                    "MinShape": [1, 256]
-                }
+        "Inputs": [{
+            "TensorName": "input_ids_1:0",
+            "Dtype": "INT32",
+            "Shape": {
+                "MaxShape": [8, 256],
+                "MinShape": [1, 256]
             }
-        ]
+        }, {
+            "TensorName": "input_mask_1:0",
+            "Dtype": "INT32",
+            "Shape": {
+                "MaxShape": [8, 256],
+                "MinShape": [1, 256]
+            }
+        }, {
+            "TensorName": "segment_ids_1:0",
+            "Dtype": "INT32",
+            "Shape": {
+                "MaxShape": [8, 256],
+                "MinShape": [1, 256]
+            }
+        }]
     }
 
     validate_tensor_config(conf)
 
     metrics = [{
-            "MetricsType": "ImageClassification",
-            "Params": '{"hardware": "ml.standard.xlarge"}',
-            "MetricsData": '{"qps": 10, "latency": 0.3}'
-        }]
+        "MetricsType": "ImageClassification",
+        "Params": '{"hardware": "ml.standard.xlarge"}',
+        "MetricsData": '{"qps": 10, "latency": 0.3}'
+    }]
 
     validate_metrics(metrics)
