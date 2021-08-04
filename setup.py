@@ -4,7 +4,8 @@ from setuptools import setup, find_packages
 require_list = [
     'boto3~=1.17.111', 'requests~=2.26.0', 'six', 'volcengine~=1.0.17',
     'numpy==1.20.0', 'tqdm~=4.61.2', 'pillow==8.2.0', 'six',
-    'setuptools~=57.1.0', 'botocore~=1.20.111', 'prettytable~=2.1.0', 'torch'
+    'setuptools~=57.1.0', 'botocore~=1.20.111', 'prettytable~=2.1.0', 'torch',
+    'jsonschema~=3.2.0'
 ]
 
 test_require_list = []
