@@ -7,7 +7,8 @@ from volcengine.Credentials import Credentials
 from volcengine.ServiceInfo import ServiceInfo
 from volcengine.base.Service import Service
 
-from ml_platform_sdk.config import constants
+from ml_platform_sdk.config import credential as auth_credential
+from ml_platform_sdk.config import env
 from ml_platform_sdk.util import reqid
 
 
@@ -52,7 +53,8 @@ class MLSTSTokenService(Service):
         return cls._instance
 
     def __init__(self, duration, region='cn-north-1'):
-        self.conf = constants.Config(region)
+        self.env = env.Env
+        self.credential = auth_credential.Credential(region=region)
         self.duration = duration
         self.api_info = self.get_api_info()
         self.service_info = self.get_service_info()
@@ -60,7 +62,7 @@ class MLSTSTokenService(Service):
                                                 self.api_info)
 
     def get_sts_token(self):
-        encrypted_key = self.conf.get_encrypted_key()
+        encrypted_key = self.env.get_encrypted_key()
         if encrypted_key is None:
             raise Exception('no encrypted key in environment variable')
 
@@ -78,16 +80,17 @@ class MLSTSTokenService(Service):
 
     def get_service_info(self):
         return ServiceInfo(
-            self.conf.get_service_direct_host(), self.get_latest_header(),
-            Credentials('', '', self.conf.get_service_name(),
-                        self.conf.get_service_region()), 10, 10, "http")
+            self.env.get_service_direct_host(), self.get_latest_header(),
+            Credentials('', '', self.env.get_service_name(),
+                        self.credential.get_region()), 10, 10, "http")
 
     def get_latest_header(self):
         headers = {
             'Accept': 'application/json',
             'X-Top-Request-Id': reqid.gen_req_id(),
-            'X-Top-Service': self.conf.get_service_name(),
-            'X-Top-Region': self.conf.region
+            'X-Top-Service': self.env.get_service_name(),
+            'X-Top-Region': self.credential.get_region(),
+            'X-Top-Account-Id': '0',  # Not used in sts service
         }
         return headers
 
@@ -97,3 +100,8 @@ class MLSTSTokenService(Service):
             'GetSTSToken': ApiInfo('GET', '/GetSTSToken', {}, {}, {}),
         }
         return api_info
+
+
+if __name__ == '__main__':
+    s = MLSTSTokenService(duration=1600)
+    print(s.get_sts_token().Result.SessionToken)
