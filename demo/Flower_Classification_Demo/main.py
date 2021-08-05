@@ -1,18 +1,14 @@
 import os
-
-os.system(
-    "pip install prettytable boto3 volcengine -i https://pypi.tuna.tsinghua.edu.cn/simple"
-)
 import re
 import shutil
-import sys
+import argparse
 import tensorflow as tf
 import numpy as np
+from swintransformer import SwinTransformer
 from ml_platform_sdk.tos import tos
-from ml_platform_sdk.models import Model
+from ml_platform_sdk.modelrepo.models import Model
 from ml_platform_sdk.config import credential as auth_credential
 import ml_platform_sdk
-from swintransformer import SwinTransformer
 
 AUTO = tf.data.experimental.AUTOTUNE
 
@@ -258,6 +254,7 @@ def get_datasets_info():
     print(
         'Dataset: {} training images, {} validation images, {} unlabeled test images'
         .format(num_training_images, num_validation_images, num_test_images))
+    return num_training_images, num_validation_images, num_test_images
 
 
 def get_pretrained_from_tos():
@@ -270,31 +267,55 @@ def get_pretrained_from_tos():
 
     with open(src_path, "wb") as file:
         file.write(obj.read())
-    if not os.path.exists(dst_path):
-        os.makedirs(os.path.dirname(dst_path), exist_ok=True)
-        shutil.move(src_path, dst_path)
+
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+    shutil.move(src_path, dst_path)
 
 
 if __name__ == '__main__':
 
-    try:  # detect TPUs
-        tpu = tf.distribute.cluster_resolver.TPUClusterResolver.connect(
-        )  # TPU detection
-        strategy = tf.distribute.TPUStrategy(tpu)
-    except ValueError:  # detect GPUs
-        strategy = tf.distribute.MirroredStrategy(
-        )  # for GPU or multi-GPU machines
-        # strategy = tf.distribute.get_strategy()
-        # # default strategy that works on CPU and single GPU
-        # strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
-        # # for clusters of multi-GPU machines
+    # args parser
+    parser = argparse.ArgumentParser(
+        description='Swin Transformer Training Example')
+    parser.add_argument('--batch-size',
+                        type=int,
+                        help='input batch size for training')
+    parser.add_argument('--epochs',
+                        type=int,
+                        default=10,
+                        help='number of epochs to train')
+    parser.add_argument('--steps-per-epoch',
+                        type=int,
+                        help='number of epochs to train')
+    parser.add_argument('--validation-steps',
+                        type=int,
+                        help='number of epochs to train')
+
+    args = parser.parse_args()
+
+    # detect GPUs
+    strategy = tf.distribute.MirroredStrategy()  # for GPU or multi-GPU machines
+    # strategy = tf.distribute.get_strategy()
+    # default strategy that works on CPU and single GPU
+    # strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
+    # # for clusters of multi-GPU machines
     print("Number of accelerators: ", strategy.num_replicas_in_sync)
 
     IMAGE_SIZE = [224, 224
                  ]  # For GPU training, please select 224 x 224 px image size.
-    BATCH_SIZE = 16 * strategy.num_replicas_in_sync
+    BATCH_SIZE = 16 * strategy.num_replicas_in_sync if args.batch_size is None else args.batch_size
 
-    get_datasets_info()
+    NUM_TRAINING_IMAGES, NUM_VALIDATION_IMAGES, NUM_TEST_IMAGES = get_datasets_info(
+    )
+
+    STEPS_PER_EPOCH = NUM_TRAINING_IMAGES // BATCH_SIZE if args.steps_per_epoch is None else args.steps_per_epoch
+
+    VALIDATION_STEPS = -(
+        -NUM_VALIDATION_IMAGES //
+        BATCH_SIZE) if args.validation_steps is None else args.validation_steps
+
+    EPOCHS = args.epochs
+
     get_pretrained_from_tos()
 
     # build model
@@ -320,21 +341,22 @@ if __name__ == '__main__':
     model.summary()
 
     # tensorboard
-    log_dir = os.getenv("TENSORBOARD_LOG_PATH", default="/tensorboard_logs")
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_images=False, histogram_freq=1)
+    log_dir = os.getenv("TENSORBOARD_LOG_PATH",
+                        default=os.path.join(os.path.dirname(__file__),
+                                             "tensorboard_logs"))
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
+                                                          write_images=False,
+                                                          histogram_freq=1)
 
     # train model
-    STEPS_PER_EPOCH = 1
-    EPOCHS = 1
-    VALIDATION_STEPS = 1
     HISTORY = model.fit(get_training_dataset(),
                         steps_per_epoch=STEPS_PER_EPOCH,
                         epochs=EPOCHS,
                         validation_data=get_validation_dataset(),
                         validation_steps=VALIDATION_STEPS,
-                        callbacks = [tensorboard_callback])
+                        callbacks=[tensorboard_callback])
 
-    SAVED_MODEL_PATH = "/root/code/Flower_Classification_Demo/tf-keras_save/1"
+    SAVED_MODEL_PATH = os.path.join(os.path.dirname(__file__), "tf_save/1")
     model.save(SAVED_MODEL_PATH)
 
     # register new model_version to mlplatform.model_repo
