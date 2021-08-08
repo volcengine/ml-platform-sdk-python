@@ -5,7 +5,7 @@ import logging
 
 from ml_platform_sdk import initializer
 from ml_platform_sdk.config import credential as auth_credential
-from ml_platform_sdk.openapi import client
+from ml_platform_sdk.openapi import client, handle_res
 
 
 class _Inference:
@@ -139,8 +139,8 @@ class _Inference:
               flavor: Optional[str] = None):
         flavor_id = None
         if flavor:
-            flavor_id = self.api_client.list_resource(
-                name=flavor)['Result']['List'][0]['FlavorID']
+            flavor_id = handle_res.get_unique_flavor(
+                self.api_client.list_resource(name=flavor))
         try:
             self.api_client.scale_service(service_id=self.service_id,
                                           replicas=replicas,

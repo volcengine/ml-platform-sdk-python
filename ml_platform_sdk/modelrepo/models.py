@@ -1,17 +1,18 @@
 import logging
 import os
-from urllib.parse import urlparse
 from typing import Optional, Tuple
+from urllib.parse import urlparse
 
 from prettytable import PrettyTable
 from tqdm import tqdm
 
 from ml_platform_sdk import initializer
 from ml_platform_sdk.config import credential as auth_credential
-from ml_platform_sdk.tos import tos
-from ml_platform_sdk.openapi import client
 from ml_platform_sdk.inferences import _Inference
 from ml_platform_sdk.modelrepo import validation
+from ml_platform_sdk.openapi import client, handle_res
+from ml_platform_sdk.tos import tos
+
 
 class Model:
 
@@ -206,8 +207,9 @@ class Model:
         self.tensor_config = tensor_config
         self.model_metrics = model_metrics
         try:
-            self._register_validate_and_preprocess(model_name, model_format, model_type,
-                                                   tensor_config, model_metrics)
+            self._register_validate_and_preprocess(model_name, model_format,
+                                                   model_type, tensor_config,
+                                                   model_metrics)
             self._upload_tos()
             response = self.api_client.create_model(
                 model_name=self.model_name,
@@ -217,8 +219,7 @@ class Model:
                 path=self.remote_path,
                 description=description,
                 tensor_config=tensor_config,
-                model_metrics=model_metrics
-            )
+                model_metrics=model_metrics)
             self.model_version = response['Result']['ModelVersion']
             self.model_id = response['Result']['ModelID']
         except Exception as e:
@@ -282,10 +283,9 @@ class Model:
             ])
             for model in response['Result']['List']:
                 table.add_row([
-                    model['ModelVersionID'],
-                    model['ModelVersion'], model['ModelFormat'],
-                    model['ModelType'], model['Path'], model['Description'],
-                    model['CreateTime']
+                    model['ModelVersionID'], model['ModelVersion'],
+                    model['ModelFormat'], model['ModelType'], model['Path'],
+                    model['Description'], model['CreateTime']
                 ])
             print(table)
         except Exception as e:
@@ -314,21 +314,21 @@ class Model:
             logging.warning(
                 'model deploy force, the old inference_service will lost')
 
-        inference_service = _Inference(
-            service_name=self.model_name,
-            image_url=image_url,
-            flavor_id=self.api_client.list_resource(
-                name=flavor, sort_by='vCPU')['Result']['List'][0]['FlavorID'],
-            model_name=self.model_name,
-            model_id=self.model_id,
-            model_version_id=self.model_version_id,
-            model_version=self.model_version,
-            model_path=self.remote_path,
-            model_type=self.model_type,
-            envs=envs,
-            replica=replica,
-            description=description,
-            credential=self.credential)
+        inference_service = _Inference(service_name=self.model_name,
+                                       image_url=image_url,
+                                       flavor_id=handle_res.get_unique_flavor(
+                                           self.api_client.list_resource(
+                                               name=flavor, sort_by='vCPU')),
+                                       model_name=self.model_name,
+                                       model_id=self.model_id,
+                                       model_version_id=self.model_version_id,
+                                       model_version=self.model_version,
+                                       model_path=self.remote_path,
+                                       model_type=self.model_type,
+                                       envs=envs,
+                                       replica=replica,
+                                       description=description,
+                                       credential=self.credential)
         inference_service.create()
         self.inference_service.update({self.model_version: inference_service})
         return inference_service
