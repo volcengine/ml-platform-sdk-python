@@ -7,8 +7,7 @@ VERSION = '1.0.0'
 description = "Volcengine ML Platform API client library"
 
 setup_requires = (
-    'setuptools>=41.0.0',
-    'pip-tools'
+    'setuptools>=41.0.0'
 )
 
 install_requires = (
