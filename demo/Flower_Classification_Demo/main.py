@@ -360,7 +360,8 @@ if __name__ == '__main__':
     model.save(SAVED_MODEL_PATH)
 
     # register new model_version to mlplatform.model_repo
-    volcengine_ml_platform.init(auth_credential.Credential(AC_AK, AC_SK, REGION_NAME))
+    volcengine_ml_platform.init(
+        auth_credential.Credential(AC_AK, AC_SK, REGION_NAME))
     model = Model(local_path=SAVED_MODEL_PATH)
     model.register(model_name='swinTransformerTestModel',
                    model_format='SavedModel',
