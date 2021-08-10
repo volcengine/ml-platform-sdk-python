@@ -17,6 +17,7 @@ jobs:
           # install python packages
           - pip3 install -i https://bytedpypi.byted.org/simple pylint yapf
           - python setup.py install
+          - pip3 install -i https://bytedpypi.byted.org/simple -r requirements.txt
 
           # Static analysis starts here
           - bash -ex presubmit/py_static_analysis.sh presubmit "$CI_EVENT_CHANGE_TARGET_SHA" "$CI_EVENT_CHANGE_SOURCE_SHA"

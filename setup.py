@@ -21,6 +21,7 @@ install_requires = [
 ]
 
 pytorch_requires = ['torch']
+full_requires = list(set(pytorch_requires))
 
 package_root = os.path.abspath(os.path.dirname(__file__))
 readme_filename = os.path.join(package_root, "README.md")
@@ -47,6 +48,7 @@ setuptools.setup(
     install_requires=install_requires,
     setup_requires=setup_requires,
     extras_require={
+        "full": full_requires,
         "pytorch": pytorch_requires,
     },
     python_requires=">=3.6",
