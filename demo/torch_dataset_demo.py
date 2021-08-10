@@ -6,8 +6,8 @@ import torch
 # pylint: disable=consider-using-from-import
 from torchvision import transforms
 
-from ml_platform_sdk.config import credential as auth_credential
-from ml_platform_sdk.datasets.image_dataset import ImageDataset
+from volcengine_ml_platform.config import credential as auth_credential
+from volcengine_ml_platform.datasets.image_dataset import ImageDataset
 
 ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
 sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='

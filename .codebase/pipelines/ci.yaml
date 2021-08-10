@@ -16,6 +16,7 @@ jobs:
           - yes | apt-get install --assume-yes git
           # install python packages
           - pip3 install -i https://bytedpypi.byted.org/simple pylint yapf
+          - python setup.py install
           - pip3 install -i https://bytedpypi.byted.org/simple -r requirements.txt
 
           # Static analysis starts here

@@ -2,7 +2,7 @@ import json
 import os
 from typing import Optional
 
-from ml_platform_sdk.config import credential as auth_credential
+from volcengine_ml_platform.config import credential as auth_credential
 
 
 class _Config:

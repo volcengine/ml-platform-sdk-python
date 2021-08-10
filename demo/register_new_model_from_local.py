@@ -1,8 +1,8 @@
 import json
 
-from ml_platform_sdk.modelrepo.models import Model
-from ml_platform_sdk.config import credential as auth_credential
-import ml_platform_sdk
+from volcengine_ml_platform.modelrepo.models import Model
+from volcengine_ml_platform.config import credential as auth_credential
+import volcengine_ml_platform
 
 # # online account id ak/sk
 # ak = 'AKLTMTFjMzZlNmY5MWZkNDc4NmJjZWM1NDJjMWMwZThmMWE'
@@ -15,7 +15,7 @@ region = 'cn-north-1'
 
 if __name__ == '__main__':
     # initialize sdk
-    ml_platform_sdk.init(auth_credential.Credential(ak, sk, region))
+    volcengine_ml_platform.init(auth_credential.Credential(ak, sk, region))
 
     # use local_model
     model = Model(local_path='./demo_model/1')

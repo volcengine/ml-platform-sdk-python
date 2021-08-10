@@ -3,9 +3,9 @@ import time
 from typing import Optional
 import logging
 
-from ml_platform_sdk import initializer
-from ml_platform_sdk.config import credential as auth_credential
-from ml_platform_sdk.openapi import client, handle_res
+from volcengine_ml_platform import initializer
+from volcengine_ml_platform.config import credential as auth_credential
+from volcengine_ml_platform.openapi import client, handle_res
 
 
 class _Inference:

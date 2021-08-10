@@ -1,9 +1,9 @@
 import numpy as np
 import tensorflow as tf
 
-import ml_platform_sdk
-from ml_platform_sdk.datasets import ImageDataset
-from ml_platform_sdk.config import credential as auth_credential
+import volcengine_ml_platform
+from volcengine_ml_platform.datasets import ImageDataset
+from volcengine_ml_platform.config import credential as auth_credential
 
 ak = 'AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q'
 sk = 'TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=='
@@ -13,7 +13,7 @@ test_path = './test_dataset'
 dataset_id = 'd-20210524180450-m592h'
 
 if __name__ == '__main__':
-    ml_platform_sdk.init(auth_credential.Credential(ak, sk, region))
+    volcengine_ml_platform.init(auth_credential.Credential(ak, sk, region))
 
     dataset = ImageDataset(dataset_id=dataset_id)
 

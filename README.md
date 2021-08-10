@@ -1,15 +1,38 @@
-# Python Operator SDK
+# Volcano Engine ML Platform Python SDK
 
-## Document
+
+## To start using SDK
 https://bytedance.feishu.cn/docs/doccnxximX3BaSrGhB81SCav60f
 
-## Usage
-Install package
+### 1. Install package
+* From pypi
 ```
-python3 setup.py install
+pip install --user volcengine_ml_platform
+```
+* Upgrade from pypi
+```
+pip install --user --upgrade volcengine_ml_platform
+```
+* To install the development version
+```
+pip install --user git+https://code.byted.org/machinelearning/mlplatform-sdk-python.git
 ```
 
-## Code style
+### 2. Usage
+
+
+
+### 3. Document
+
+
+
+
+## To start developing SDK
+### Installation dependencies
+```
+python setup.py install
+```
+### Code style
 Format code
 ```
 yapf -ipr .

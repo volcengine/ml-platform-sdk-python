@@ -6,8 +6,8 @@ from typing import Optional
 from tqdm import tqdm
 import numpy as np
 
-from ml_platform_sdk.datasets.dataset import _Dataset, dataset_copy_file
-from ml_platform_sdk.config import constants
+from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
+from volcengine_ml_platform.config import constants
 
 
 class VideoDataset(_Dataset):

@@ -21,6 +21,9 @@ else
 fi
 
 for file in ${changed_files}; do
+  if [ ! -f "${file}" ]; then
+    continue
+  fi
   flag=0
   for (( i=0;i<${#BLACKLIST_FOLDER[@]};i++ )) do
     if [[ ${file} == ${BLACKLIST_FOLDER[i]}*.py ]]; then
@@ -34,6 +37,7 @@ for file in ${changed_files}; do
   if [ "${file##*.}" != "py" ]; then
     continue
   fi
+
 	
   echo "Checking format and style for: $file"
   yapf -dpr "$file"

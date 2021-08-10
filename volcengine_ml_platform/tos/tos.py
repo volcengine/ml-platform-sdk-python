@@ -8,8 +8,8 @@ import botocore
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 
-from ml_platform_sdk import initializer
-from ml_platform_sdk.config import credential as auth_credential, constants
+from volcengine_ml_platform import initializer
+from volcengine_ml_platform.config import credential as auth_credential, constants
 
 
 def _init_boto3_client(credential: Optional[auth_credential.Credential] = None):

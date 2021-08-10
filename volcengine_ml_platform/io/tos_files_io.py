@@ -4,9 +4,9 @@ import io
 import torch
 from PIL import Image
 
-from ml_platform_sdk import initializer
-from ml_platform_sdk.config import credential as auth_credential
-from ml_platform_sdk.tos import tos
+from volcengine_ml_platform import initializer
+from volcengine_ml_platform.config import credential as auth_credential
+from volcengine_ml_platform.tos import tos
 
 
 class TorchTOSDataset:

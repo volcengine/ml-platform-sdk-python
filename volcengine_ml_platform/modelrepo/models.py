@@ -6,12 +6,12 @@ from urllib.parse import urlparse
 from prettytable import PrettyTable
 from tqdm import tqdm
 
-from ml_platform_sdk import initializer
-from ml_platform_sdk.config import credential as auth_credential
-from ml_platform_sdk.inferences import _Inference
-from ml_platform_sdk.modelrepo import validation
-from ml_platform_sdk.openapi import client, handle_res
-from ml_platform_sdk.tos import tos
+from volcengine_ml_platform import initializer
+from volcengine_ml_platform.config import credential as auth_credential
+from volcengine_ml_platform.inferences import _Inference
+from volcengine_ml_platform.modelrepo import validation
+from volcengine_ml_platform.openapi import client, handle_res
+from volcengine_ml_platform.tos import tos
 
 
 class Model:
