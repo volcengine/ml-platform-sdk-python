@@ -173,7 +173,6 @@ def main():
         local_path="./demo_train_manifest",
     )
     train_dataset = train_dataset.init_torch_dataset(
-        decode=decode,
         transform=transform,
         target_transform=target_transform,
     )

@@ -6,11 +6,9 @@ NAME = 'volcengine_ml_platform'
 VERSION = '1.0.0'
 description = "Volcengine ML Platform API client library"
 
-setup_requires = (
-    'setuptools>=41.0.0'
-)
+setup_requires = ['setuptools>=41.0.0']
 
-install_requires = (
+install_requires = [
     'volcengine>=1.0.19',
     'boto3>=1.18.0',
     'requests>=2.18.0',
@@ -20,11 +18,9 @@ install_requires = (
     'jsonschema>=3.0.0',
     'tqdm>=4.19.2',
     'prettytable>=2.0.0',
-)
+]
 
-pytorch_requires = (
-    'torch'
-)
+pytorch_requires = ['torch']
 
 package_root = os.path.abspath(os.path.dirname(__file__))
 readme_filename = os.path.join(package_root, "README.md")
@@ -37,8 +33,7 @@ setuptools.setup(
     description=description,
     long_description=readme,
     packages=[
-        package
-        for package in setuptools.PEP420PackageFinder.find()
+        package for package in setuptools.PEP420PackageFinder.find()
         if package.startswith(NAME)
     ],
     entry_points={},
