@@ -5,10 +5,10 @@ import argparse
 import tensorflow as tf
 import numpy as np
 from swintransformer import SwinTransformer
-from ml_platform_sdk.tos import tos
-from ml_platform_sdk.modelrepo.models import Model
-from ml_platform_sdk.config import credential as auth_credential
-import ml_platform_sdk
+from volcengine_ml_platform.tos import tos
+from volcengine_ml_platform.modelrepo.models import Model
+from volcengine_ml_platform.config import credential as auth_credential
+import volcengine_ml_platform
 
 AUTO = tf.data.experimental.AUTOTUNE
 
@@ -360,7 +360,7 @@ if __name__ == '__main__':
     model.save(SAVED_MODEL_PATH)
 
     # register new model_version to mlplatform.model_repo
-    ml_platform_sdk.init(auth_credential.Credential(AC_AK, AC_SK, REGION_NAME))
+    volcengine_ml_platform.init(auth_credential.Credential(AC_AK, AC_SK, REGION_NAME))
     model = Model(local_path=SAVED_MODEL_PATH)
     model.register(model_name='swinTransformerTestModel',
                    model_format='SavedModel',

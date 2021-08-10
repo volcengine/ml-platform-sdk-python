@@ -9,9 +9,9 @@ from volcengine.Credentials import Credentials
 from volcengine.ServiceInfo import ServiceInfo
 from volcengine.base.Service import Service
 
-from ml_platform_sdk import initializer
-from ml_platform_sdk.config import credential as auth_credential, env
-from ml_platform_sdk.openapi.handle_res import handle_res
+from volcengine_ml_platform import initializer
+from volcengine_ml_platform.config import credential as auth_credential, env
+from volcengine_ml_platform.openapi.handle_res import handle_res
 
 
 class APIClient(Service):

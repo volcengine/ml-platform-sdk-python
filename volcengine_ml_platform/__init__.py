@@ -1,6 +1,8 @@
-from ml_platform_sdk import initializer
-from ml_platform_sdk.modelrepo.models import Model
-from ml_platform_sdk.datasets import (
+# -*- coding: utf-8 -*-
+
+from volcengine_ml_platform import initializer
+from volcengine_ml_platform.modelrepo.models import Model
+from volcengine_ml_platform.datasets import (
     VideoDataset,
     ImageDataset,
     TextDataset,

@@ -6,10 +6,10 @@ from urllib.parse import urlparse
 import json
 import requests
 
-from ml_platform_sdk import initializer
-from ml_platform_sdk.config import credential as auth_credential, constants
-from ml_platform_sdk.tos import tos
-from ml_platform_sdk.openapi import client
+from volcengine_ml_platform import initializer
+from volcengine_ml_platform.config import credential as auth_credential, constants
+from volcengine_ml_platform.tos import tos
+from volcengine_ml_platform.openapi import client
 
 
 def dataset_copy_file(metadata, source_dir, destination_dir):

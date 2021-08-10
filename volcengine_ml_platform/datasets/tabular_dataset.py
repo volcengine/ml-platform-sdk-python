@@ -3,7 +3,7 @@ import os
 from typing import Optional
 import numpy as np
 
-from ml_platform_sdk.datasets.dataset import _Dataset
+from volcengine_ml_platform.datasets.dataset import _Dataset
 
 
 class TabularDataset(_Dataset):

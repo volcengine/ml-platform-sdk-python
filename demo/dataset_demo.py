@@ -1,13 +1,13 @@
-from ml_platform_sdk.datasets.text_dataset import TextDataset
-from ml_platform_sdk.config import credential as auth_credential
-import ml_platform_sdk
+from volcengine_ml_platform.datasets.text_dataset import TextDataset
+from volcengine_ml_platform.config import credential as auth_credential
+import volcengine_ml_platform
 
 ak = 'AKLTMTFjMzZlNmY5MWZkNDc4NmJjZWM1NDJjMWMwZThmMWE'
 sk = 'WTJSbU1HWm1PR1ZpWTJNME5EZGhZamxtTkdVeE1EUm1NMlkyT0dJNVlUSQ=='
 region = 'cn-qingdao'
 
 if __name__ == '__main__':
-    ml_platform_sdk.init(auth_credential.Credential(ak, sk, region))
+    volcengine_ml_platform.init(auth_credential.Credential(ak, sk, region))
     dataset = TextDataset(dataset_id='d-20210715165619-s6x25')
 
     dataset.create(local_path='./demo_dataset')

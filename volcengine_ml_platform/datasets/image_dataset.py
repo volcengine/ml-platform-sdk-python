@@ -2,15 +2,18 @@ import json
 import math
 import os
 from typing import Optional
+from collections.abc import Callable
 
 import numpy as np
+from PIL import Image
 from tqdm import tqdm
 
-from ml_platform_sdk.datasets.dataset import _Dataset, dataset_copy_file
-from ml_platform_sdk.config import constants
+from volcengine_ml_platform.config import constants
+from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
+from volcengine_ml_platform.io.tos_files_io import TorchTOSDataset
 
 
-class TextDataset(_Dataset):
+class ImageDataset(_Dataset):
 
     def create(self, local_path: Optional[str] = None, limit=-1):
         """download datasets from source
@@ -30,9 +33,9 @@ class TextDataset(_Dataset):
                 self.data_count = 0
                 for line in tqdm(f):
                     manifest_line = json.loads(line)
-                    if 'TextURL' in manifest_line['Data']:
+                    if 'ImageURL' in manifest_line['Data']:
                         manifest_line['Data']['FilePath'] = self._download_file(
-                            manifest_line['Data']['TextURL'], self.local_path)
+                            manifest_line['Data']['ImageURL'], self.local_path)
 
                     # create new local metadata file
                     json.dump(manifest_line, new_manifest_file)
@@ -72,10 +75,10 @@ class TextDataset(_Dataset):
         os.makedirs(testing_dir, exist_ok=True)
         os.makedirs(training_dir, exist_ok=True)
 
-        train_dataset = TextDataset(local_path=training_dir,
+        train_dataset = ImageDataset(local_path=training_dir,
+                                     credential=self.credential)
+        test_dataset = ImageDataset(local_path=testing_dir,
                                     credential=self.credential)
-        test_dataset = TextDataset(local_path=testing_dir,
-                                   credential=self.credential)
         # set new datasets size
         test_dataset.data_count = math.floor(line_count * (1 - ratio))
         train_dataset.data_count = line_count - test_dataset.data_count
@@ -106,3 +109,56 @@ class TextDataset(_Dataset):
         train_dataset.created = True
         test_dataset.created = True
         return train_dataset, test_dataset
+
+    def load_as_np(self, offset=0, limit=-1):
+        """load images as numpy array
+
+        Args:
+            offset (int, optional): num of images to skip. Defaults to 0.
+            limit (int, optional): num of images to load. Defaults to -1.
+
+        Returns:
+            np array of images
+            list of annotations
+        """
+        images = []
+        annotations = []
+
+        with open(self._manifest_path()) as f:
+            for i, line in enumerate(f):
+                manifest_line = json.loads(line)
+                if i < offset:
+                    continue
+                if limit != -1 and i >= offset + limit:
+                    break
+                file_path = manifest_line['Data']['FilePath']
+                image = Image.open(file_path)
+                images.append(np.asarray(image))
+                annotations.append(manifest_line['Annotation'])
+
+        return np.array(images), annotations
+
+    def parse_image_manifest(self, manifest_file_path):
+        # parse manifest
+        manifest_info = {'buckets': [], 'keys': [], 'annotations': []}
+        with open(manifest_file_path) as f:
+            for _, line in enumerate(f):
+                manifest_line = json.loads(line)
+                url = manifest_line['Data']['ImageURL']
+                bucket = url.split('//')[1].split('/')[0]
+                key = url.split(f'{bucket}/')[1]
+                manifest_info['buckets'].append(bucket)
+                manifest_info['keys'].append(key)
+                manifest_info['annotations'].append(manifest_line['Annotation'])
+        return manifest_info
+
+    def init_torch_dataset(self,
+                           transform: Optional[Callable] = None,
+                           target_transform: Optional[Callable] = None):
+        manifest_info = self.get_manifest_info(self.parse_image_manifest)
+        torch_dataset = TorchTOSDataset(manifest_info=manifest_info,
+                                        transform=transform,
+                                        target_transform=target_transform,
+                                        credential=self.credential)
+
+        return torch_dataset

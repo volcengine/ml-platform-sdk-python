@@ -1,6 +1,6 @@
 import os
 
-from ml_platform_sdk.config import constants
+from volcengine_ml_platform.config import constants
 
 
 class Env:

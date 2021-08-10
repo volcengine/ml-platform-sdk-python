@@ -7,9 +7,9 @@ from volcengine.Credentials import Credentials
 from volcengine.ServiceInfo import ServiceInfo
 from volcengine.base.Service import Service
 
-from ml_platform_sdk.config import credential as auth_credential
-from ml_platform_sdk.config import env
-from ml_platform_sdk.util import reqid
+from volcengine_ml_platform.config import credential as auth_credential
+from volcengine_ml_platform.config import env
+from volcengine_ml_platform.util import reqid
 
 
 class MLSTSTokenResponse:
