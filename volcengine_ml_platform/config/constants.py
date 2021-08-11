@@ -1,4 +1,5 @@
 # coding:utf-8
+import os
 
 DATASET_LOCAL_METADATA_FILENAME = 'local_metadata.manifest'
 ENCRYPTED_KEY_ENV_NAME = 'ENCRYPTED_KEY'
@@ -14,9 +15,11 @@ TOS_REGION_ENDPOINT_URL = {
     'cn-north-1': 'http://boe-s3-official-test.volces.com',
 }
 
-ONLINE_TOS_REGION_ENDPOINT_URL = {
-    'cn-qingdao': 'http://tos-s3-cn-qingdao.volces.com',
-    'cn-north-1': 'http://tos-s3-cn-qingdao.volces.com',
-    'cn-beijing': 'http://tos-s3-cn-beijing.volces.com',
-    'cn-north-4': 'http://boe-s3-official-test.volces.com'
-}
+APP_ENV = os.environ.get("APP_ENV", "boe")
+if APP_ENV != "boe":
+    TOS_REGION_ENDPOINT_URL = {
+        'cn-qingdao': 'http://tos-s3-cn-qingdao.volces.com',
+        'cn-north-1': 'http://tos-s3-cn-qingdao.volces.com',
+        'cn-beijing': 'http://tos-s3-cn-beijing.volces.com',
+        'cn-north-4': 'http://boe-s3-official-test.volces.com'
+    }
