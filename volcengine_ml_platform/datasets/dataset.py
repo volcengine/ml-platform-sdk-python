@@ -36,22 +36,29 @@ class _Dataset:
 
     def __init__(self,
                  dataset_id: Optional[str] = None,
+                 annotation_id: Optional[str] = None,
                  local_path: Optional[str] = None,
                  tos_source: Optional[str] = None,
                  credential: Optional[auth_credential.Credential] = None):
         self.dataset_id = dataset_id
+        self.annotation_id = annotation_id
         self.local_path = local_path
         self.tabular_path = None
         self.tos_source = tos_source
         self.created = False
         self.data_count = 0
         self.detail = None
+        self.annotation_detail = None
         self.credential = credential or initializer.global_config.get_credential(
         )
         self.tos_client = tos.TOSClient(credential)
         self.api_client = client.APIClient(credential)
 
     def _get_detail(self):
+        self._get_dataset_detail()
+        self._get_annotation_detail()
+
+    def _get_dataset_detail(self):
         if self.dataset_id is None:
             return
         try:
@@ -60,9 +67,22 @@ class _Dataset:
             logging.error('get datasets detail failed, error: %s', e)
             raise Exception('invalid datasets') from e
 
+    def _get_annotation_detail(self):
+        if self.annotation_id is None:
+            return
+        try:
+            resp = self.api_client.get_annotation_set(self.dataset_id,
+                                                      self.annotation_id)
+            self.annotation_detail = resp['Result']
+        except Exception as e:
+            logging.error('get annotation detail failed, error: %s', e)
+            raise Exception('invalid annotation') from e
+
     def _get_storage_path(self) -> str:
         if self.detail is None:
             return ""
+        if self.annotation_id is not None:
+            return self.annotation_detail['StoragePath']
         return self.detail['StoragePath']
 
     def _manifest_path(self):
