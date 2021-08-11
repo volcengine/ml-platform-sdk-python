@@ -17,5 +17,6 @@ TOS_REGION_ENDPOINT_URL = {
 ONLINE_TOS_REGION_ENDPOINT_URL = {
     'cn-qingdao': 'http://tos-s3-cn-qingdao.volces.com',
     'cn-north-1': 'http://tos-s3-cn-qingdao.volces.com',
-    'cn-beijing': 'http://tos-s3-cn-beijing.volces.com'
+    'cn-beijing': 'http://tos-s3-cn-beijing.volces.com',
+    'cn-north-4': 'http://boe-s3-official-test.volces.com'
 }

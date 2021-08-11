@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+BLACKLIST_FOLDER=("volcengine_ml_platform/annotation/manifest")
 
 if ! type pylint &> /dev/null ; then
   echo "pylint is not found, please install it by \`pip3 install pylint\`"

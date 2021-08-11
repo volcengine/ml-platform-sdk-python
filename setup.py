@@ -18,6 +18,7 @@ install_requires = [
     'jsonschema>=3.0.0',
     'tqdm>=4.19.2',
     'prettytable>=2.0.0',
+    'thrift',
 ]
 
 pytorch_requires = ['torch']
