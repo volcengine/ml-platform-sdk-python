@@ -5,5 +5,9 @@ set -e
 ROOT_DIRECTORY=$(dirname "$(dirname "$0")")
 
 pushd "$ROOT_DIRECTORY"
-python3 -m unittest discover "volcengine_ml_platform" "*_test.py"
+export VOLC_ACCESSKEY="AKLTMTFjMzZlNmY5MWZkNDc4NmJjZWM1NDJjMWMwZThmMWE"
+export VOLC_SECRETKEY="WTJSbU1HWm1PR1ZpWTJNME5EZGhZamxtTkdVeE1EUm1NMlkyT0dJNVlUSQ=="
+export VOLC_ML_PLATFORM_ENV="BOE"
+
+#python -m py.test tests/
 popd

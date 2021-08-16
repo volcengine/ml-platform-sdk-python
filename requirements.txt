@@ -1,2 +1,7 @@
-# only put extras_require in setup.py
-torch
+# only put libs extras_require in setup.py
+torch==1.8.0
+
+# only put libs for end2end test
+tensorflow==2.4.0
+pytest==6.2.4
+protobuf==3.17.3
