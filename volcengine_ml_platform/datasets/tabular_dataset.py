@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import math
 import os
 from typing import Optional
@@ -8,7 +10,7 @@ from volcengine_ml_platform.datasets.dataset import _Dataset
 
 class TabularDataset(_Dataset):
 
-    def create(self, local_path: Optional[str] = None):
+    def download(self, local_path: Optional[str] = None):
         if local_path is not None:
             self.local_path = local_path
         self.tabular_path = self._download_file(self._get_storage_path(),
@@ -56,10 +58,8 @@ class TabularDataset(_Dataset):
         os.makedirs(testing_dir, exist_ok=True)
         os.makedirs(training_dir, exist_ok=True)
 
-        train_dataset = TabularDataset(local_path=training_dir,
-                                       credential=self.credential)
-        test_dataset = TabularDataset(local_path=testing_dir,
-                                      credential=self.credential)
+        train_dataset = TabularDataset(local_path=training_dir)
+        test_dataset = TabularDataset(local_path=testing_dir)
         # set new dataset size
         test_dataset.data_count = math.floor(line_count * (1 - ratio))
         train_dataset.data_count = line_count - test_dataset.data_count

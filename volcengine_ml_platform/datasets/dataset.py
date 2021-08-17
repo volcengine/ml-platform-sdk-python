@@ -1,15 +1,15 @@
+import json
 import logging
 import os
 import shutil
 from typing import Optional, Tuple, List
 from urllib.parse import urlparse
-import json
+
 import requests
 
-from volcengine_ml_platform import initializer
-from volcengine_ml_platform.config import credential as auth_credential, constants
+from volcengine_ml_platform import constant
+from volcengine_ml_platform.openapi import dataset_client
 from volcengine_ml_platform.tos import tos
-from volcengine_ml_platform.openapi import client
 
 
 def dataset_copy_file(metadata, source_dir, destination_dir):
@@ -38,8 +38,7 @@ class _Dataset:
                  dataset_id: Optional[str] = None,
                  annotation_id: Optional[str] = None,
                  local_path: Optional[str] = None,
-                 tos_source: Optional[str] = None,
-                 credential: Optional[auth_credential.Credential] = None):
+                 tos_source: Optional[str] = None):
         self.dataset_id = dataset_id
         self.annotation_id = annotation_id
         self.local_path = local_path
@@ -49,10 +48,8 @@ class _Dataset:
         self.data_count = 0
         self.detail = None
         self.annotation_detail = None
-        self.credential = credential or initializer.global_config.get_credential(
-        )
-        self.tos_client = tos.TOSClient(credential)
-        self.api_client = client.APIClient(credential)
+        self.tos_client = tos.TOSClient()
+        self.api_client = dataset_client.DataSetClient()
 
     def _get_detail(self):
         self._get_dataset_detail()
@@ -87,7 +84,7 @@ class _Dataset:
 
     def _manifest_path(self):
         return os.path.join(self.local_path,
-                            constants.DATASET_LOCAL_METADATA_FILENAME)
+                            constant.DATASET_LOCAL_METADATA_FILENAME)
 
     def _download_file(self, url, target_dir, chunk_size=8192):
         parse_result = urlparse(url)

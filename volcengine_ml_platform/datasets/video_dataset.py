@@ -3,16 +3,16 @@ import math
 import os
 from typing import Optional
 
-from tqdm import tqdm
 import numpy as np
+from tqdm import tqdm
 
+from volcengine_ml_platform import constant
 from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
-from volcengine_ml_platform.config import constants
 
 
 class VideoDataset(_Dataset):
 
-    def create(self, local_path: Optional[str] = None, limit=-1):
+    def download(self, local_path: Optional[str] = None, limit=-1):
         """download datasets from source
 
         Args:
@@ -72,19 +72,17 @@ class VideoDataset(_Dataset):
         os.makedirs(testing_dir, exist_ok=True)
         os.makedirs(training_dir, exist_ok=True)
 
-        train_dataset = VideoDataset(local_path=training_dir,
-                                     credential=self.credential)
-        test_dataset = VideoDataset(local_path=testing_dir,
-                                    credential=self.credential)
+        train_dataset = VideoDataset(local_path=training_dir)
+        test_dataset = VideoDataset(local_path=testing_dir)
         # set new datasets size
         test_dataset.data_count = math.floor(line_count * (1 - ratio))
         train_dataset.data_count = line_count - test_dataset.data_count
 
         # generate training and testing datasets's manifest file
         train_metadata_path = os.path.join(
-            training_dir, constants.DATASET_LOCAL_METADATA_FILENAME)
+            training_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
         test_metadata_path = os.path.join(
-            testing_dir, constants.DATASET_LOCAL_METADATA_FILENAME)
+            testing_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
         with open(test_metadata_path, 'w') as testing_manifest_file:
             with open(train_metadata_path, 'w') as training_manifest_file:
                 index = 0

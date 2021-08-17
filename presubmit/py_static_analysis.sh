@@ -18,7 +18,7 @@ if [ "$1" = "precommit" ]; then
 else
   # $2: latest commit SHA in source branch
   # $3: latest commit SHA in target branch
-  changed_files=$(git diff --name-only --diff-filter=ACM "$2" "$3")
+  changed_files=$(find tests samples volcengine_ml_platform -name "*.py")
 fi
 
 for file in ${changed_files}; do
@@ -39,8 +39,17 @@ for file in ${changed_files}; do
     continue
   fi
 
+  if [[ "${file}" =~ ^tests/* ]]; then
+    continue
+  fi
+
+  if [[ "${file}" =~ ^samples/* ]]; then
+    continue
+  fi
+
 	
-  echo "Checking format and style for: $file"
+  echo "Checking yapf for: $file"
   yapf -dpr "$file"
+  echo "Checking pylint for: $file"
   pylint "$file"
 done

@@ -1,21 +1,21 @@
 import json
 import math
 import os
-from typing import Optional
 from collections.abc import Callable
+from typing import Optional
 
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from volcengine_ml_platform.config import constants
+from volcengine_ml_platform import constant
 from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
 from volcengine_ml_platform.io.tos_files_io import TorchTOSDataset
 
 
 class ImageDataset(_Dataset):
 
-    def create(self, local_path: Optional[str] = None, limit=-1):
+    def download(self, local_path: Optional[str] = None, limit=-1):
         """download datasets from source
 
         Args:
@@ -75,19 +75,17 @@ class ImageDataset(_Dataset):
         os.makedirs(testing_dir, exist_ok=True)
         os.makedirs(training_dir, exist_ok=True)
 
-        train_dataset = ImageDataset(local_path=training_dir,
-                                     credential=self.credential)
-        test_dataset = ImageDataset(local_path=testing_dir,
-                                    credential=self.credential)
+        train_dataset = ImageDataset(local_path=training_dir)
+        test_dataset = ImageDataset(local_path=testing_dir)
         # set new datasets size
         test_dataset.data_count = math.floor(line_count * (1 - ratio))
         train_dataset.data_count = line_count - test_dataset.data_count
 
         # generate training and testing datasets's manifest file
         train_metadata_path = os.path.join(
-            training_dir, constants.DATASET_LOCAL_METADATA_FILENAME)
+            training_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
         test_metadata_path = os.path.join(
-            testing_dir, constants.DATASET_LOCAL_METADATA_FILENAME)
+            testing_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
         with open(test_metadata_path, 'w') as testing_manifest_file:
             with open(train_metadata_path, 'w') as training_manifest_file:
                 index = 0
@@ -158,7 +156,6 @@ class ImageDataset(_Dataset):
         manifest_info = self.get_manifest_info(self.parse_image_manifest)
         torch_dataset = TorchTOSDataset(manifest_info=manifest_info,
                                         transform=transform,
-                                        target_transform=target_transform,
-                                        credential=self.credential)
+                                        target_transform=target_transform)
 
         return torch_dataset

@@ -1,11 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from typing import Optional, Dict
 from collections.abc import Callable
 import io
 import torch
 from PIL import Image
 
-from volcengine_ml_platform import initializer
-from volcengine_ml_platform.config import credential as auth_credential
 from volcengine_ml_platform.tos import tos
 
 
@@ -15,10 +15,7 @@ class TorchTOSDataset:
                  manifest_info: Optional[Dict] = None,
                  decode: Optional[Callable] = None,
                  transform: Optional[Callable] = None,
-                 target_transform: Optional[Callable] = None,
-                 credential: Optional[auth_credential.Credential] = None):
-        self.credential = credential or initializer.global_config.get_credential(
-        )
+                 target_transform: Optional[Callable] = None):
         self.decode = decode
         self.transform = transform
         self.target_transform = target_transform
@@ -36,7 +33,7 @@ class TorchTOSDataset:
 
     def __len__(self):
         return len(self.buckets)
-    
+
     def _decode(self, raw_data):
         return Image.open(io.BytesIO(raw_data)).convert('RGB')
 
@@ -48,7 +45,7 @@ class TorchTOSDataset:
         torch.set_num_threads(1)
         # get each process a TOS client
         if not hasattr(self, "tos_client"):
-            self.tos_client = tos.TOSClient(self.credential)
+            self.tos_client = tos.TOSClient()
         bucket, key, annotation = self.buckets[index], self.keys[
             index], self.annotations[index]
         rsp = self.tos_client.get_object(bucket=bucket, key=key)

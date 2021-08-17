@@ -1,45 +1,26 @@
 import logging
 import math
 import os
-from typing import Optional
 
 import boto3
 import botocore
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 
-from volcengine_ml_platform import initializer
-from volcengine_ml_platform.config import credential as auth_credential, constants
-
-
-def _init_boto3_client(credential: Optional[auth_credential.Credential] = None):
-    # custom config
-    # pylint: disable=C0301
-    # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
-    if credential is None:
-        credential = initializer.global_config.get_credential()
-
-    # client = boto3.client(
-    #     's3',
-    #     region_name=credential.get_region(),
-    #     endpoint_url=constants.TOS_REGION_ENDPOINT_URL[credential.get_region()],
-    #     aws_access_key_id=credential.get_access_key_id(),
-    #     aws_secret_access_key=credential.get_secret_access_key())
-
-    # TODO: tos doesn't have boe env
-    client = boto3.client(
-        's3',
-        region_name=credential.get_region(),
-        endpoint_url=constants.TOS_REGION_ENDPOINT_URL[credential.get_region()],
-        aws_access_key_id=credential.get_access_key_id(),
-        aws_secret_access_key=credential.get_secret_access_key())
-    return client
+import volcengine_ml_platform
 
 
 class TOSClient:
 
-    def __init__(self, credential: auth_credential.Credential):
-        self.s3_client = _init_boto3_client(credential)
+    def __init__(self):
+        # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
+        credentials = volcengine_ml_platform.get_credentials()
+        self.s3_client = boto3.client(
+            's3',
+            region_name=credentials.region,
+            aws_access_key_id=credentials.ak,
+            aws_secret_access_key=credentials.sk,
+            endpoint_url=volcengine_ml_platform.get_tos_endpoint_url())
 
     def bucket_exists(self, bucket_name):
         """Check whether a bucket exists."""

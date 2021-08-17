@@ -21,7 +21,7 @@ install_requires = [
     'thrift',
 ]
 
-pytorch_requires = ['torch']
+pytorch_requires = ['torch==1.8.0']
 full_requires = list(set(pytorch_requires))
 
 package_root = os.path.abspath(os.path.dirname(__file__))
@@ -50,7 +50,7 @@ setuptools.setup(
     setup_requires=setup_requires,
     extras_require={
         "full": full_requires,
-        "pytorch": pytorch_requires,
+        "pytorch": pytorch_requires
     },
     python_requires=">=3.6",
     scripts=[],
