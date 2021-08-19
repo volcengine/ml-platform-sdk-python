@@ -36,7 +36,7 @@ class TOSClient:
                 exists = False
         return exists
 
-    def create_bucket(self, bucket_name, region):
+    def create_bucket(self, bucket_name, region=""):
         """Create an S3 bucket in a specified region
 
         param bucket_name: Bucket to create
@@ -46,7 +46,9 @@ class TOSClient:
 
         # Create bucket
         try:
-            location = {'LocationConstraint': region}
+            location = {}
+            if region not in ("", self.region_name):
+                location = {'LocationConstraint': region}
             self.s3_client.create_bucket(Bucket=bucket_name,
                                          CreateBucketConfiguration=location)
         except ClientError as e:
