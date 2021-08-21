@@ -7,7 +7,6 @@ from volcengine_ml_platform.openapi.base_client import define_api, BaseClient
 define_api("UpdateService")
 define_api("CreateService")
 define_api("UpdateServiceVersionDescription")
-define_api("ListServiceImages")
 define_api("ListServices")
 define_api("StopService")
 define_api("ListServiceVersions")
@@ -15,8 +14,8 @@ define_api("StartService")
 define_api("DeleteService")
 define_api("GetService")
 define_api("RollbackServiceVersion")
-define_api("ListModelServiceInstances")
-define_api("GetModelServiceInstanceStatus")
+define_api("ListInferenceServiceInstances")
+define_api("GetInferenceServiceInstanceStatus")
 define_api("ModifyService")
 
 
@@ -27,24 +26,19 @@ class InferenceServiceClient(BaseClient):
 
     def create_service(self,
                        service_name: str,
-                       model_name: str,
                        model_id: str,
                        model_version_id: str,
-                       image_url: str,
+                       image_id: str,
                        flavor_id: str,
                        envs: list,
-                       model_version: Optional[int] = None,
-                       model_path: Optional[str] = None,
-                       model_type: Optional[str] = None,
                        replica: Optional[int] = 1,
-                       cluster_id: Optional[str] = 'cc3gpncvqtofppg3tqam0',
                        description: Optional[str] = None) -> dict:
         """create inference service for models
 
         Args:
             service_name (str): service name
             models (Model): Model object
-            image_url (str): container image url
+            image_id (str): container image id
             flavor_id (str): hardward standard id
             envs (list): environment variables
             replica (int, optional): replica number. Defaults to 1.
@@ -59,21 +53,14 @@ class InferenceServiceClient(BaseClient):
         try:
             body = {
                 'ServiceName': service_name,
-                'ClusterID': cluster_id,
                 'ServiceDeployment': {
                     'Replicas': replica,
                     'FlavorID': flavor_id,
                     'Model': {
                         'ModelID': model_id,
                         'ModelVersionID': model_version_id,
-                        'Name': model_name,
-                        'Version': model_version,
-                        'Path': model_path,
-                        'Type': model_type,
                     },
-                    'Image': {
-                        'URL': image_url,
-                    },
+                    'ImageID': image_id,
                     'Envs': envs
                 }
             }
@@ -177,14 +164,12 @@ class InferenceServiceClient(BaseClient):
                           service_id, e)
             raise Exception('stop_service failed') from e
 
-    def scale_service(self, service_id: str, replicas: int,
-                      flavor_id: str) -> dict:
+    def scale_service(self, service_id: str, replicas: int) -> dict:
         """scale service by changing the number of replicas
 
         Args:
             service_id (str): service id
             replicas (int): number of replicas
-            flavor_id (str): hardware standard
 
         Raises:
             Exception: scale_service failed
@@ -198,7 +183,6 @@ class InferenceServiceClient(BaseClient):
             body = {
                 'ServiceID': service_id,
                 'Replicas': replicas,
-                'FlavorID': flavor_id,
                 'ChangeType': change_type
             }
 
@@ -216,17 +200,10 @@ class InferenceServiceClient(BaseClient):
         flavor_id: str,
         model_id: str,
         model_version_id: str,
-        img_url: str,
+        image_id: str,
         envs: list,
         change_type: str,
-        img_description: str = None,
-        img_version: str = None,
-        img_type: str = None,
         service_description: str = None,
-        model_name: str = None,
-        model_version: int = None,
-        model_type: str = None,
-        model_path: str = None,
     ):
         body = {
             'ServiceID': service_id,
@@ -236,29 +213,12 @@ class InferenceServiceClient(BaseClient):
                 'ModelID': model_id,
                 'ModelVersionID': model_version_id,
             },
-            'Image': {
-                'URL': img_url,
-            },
+            'ImageID': image_id,
             'Envs': envs,
             'ChangeType': change_type
         }
         if service_description:
             body.update({'Description': service_description})
-        if model_name:
-            body['Model'].update({'Name': model_name})
-        if model_version:
-            body['Model'].update({'Version': model_version})
-        if model_type:
-            body['Model'].update({'Type': model_type})
-        if model_path:
-            body['Model'].update({'Path': model_path})
-
-        if img_description:
-            body['Image'].update({'Description': img_description})
-        if img_version:
-            body['Image'].update({'Version': img_version})
-        if img_type:
-            body['Image'].update({'Type': img_type})
         try:
             res_json = self.common_json_handler(api='UpdateService', body=body)
             return res_json
@@ -266,10 +226,6 @@ class InferenceServiceClient(BaseClient):
             logging.error('Failed to update service, service_id: %s, error: %s',
                           service_id, e)
             raise Exception('update_service failed') from e
-
-    # TODO
-    def update_service_version_description(self):
-        pass
 
     def get_service(self, service_id: str):
         """get service with given service_id
@@ -292,31 +248,6 @@ class InferenceServiceClient(BaseClient):
                           service_id, e)
             raise Exception('get_service failed') from e
 
-    def list_service_images(self,
-                            model_id: str,
-                            model_version_id: str,
-                            name: str = None,
-                            version: int = None,
-                            service_type: str = None,
-                            path: str = None):
-        body = {'ModelID': model_id, 'ModelVersionID': model_version_id}
-        if name:
-            body.update({'Name': name})
-        if version:
-            body.update({'Version': version})
-        if service_type:
-            body.update({'Type': service_type})
-        if path:
-            body.update({'Path': path})
-
-        try:
-            res_json = self.common_json_handler(api='ListServiceImages',
-                                                body=body)
-            return res_json
-        except Exception as e:
-            logging.error('Failed to list service images, error: %s', e)
-            raise Exception('list_service_images failed') from e
-
     def list_services(self,
                       service_name: str = None,
                       service_name_contains: str = None,
@@ -332,7 +263,7 @@ class InferenceServiceClient(BaseClient):
                                 service name contains given string. Defaults to None.
             offset (int, optional): offset of database. Defaults to 0.
             page_size (int, optional): number of results to fetch. Defaults to 10.
-            sort_by (str, optional): sort by 'ServicelName' or 'CreateTime'. Defaults to 'CreateTime'.
+            sort_by (str, optional): sort by 'ServiceName' or 'CreateTime'. Defaults to 'CreateTime'.
             sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
 
         Raises:
@@ -423,19 +354,19 @@ class InferenceServiceClient(BaseClient):
                 service_id, service_version_id, e)
             raise Exception('rollback_service_version failed') from e
 
-    def list_model_service_instances(self,
+    def list_inference_service_instances(self,
                                      service_id: str,
                                      offset=0,
                                      page_size=10,
                                      sort_by='CreateTime',
                                      sort_order='Descend'):
-        """list models service instances
+        """list service instances
 
         Args:
             service_id (str, optional): The unique ID of Service
             offset (int, optional): offset of service. Defaults to 0.
             page_size (int, optional): number of results to fetch. Defaults to 10.
-            sort_by (str, optional): sort by 'ModelServiceInstanceName' or 'CreateTime'. Defaults to 'CreateTime'.
+            sort_by (str, optional): sort by 'InstanceName' or 'CreateTime'. Defaults to 'CreateTime'.
             sort_order (str, optional): 'Ascend' or 'Descend'. Defaults to 'Descend'.
 
         Raises:
@@ -453,25 +384,25 @@ class InferenceServiceClient(BaseClient):
         }
 
         try:
-            res_json = self.common_json_handler(api='ListModelServiceInstances',
+            res_json = self.common_json_handler(api='ListInferenceServiceInstances',
                                                 body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to list models service instances, service_id: %s, error: %s',
+                'Failed to list inference service instances, service_id: %s, error: %s',
                 service_id, e)
-            raise Exception('list_model_service_instances failed') from e
+            raise Exception('list_inference_service_instances failed') from e
 
-    def get_model_service_instance_status(self, service_id: str,
+    def get_inference_service_instance_status(self, service_id: str,
                                           instance_id_list: list):
-        """get the status of models service instance
+        """get the status of inference service instance
 
         Args:
             service_id (str, required): The unique ID of Service
             offset (list, required): instance id list
 
         Raises:
-            Exception: get models service instance status exception
+            Exception: get service instance status exception
 
         Returns:
             json response
@@ -480,10 +411,10 @@ class InferenceServiceClient(BaseClient):
 
         try:
             res_json = self.common_json_handler(
-                api='GetModelServiceInstanceStatus', body=body)
+                api='GetInferenceServiceInstanceStatus', body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get models service instance status, service_id: %s, error: %s',
+                'Failed to get inference service instance status, service_id: %s, error: %s',
                 service_id, e)
-            raise Exception('get_model_service_instance_status failed') from e
+            raise Exception('get_inference_service_instance_status failed') from e
