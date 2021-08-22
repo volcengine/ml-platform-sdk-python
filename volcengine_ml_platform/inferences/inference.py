@@ -143,7 +143,7 @@ class InferenceService:
         # do not support predict now
 
     def _envs_dict_to_list(self, envs):
-        if envs is list:
+        if isinstance(envs, list):
             return envs
         rvs = []
         for key in envs:
@@ -155,7 +155,7 @@ class InferenceService:
             )
         return rvs
     def _envs_list_to_dict(self, envs):
-        if envs is dict:
+        if isinstance(envs, dict):
             return envs
         rvs = {}
         for item in envs:
