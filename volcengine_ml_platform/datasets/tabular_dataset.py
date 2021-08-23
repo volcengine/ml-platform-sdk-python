@@ -18,7 +18,7 @@ class TabularDataset(_Dataset):
         self.created = True
 
         # count number of lines, not including header line
-        with open(self.tabular_path) as f:
+        with open(self.tabular_path, encoding='utf-8') as f:
             self.data_count = sum(1 for line in f) - 1
 
     def split(self,
@@ -64,10 +64,10 @@ class TabularDataset(_Dataset):
         test_dataset.data_count = math.floor(line_count * (1 - ratio))
         train_dataset.data_count = line_count - test_dataset.data_count
 
-        with open(test_csv_path, 'w') as test_file:
-            with open(train_csv_path, 'w') as train_file:
+        with open(test_csv_path, mode='w', encoding='utf-8') as test_file:
+            with open(train_csv_path, mode='w', encoding='utf-8') as train_file:
                 index = -1
-                with open(self.tabular_path) as input_file:
+                with open(self.tabular_path, encoding='utf-8') as input_file:
                     for line in input_file:
                         # write header
                         if index == -1:

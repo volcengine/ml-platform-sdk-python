@@ -96,12 +96,10 @@ class Model:
                                                   marker=marker,
                                                   max_keys=1000,
                                                   prefix=key)
-            keys = [
-                content['Key'] for content in result.get('Contents', list())
-            ]
+            keys = [content['Key'] for content in result.get('Contents', [])]
             dirs = [
                 content['Prefix']
-                for content in result.get('CommonPrefixes', list())
+                for content in result.get('CommonPrefixes', [])
             ]
 
             for d in tqdm(dirs):
@@ -266,9 +264,7 @@ class Model:
             model_version: int,
             service_name: str,
             flavor: Optional[str] = 'ml.highcpu.large',
-            image_url:
-        Optional[
-            str] = 'cr-stg-cn-beijing.ivolces.com/machinelearning/cuda10:1.0.10',
+            image_url: Optional[str] = 'machinelearning/tfserving:tf-cuda10.1',
             envs=None,
             replica: Optional[int] = 1,
             description: Optional[str] = None) -> InferenceService:

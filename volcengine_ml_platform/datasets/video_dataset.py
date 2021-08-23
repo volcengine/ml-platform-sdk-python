@@ -24,8 +24,9 @@ class VideoDataset(_Dataset):
         self._get_detail()
         manifest_file_path = self._download_file(self._get_storage_path(),
                                                  self.local_path)
-        with open(self._manifest_path(), 'w') as new_manifest_file:
-            with open(manifest_file_path) as f:
+        with open(self._manifest_path(), mode='w',
+                  encoding='utf-8') as new_manifest_file:
+            with open(manifest_file_path, encoding='utf-8') as f:
                 print('Downloading datasets ...')
                 self.data_count = 0
                 for line in tqdm(f):
@@ -83,10 +84,12 @@ class VideoDataset(_Dataset):
             training_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
         test_metadata_path = os.path.join(
             testing_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
-        with open(test_metadata_path, 'w') as testing_manifest_file:
-            with open(train_metadata_path, 'w') as training_manifest_file:
+        with open(test_metadata_path, mode='w',
+                  encoding='utf-8') as testing_manifest_file:
+            with open(train_metadata_path, mode='w',
+                      encoding='utf-8') as training_manifest_file:
                 index = 0
-                with open(self._manifest_path()) as f:
+                with open(self._manifest_path(), encoding='utf-8') as f:
                     for line in f:
                         manifest_line = json.loads(line)
                         if index in test_index_set:

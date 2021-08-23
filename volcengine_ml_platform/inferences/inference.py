@@ -49,7 +49,7 @@ class InferenceService:
             logging.warning('inference models is invalid')
             raise ValueError
         if self.envs is None:
-            self.envs = list()
+            self.envs = []
 
         try:
             self.service_id = self.inference_service_client.create_service(
@@ -89,12 +89,12 @@ class InferenceService:
     def print(self):
         self._sync()
 
-        json_output = dict()
+        json_output = {}
         json_output['service_id'] = self.service_id
         json_output['endpoint_url'] = self.endpoint_url
         json_output['replicas'] = self.replicas
         json_output['service_status'] = self.service_status
-        json_output['models'] = dict()
+        json_output['models'] = {}
         json_output['models']['name'] = self.model_name
         json_output['models']['version'] = self.model_version
         json_output['models']['type'] = self.model_type

@@ -102,7 +102,7 @@ class _Dataset:
             # write response chunks in file
             with requests.get(url, stream=True) as r:
                 r.raise_for_status()
-                with open(file_path, 'wb+') as f:
+                with open(file_path, mode='wb+', encoding='utf-8') as f:
                     for chunk in r.iter_content(chunk_size=chunk_size):
                         f.write(chunk)
         elif parse_result.scheme == 'tos':
@@ -131,7 +131,7 @@ class _Dataset:
         paths = []
         annotations = []
 
-        with open(self._manifest_path()) as f:
+        with open(self._manifest_path(), encoding='utf-8') as f:
             for i, line in enumerate(f):
                 manifest_line = json.loads(line)
                 if i < offset:
