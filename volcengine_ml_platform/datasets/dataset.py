@@ -158,7 +158,8 @@ class _Dataset:
                     mainfest_str += json.dumps(heaplist[0][1]) + "\n"
                     heapq.heappop(heaplist)
 
-        with open(self._manifest_path(), 'w') as new_manifest_file:
+        with open(self._manifest_path(), mode='w',
+                  encoding='utf-8') as new_manifest_file:
             new_manifest_file.write(mainfest_str)
         print("Update the local mainfest file successful")
 
@@ -180,7 +181,7 @@ class _Dataset:
         done = Value("i", 0)
         # use pool to download file and produce new mainfest lines
         p = Pool(self.concurrency_num)
-        with open(manifest_file_path) as f:
+        with open(manifest_file_path, encoding='utf-8') as f:
             for seqNum, line in enumerate(f):
                 manifest_line = json.loads(line)
                 if manifest_keyword in manifest_line['Data']:

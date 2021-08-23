@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import functools
 import logging
 import os
-from threading import local
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
@@ -206,7 +204,7 @@ class Model:
                            sort_order='Descend'):
         if not model_id:
             logging.warning('model_id is empty')
-            return
+            return None
 
         response = self.model_client.list_model_versions(
             model_id=model_id,

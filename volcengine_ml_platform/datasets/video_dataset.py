@@ -4,7 +4,6 @@ import os
 from typing import Optional
 
 import numpy as np
-from tqdm import tqdm
 
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
