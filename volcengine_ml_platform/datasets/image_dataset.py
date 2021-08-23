@@ -6,7 +6,6 @@ from typing import Optional
 
 import numpy as np
 from PIL import Image
-from tqdm import tqdm
 
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
@@ -21,31 +20,7 @@ class ImageDataset(_Dataset):
         Args:
             limit (int, optional): download size. Defaults to -1 (no limit).
         """
-        # download manifest
-        if local_path is not None:
-            self.local_path = local_path
-        self._get_detail()
-        manifest_file_path = self._download_file(self._get_storage_path(),
-                                                 self.local_path)
-        with open(self._manifest_path(), mode='w',
-                  encoding='utf-8') as new_manifest_file:
-            with open(manifest_file_path, encoding='utf-8') as f:
-                print('Downloading datasets ...')
-                self.data_count = 0
-                for line in tqdm(f):
-                    manifest_line = json.loads(line)
-                    if 'ImageURL' in manifest_line['Data']:
-                        manifest_line['Data']['FilePath'] = self._download_file(
-                            manifest_line['Data']['ImageURL'], self.local_path)
-
-                    # create new local metadata file
-                    json.dump(manifest_line, new_manifest_file)
-                    new_manifest_file.write('\n')
-                    self.data_count = self.data_count + 1
-
-                    if self.data_count > limit != -1:
-                        break
-        self.created = True
+        self._create_mainfest_dataset(local_path, "ImageURL")
 
     def split(self,
               training_dir: str,

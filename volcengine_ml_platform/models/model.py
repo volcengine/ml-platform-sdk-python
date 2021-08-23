@@ -107,7 +107,7 @@ class Model:
                                              os.path.relpath(d, prefix) + '/')
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
-                self._download_tos(bucket, d, prefix)
+                self._download_tos(bucket, d, prefix, local_path)
 
             for file in tqdm(keys):
                 dest_pathname = os.path.join(local_path,
@@ -170,8 +170,8 @@ class Model:
         remote_path = response['Result']['VersionInfo']['Path']
 
         self._download_model(remote_path, local_path)
-        logging.info("model {}:{} download finished to {}".format(
-            model_id, model_version, local_path))
+        logging.info("model %s:%s download finished to %s", model_id,
+                     model_version, local_path)
 
     def unregister(self, model_id: str, model_version: int):
         self.model_client.delete_model_version("{}-{}".format(
@@ -264,14 +264,14 @@ class Model:
             model_version: int,
             service_name: str,
             flavor: Optional[str] = 'ml.highcpu.large',
-            image_url: Optional[str] = 'machinelearning/tfserving:tf-cuda10.1',
+            image_id: Optional[str] = 'machinelearning/tfserving:tf-cuda10.1',
             envs=None,
             replica: Optional[int] = 1,
             description: Optional[str] = None) -> InferenceService:
 
         inference_service = InferenceService(
             service_name=service_name,
-            image_url=image_url,
+            image_id=image_id,
             flavor_id=self.model_client.get_unique_flavor(
                 self.resource_client.list_resource(name=flavor,
                                                    sort_by='vCPU')),

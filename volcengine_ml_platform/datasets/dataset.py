@@ -1,15 +1,23 @@
 import json
 import logging
 import os
+import heapq
+import time
+
+from multiprocessing.dummy import Queue, Value, Process
+from multiprocessing.pool import ThreadPool as Pool
 import shutil
 from typing import Optional, Tuple, List
 from urllib.parse import urlparse
-
 import requests
+from tqdm import tqdm
 
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.openapi import dataset_client
 from volcengine_ml_platform.tos import tos
+
+CONCURENCY_NUM = 10
+QUEUE_TIMEOUT_SECONDS = 4
 
 
 def dataset_copy_file(metadata, source_dir, destination_dir):
@@ -18,7 +26,6 @@ def dataset_copy_file(metadata, source_dir, destination_dir):
     target_dir = os.path.join(destination_dir,
                               os.path.relpath(file_dir, start=source_dir))
 
-    # create output file directory
     try:
         os.makedirs(target_dir, exist_ok=True)
     except OSError:
@@ -43,6 +50,8 @@ class _Dataset:
         self.annotation_id = annotation_id
         self.local_path = local_path
         self.tabular_path = None
+        self.dir_record = set()
+        self.concurrency_num = CONCURENCY_NUM
         self.tos_source = tos_source
         self.created = False
         self.data_count = 0
@@ -86,18 +95,25 @@ class _Dataset:
         return os.path.join(self.local_path,
                             constant.DATASET_LOCAL_METADATA_FILENAME)
 
+    def _create_dir(self, dir_path):
+        if dir_path not in self.dir_record:
+            self.dir_record.add(dir_path)
+            try:
+                os.makedirs(dir_path, exist_ok=True)
+            except OSError:
+                logging.warning('Cannot create download directory: %s',
+                                dir_path)
+            logging.info('create download directory: %s', dir_path)
+
+        return dir_path
+
     def _download_file(self, url, target_dir, chunk_size=8192):
         parse_result = urlparse(url)
         file_path = os.path.join(target_dir, parse_result.path[1:])
         dir_path, _ = os.path.split(file_path)
 
-        # create file directory
-        try:
-            os.makedirs(dir_path, exist_ok=True)
-        except OSError:
-            logging.warning('Cannot create download directory: %s', dir_path)
+        self._create_dir(dir_path)
 
-        # download file base on url schemes
         if parse_result.scheme == 'https' or parse_result.scheme == 'http':
             # write response chunks in file
             with requests.get(url, stream=True) as r:
@@ -112,8 +128,80 @@ class _Dataset:
         else:
             logging.warning('Cannot handle url scheme: %s', url)
             raise requests.exceptions.InvalidURL
-
         return file_path
+
+    def _download_producer(self, manifest_line, url, target_dir, seqNum,
+                           res_que):
+        file = self._download_file(url, target_dir)
+        manifest_line["Data"]["FilePath"] = file
+        res_que.put((seqNum, manifest_line))
+
+    def _update_local_mainfest_consumer(self, que, done):
+        mainfest_str = ""
+        heaplist = []
+        orderNum = 0
+        # consume items even producer processes has done
+        with tqdm(total=self.data_count) as pbar:
+            while not que.empty() or done.value == 0:
+                if que.empty():
+                    time.sleep(0.1)
+                    continue
+                try:
+                    heapq.heappush(heaplist,
+                                   que.get(timeout=QUEUE_TIMEOUT_SECONDS))
+                    pbar.update(1)
+                except TimeoutError:
+                    logging.waning(
+                        "fail to catch all files in the mainfest file")
+                while len(heaplist) >= 1 and orderNum == heaplist[0][0]:
+                    orderNum += 1
+                    mainfest_str += json.dumps(heaplist[0][1]) + "\n"
+                    heapq.heappop(heaplist)
+
+        with open(self._manifest_path(), 'w') as new_manifest_file:
+            new_manifest_file.write(mainfest_str)
+        print("Update the local mainfest file successful")
+
+    def _create_mainfest_dataset(self,
+                                 local_path: Optional[str] = None,
+                                 manifest_keyword: Optional[str] = None,
+                                 limit=-1):
+
+        if local_path is not None:
+            self.local_path = local_path
+        print('Downloading the mainfest file ...')
+        self._get_detail()
+        manifest_file_path = self._download_file(self._get_storage_path(),
+                                                 self.local_path)
+
+        print('Downloading datasets ...')
+        self.data_count = 0
+        res_que = Queue()
+        done = Value("i", 0)
+        # use pool to download file and produce new mainfest lines
+        p = Pool(self.concurrency_num)
+        with open(manifest_file_path) as f:
+            for seqNum, line in enumerate(f):
+                manifest_line = json.loads(line)
+                if manifest_keyword in manifest_line['Data']:
+                    p.apply_async(
+                        self._download_producer,
+                        (manifest_line, manifest_line['Data'][manifest_keyword],
+                         self.local_path, seqNum, res_que))
+                self.data_count = self.data_count + 1
+                if limit != -1 and self.data_count > limit:
+                    break
+        p.close()
+
+        # create a new thread to consume new local maifest file
+        print('Generating the local mainfest file...')
+        update = Process(target=self._update_local_mainfest_consumer,
+                         args=(res_que, done))
+        update.start()
+        p.join()
+        done.value = 1
+        update.join()
+        self.created = True
 
     def get_paths(self, offset=0, limit=-1) -> Tuple[List, List]:
         """get filepaths of dataset files

@@ -2,7 +2,6 @@
 
 import json
 import logging
-import time
 from typing import Optional
 
 from volcengine_ml_platform.openapi import inference_service_client
@@ -13,14 +12,10 @@ class InferenceService:
 
     def __init__(self,
                  service_name: str,
-                 image_url: str,
+                 image_id: str,
                  flavor_id: str,
                  model_id: str,
                  model_version_id: str,
-                 model_name: Optional[str],
-                 model_version: Optional[int],
-                 model_path: Optional[str],
-                 model_type: Optional[str],
                  envs=None,
                  replica: Optional[int] = 1,
                  description: Optional[str] = None):
@@ -30,15 +25,15 @@ class InferenceService:
         self.service_version_id = None
         self.endpoint_url = None
         self.replicas = None
-        self.image_url = image_url
+        self.image_id = image_id
         self.flavor_id = flavor_id
-        self.model_name = model_name
         self.model_id = model_id
         self.model_version_id = model_version_id
-        self.model_version = model_version
-        self.model_path = model_path
-        self.model_type = model_type
-        self.envs = envs
+        self.model_version = None
+        self.model_type = None
+        self.model_path = None
+        self.model_name = None
+        self.envs = envs or {}
         self.replica = replica
         self.description = description
         self.inference_service_client = inference_service_client.InferenceServiceClient(
@@ -48,21 +43,16 @@ class InferenceService:
         if self.model_id is None or self.model_version_id is None:
             logging.warning('inference models is invalid')
             raise ValueError
-        if self.envs is None:
-            self.envs = []
 
+        envs = self._envs_dict_to_list(self.envs)
         try:
             self.service_id = self.inference_service_client.create_service(
-                service_name='sdk-create-{}'.format(int(time.time())),
-                image_url=self.image_url,
+                service_name=self.service_name,
+                image_id=self.image_id,
                 flavor_id=self.flavor_id,
-                envs=self.envs,
-                model_name=self.model_name,
-                model_version=self.model_version,
+                envs=envs,
                 model_version_id=self.model_version_id,
                 model_id=self.model_id,
-                model_type=self.model_type,
-                model_path=self.model_path,
                 description=self.description,
                 replica=self.replica)['Result']['ServiceID']
         except Exception as e:
@@ -85,6 +75,8 @@ class InferenceService:
         self.replicas = result['ServiceDeployment']['Replicas']
         self.service_version_id = result['ServiceDeployment'][
             'ServiceVersionID']
+        self.envs = self._envs_list_to_dict(result['ServiceDeployment'].get(
+            'Envs', []))
 
     def print(self):
         self._sync()
@@ -99,6 +91,7 @@ class InferenceService:
         json_output['models']['version'] = self.model_version
         json_output['models']['type'] = self.model_type
         json_output['models']['path'] = self.model_path
+        json_output['envs'] = self.envs
         print(json.dumps(json_output, indent='\t'))
 
     def delete(self):
@@ -136,18 +129,10 @@ class InferenceService:
             logging.warning('Inference failed to start')
             raise Exception('Inference is invalid') from e
 
-    def scale(self,
-              replicas: Optional[int] = None,
-              flavor: Optional[str] = None):
-        flavor_id = None
-        if flavor:
-            flavor_id = self.inference_service_client.get_unique_flavor(
-                self.inference_service_client.list_resource(name=flavor))
+    def scale(self, replicas: Optional[int] = None):
         try:
             self.inference_service_client.scale_service(
-                service_id=self.service_id,
-                replicas=replicas,
-                flavor_id=flavor_id)
+                service_id=self.service_id, replicas=replicas)
             self._sync()
         except Exception as e:
             logging.warning('Inference failed to scale')
@@ -157,3 +142,19 @@ class InferenceService:
     def predict(self, data: Optional[dict] = None):
         self._sync()
         # do not support predict now
+
+    def _envs_dict_to_list(self, envs):
+        if isinstance(envs, list):
+            return envs
+        rvs = []
+        for key in envs:
+            rvs.append({"Name": key, "Value": str(envs[key])})
+        return rvs
+
+    def _envs_list_to_dict(self, envs):
+        if isinstance(envs, dict):
+            return envs
+        rvs = {}
+        for item in envs:
+            rvs[item['Name']] = item['Value']
+        return rvs

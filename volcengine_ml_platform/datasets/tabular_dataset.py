@@ -13,8 +13,9 @@ class TabularDataset(_Dataset):
     def download(self, local_path: Optional[str] = None):
         if local_path is not None:
             self.local_path = local_path
-        self.tabular_path = self._download_file(self._get_storage_path(),
-                                                self.local_path)
+        self.tabular_path = self._download_file(
+            self._get_storage_path(),  # TODO tabular file hasn't storage_path()
+            self.local_path)
         self.created = True
 
         # count number of lines, not including header line
