@@ -18,7 +18,7 @@ _tensor_schema = {
             },
             'required': ['MinShape', 'MaxShape']
         },
-        'Dtype': {
+        'DType': {
             'type':
                 'string',
             'enum': [
@@ -27,7 +27,7 @@ _tensor_schema = {
             ],
         },
     },
-    'required': ['TensorName', 'Shape', 'Dtype']
+    'required': ['TensorName', 'Shape', 'DType']
 }
 
 _model_schema = {
@@ -95,21 +95,21 @@ if __name__ == '__main__':
     conf = {
         "Inputs": [{
             "TensorName": "input_ids_1:0",
-            "Dtype": "INT32",
+            "DType": "INT32",
             "Shape": {
                 "MaxShape": [8, 256],
                 "MinShape": [1, 256]
             }
         }, {
             "TensorName": "input_mask_1:0",
-            "Dtype": "INT32",
+            "DType": "INT32",
             "Shape": {
                 "MaxShape": [8, 256],
                 "MinShape": [1, 256]
             }
         }, {
             "TensorName": "segment_ids_1:0",
-            "Dtype": "INT32",
+            "DType": "INT32",
             "Shape": {
                 "MaxShape": [8, 256],
                 "MinShape": [1, 256]

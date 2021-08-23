@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import functools
 import logging
 import os
+from threading import local
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
@@ -14,94 +16,39 @@ from volcengine_ml_platform.openapi import model_client, resource_client
 from volcengine_ml_platform.tos import tos
 
 
-# TODO 去掉model_version_id
 class Model:
 
-    def __init__(self,
-                 model_id: Optional[str] = None,
-                 local_path: Optional[str] = None):
-        self.model_id = model_id
-        self.model_version = None
-        self.model_version_id = None
-        self.model_name = None
-        self.model_format = None
-        self.model_type = None
-        self.local_path = local_path
-        self.remote_path = None
-        self.tensor_config = None
-        self.model_metrics = None
+    def __init__(self):
         self.tos_client = tos.TOSClient()
         self.model_client = model_client.ModelClient()
         self.resource_client = resource_client.ResourceClient()
-        self.inference_services = dict()
-        if self.model_id is None and self.local_path is None:
-            logging.warning('Model init need model_id or local_path')
-            raise ValueError
-
-    def _sync(self):
-        if self.model_version is None:
-            response = self.model_client.get_model(model_id=self.model_id)
-            self.model_version = response['Result']['VersionInfo'][
-                'ModelVersion']
-            self.model_version_id = response['Result']['VersionInfo'][
-                'ModelVersionID']
-            self.remote_path = response['Result']['VersionInfo']['Path']
-            self.model_name = response['Result']['ModelName']
-            self.model_format = response['Result']['VersionInfo']['ModelFormat']
-            self.model_type = response['Result']['VersionInfo']['ModelType']
-        else:
-            response = self.model_client.list_model_versions(
-                model_id=self.model_id, model_version=self.model_version)
-            if response['Result']['Total'] == 0:
-                logging.warning('Model selected version is not exists')
-                raise ValueError
-            self.model_version = response['Result']['List'][0]['ModelVersion']
-            self.model_version_id = response['Result']['List'][0][
-                'ModelVersionID']
-            self.remote_path = response['Result']['List'][0]['Path']
-            self.model_name = self.model_client.get_model(
-                model_id=self.model_id)['Result']['ModelName']
-            self.model_format = response['Result']['List'][0]['ModelFormat']
-            self.model_type = response['Result']['List'][0]['ModelType']
-
-    def _clear(self):
-        self.model_version = None
-        self.model_version_id = None
-        self.remote_path = None
-
-    def _restore(self):
-        self._clear()
-        self.model_id = None
 
     def _register_validate_and_preprocess(self,
+                                          local_path: str,
+                                          model_id: Optional[str] = None,
                                           model_name: Optional[str] = None,
                                           model_format: Optional[str] = None,
                                           model_type: Optional[str] = None,
                                           tensor_config: Optional[dict] = None,
                                           model_metrics: Optional[list] = None):
-        if self.local_path is None:
+        if local_path is None:
             logging.warning('Model local_path is empty')
             raise ValueError
-        if not os.path.exists(self.local_path):
-            logging.warning('Model local_path is not exists %s',
-                            self.local_path)
+        if not os.path.exists(local_path):
+            logging.warning('Model local_path not exists %s', local_path)
             raise ValueError
-        if self.model_id is None:
+        if model_id is None:
             if model_name is None or model_format is None or model_type is None:
                 logging.warning(
-                    'Model register new models need model_name/model_format/model_type'
+                    'Model register new model need model_name/model_format/model_type'
                 )
                 raise ValueError
-            self.model_version = self.model_client.get_model_next_version(
-                model_id=self.model_id)['Result']['ModelVersion']
         else:
-            self.model_version = self.model_client.get_model_next_version(
-                model_id=self.model_id)['Result']['ModelVersion']
-            self.model_name = self.model_client.get_model(
-                model_id=self.model_id)['Result']['ModelName']
-            if model_name != self.model_name:
+            raw_model_name = self.model_client.get_model(
+                model_id=model_id)['Result']['ModelName']
+            if raw_model_name != model_name:
                 logging.warning(
-                    'models name is diff from origin, use old model_name')
+                    'model name is diff from origin, use old model_name')
         try:
             validation.validate_tensor_config(tensor_config)
         except Exception as e:
@@ -117,30 +64,30 @@ class Model:
             service_name='modelrepo', path=['from-sdk-repo'])
         return response['Result']['Bucket'], response['Result']['KeyPrefix']
 
-    def _upload_tos(self):
+    def _upload_tos(self, local_path) -> str:
         bucket, prefix = self._require_model_tos_storage()
 
-        if os.path.isfile(self.local_path):
-            key = '{}{}'.format(prefix, os.path.basename(self.local_path))
-            self.tos_client.upload_file(self.local_path, bucket, key=key)
+        if os.path.isfile(local_path):
+            key = '{}{}'.format(prefix, os.path.basename(local_path))
+            self.tos_client.upload_file(local_path, bucket, key=key)
 
-        if os.path.isdir(self.local_path):
-            self_prefix = os.path.basename(self.local_path.rstrip('/'))
+        if os.path.isdir(local_path):
+            self_prefix = os.path.basename(local_path.rstrip('/'))
             if self_prefix != '.':
                 prefix = '{}{}/'.format(prefix, self_prefix)
 
-            for root, dirs, files in os.walk(self.local_path):
+            for root, _, files in os.walk(local_path):
                 for file in tqdm(files):
                     file_path = os.path.join(root, file)
-                    rel_path = os.path.relpath(root, self.local_path)
+                    rel_path = os.path.relpath(root, local_path)
                     if rel_path == '.':
                         key = '{}{}'.format(prefix, file)
                     else:
                         key = '{}{}/{}'.format(prefix, rel_path, file)
                     self.tos_client.upload_file(file_path, bucket, key=key)
-        self.remote_path = 'tos://{}/{}'.format(bucket, prefix)
+        return 'tos://{}/{}'.format(bucket, prefix)
 
-    def _download_tos(self, bucket, key, prefix):
+    def _download_tos(self, bucket, key, prefix, local_path):
         marker = ''
         while True:
             result = self.tos_client.list_objects(bucket=bucket,
@@ -158,14 +105,14 @@ class Model:
             ]
 
             for d in tqdm(dirs):
-                dest_pathname = os.path.join(self.local_path,
+                dest_pathname = os.path.join(local_path,
                                              os.path.relpath(d, prefix) + '/')
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
                 self._download_tos(bucket, d, prefix)
 
             for file in tqdm(keys):
-                dest_pathname = os.path.join(self.local_path,
+                dest_pathname = os.path.join(local_path,
                                              os.path.relpath(file, prefix))
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
@@ -179,161 +126,213 @@ class Model:
                 continue
             break
 
-    def _download_model(self):
-        if self.remote_path is None or self.model_version is None:
-            logging.info('Model remote_path is empty, need sync')
-            self._sync()
-
-        parse_url = urlparse(self.remote_path)
+    def _download_model(self, remote_path, local_path):
+        parse_url = urlparse(remote_path)
         scheme = parse_url.scheme
         if scheme == 'tos':
             bucket = parse_url.hostname
             key = parse_url.path.lstrip('/')
-            self._download_tos(bucket, key, key)
+            self._download_tos(bucket, key, key, local_path)
         else:
-            logging.warning('unsupported remote_path, %s', self.remote_path)
+            logging.warning('unsupported remote_path, %s', remote_path)
 
     def register(self,
+                 local_path: str,
+                 model_id: Optional[str] = None,
                  model_name: Optional[str] = None,
                  model_format: Optional[str] = None,
                  model_type: Optional[str] = None,
                  description: Optional[str] = None,
                  tensor_config: Optional[dict] = None,
                  model_metrics: Optional[list] = None):
-        self.model_name = model_name
-        self.model_format = model_format
-        self.model_type = model_type
-        self.tensor_config = tensor_config
-        self.model_metrics = model_metrics
-        try:
-            self._register_validate_and_preprocess(model_name, model_format,
-                                                   model_type, tensor_config,
-                                                   model_metrics)
-            self._upload_tos()
-            response = self.model_client.create_model(
-                model_name=self.model_name,
-                model_format=self.model_format,
-                model_type=self.model_type,
-                model_id=self.model_id,
-                path=self.remote_path,
-                description=description,
-                tensor_config=tensor_config,
-                model_metrics=model_metrics)
-            self.model_version = response['Result']['ModelVersion']
-            self.model_id = response['Result']['ModelID']
-        except Exception as e:
-            logging.warning('Model failed to register')
-            raise Exception('Model is invalid') from e
+
+        self._register_validate_and_preprocess(local_path, model_id, model_name,
+                                               model_format, model_type,
+                                               tensor_config, model_metrics)
+        tos_path = self._upload_tos(local_path)
+        return self.model_client.create_model(model_name=model_name,
+                                              model_format=model_format,
+                                              model_type=model_type,
+                                              model_id=model_id,
+                                              path=tos_path,
+                                              description=description,
+                                              tensor_config=tensor_config,
+                                              model_metrics=model_metrics)
 
     def download(self,
-                 model_version: Optional[int] = None,
+                 model_id: str,
+                 model_version: int,
                  local_path: Optional[str] = None):
-        if local_path:
-            self.local_path = local_path
-        if model_version:
-            self.model_version = model_version
-        if self.model_id is None:
+        if not model_id:
             logging.warning('Model can not be download, model_id is empty')
             raise ValueError
-        self._sync()
 
-        try:
-            self._download_model()
-        except Exception as e:
-            logging.warning('Model failed to download')
-            raise Exception('Model is invalid') from e
+        response = self.model_client.get_model_version("{}-{}".format(
+            model_id, model_version))
+        remote_path = response['Result']['VersionInfo']['Path']
 
-    def unregister(self):
-        if self.model_id is None:
-            logging.warning('Model has not been registered')
+        self._download_model(remote_path, local_path)
+        logging.info("model {}:{} download finished to {}".format(
+            model_id, model_version, local_path))
+
+    def unregister(self, model_id: str, model_version: int):
+        self.model_client.delete_model_version("{}-{}".format(
+            model_id, model_version))
+
+    def unregister_all_versions(self, model_id: str):
+        if not model_id:
+            logging.warning('model_id is empty')
             return
 
-        self._sync()
-        try:
-            self.model_client.delete_model_version(
-                model_version_id=self.model_version_id)
-        except Exception as e:
-            logging.warning('Model failed to unregister')
-            raise Exception('Model is invalid') from e
-        self._clear()
+        self.model_client.delete_model(model_id=model_id)
 
-    def unregister_all_versions(self):
-        if self.model_id is None:
-            logging.warning('Model has been registered')
+    def list_models(self,
+                    model_name_contains=None,
+                    offset=0,
+                    page_size=10,
+                    sort_by='CreateTime',
+                    sort_order='Descend'):
+        return self.model_client.list_models(
+            model_name_contains=model_name_contains,
+            offset=offset,
+            page_size=page_size,
+            sort_by=sort_by,
+            sort_order=sort_order)
+
+    def get_model_versions(self,
+                           model_id: str,
+                           model_version: int = None,
+                           offset=0,
+                           page_size=10,
+                           sort_by='CreateTime',
+                           sort_order='Descend'):
+        if not model_id:
+            logging.warning('model_id is empty')
             return
-        try:
-            self.model_client.delete_model(model_id=self.model_id)
-        except Exception as e:
-            logging.warning('Model failed to unregister all versions')
-            raise Exception('Model is invalid') from e
-        self._restore()
 
-    def print(self):
-        if self.model_id is None:
-            logging.warning('Model has not been registered')
-            raise ValueError
-
-        try:
-            response = self.model_client.list_model_versions(
-                model_id=self.model_id, page_size=20)
-            table = PrettyTable([
-                'ID', 'Version', 'Format', 'Type', 'RemotePath', 'Description',
-                'CreateTime'
+        response = self.model_client.list_model_versions(
+            model_id=model_id,
+            model_version=model_version,
+            offset=offset,
+            page_size=page_size,
+            sort_by=sort_by,
+            sort_order=sort_order)
+        table = PrettyTable([
+            'ModelID', 'Version', 'Format', 'Type', 'RemotePath', 'Description',
+            'CreateTime'
+        ])
+        for model in response['Result']['List']:
+            table.add_row([
+                model_id, model['ModelVersion'], model['ModelFormat'],
+                model['ModelType'], model['Path'], model['Description'],
+                model['CreateTime']
             ])
-            for model in response['Result']['List']:
-                table.add_row([
-                    model['ModelVersionID'], model['ModelVersion'],
-                    model['ModelFormat'], model['ModelType'], model['Path'],
-                    model['Description'], model['CreateTime']
-                ])
-            print(table)
+        print(table)
+        return response
+
+    def update_model(
+        self,
+        model_id: str,
+        model_name: str = None,
+    ):
+        return self.model_client.update_model(model_id=model_id,
+                                              model_name=model_name)
+
+    def update_model_version(self,
+                             model_id: str,
+                             model_version: int,
+                             description: Optional[str] = None,
+                             tensor_config: Optional[dict] = None,
+                             model_metrics: Optional[list] = None):
+        try:
+            validation.validate_tensor_config(tensor_config)
         except Exception as e:
-            logging.warning('Model failed to explain')
-            raise Exception('Model is invalid') from e
+            raise Exception('Invalid tensor config.') from e
+
+        try:
+            validation.validate_metrics(model_metrics)
+        except Exception as e:
+            raise Exception('Invalid models metrics.') from e
+
+        return self.model_client.update_model_version(
+            model_version_id="{}-{}".format(model_id, model_version),
+            description=description,
+            tensor_config=tensor_config,
+            model_metrics=model_metrics)
 
     def deploy(
             self,
-            force: Optional[bool] = False,
+            model_id: str,
+            model_version: int,
+            service_name: str,
             flavor: Optional[str] = 'ml.highcpu.large',
             image_url:
         Optional[
             str] = 'cr-stg-cn-beijing.ivolces.com/machinelearning/cuda10:1.0.10',
-            model_version: Optional[int] = None,
             envs=None,
             replica: Optional[int] = 1,
             description: Optional[str] = None) -> InferenceService:
-        if model_version:
-            self.model_version = model_version
-        self._sync()
-
-        if self.model_version in self.inference_services.keys():
-            if not force:
-                logging.warning('models has been deployed')
-                return self.inference_services[self.model_version]
-            logging.warning(
-                'models deploy force, the old inference_service will lost')
 
         inference_service = InferenceService(
-            service_name=self.model_name,
+            service_name=service_name,
             image_url=image_url,
             flavor_id=self.model_client.get_unique_flavor(
                 self.resource_client.list_resource(name=flavor,
                                                    sort_by='vCPU')),
-            model_name=self.model_name,
-            model_id=self.model_id,
-            model_version_id=self.model_version_id,
-            model_version=self.model_version,
-            model_path=self.remote_path,
-            model_type=self.model_type,
+            model_id=model_id,
+            model_version_id="{}-{}".format(model_id, model_version),
             envs=envs,
             replica=replica,
             description=description)
         inference_service.create()
-        self.inference_services.update({self.model_version: inference_service})
         return inference_service
 
-    def undeploy(self):
-        if self.model_version in self.inference_services.keys():
-            self.inference_services[self.model_version].stop()
-        else:
-            logging.warning('models has not been deployed')
+    def create_perf_job(self, model_id: str, model_version: int,
+                        tensor_config: dict, job_type: str, job_params: list):
+
+        return self.model_client.create_perf_job(
+            model_version_id="{}-{}".format(model_id, model_version),
+            tensor_config=tensor_config,
+            job_type=job_type,
+            job_params=job_params)
+
+    def list_perf_jobs(self,
+                       model_id=None,
+                       model_version=None,
+                       job_id=None,
+                       offset=0,
+                       page_size=10,
+                       sort_by='CreateTime',
+                       sort_order='Descend'):
+        model_version_id = "{}-{}".format(model_id, model_version)
+        return self.model_client.list_perf_jobs(
+            model_version_id=model_version_id,
+            job_id=job_id,
+            offset=offset,
+            page_size=page_size,
+            sort_by=sort_by,
+            sort_order=sort_order)
+
+    def cancel_perf_job(self, job_id: str):
+        return self.model_client.cancel_perf_job(job_id=job_id)
+
+    def list_perf_tasks(self,
+                        task_id=None,
+                        job_id=None,
+                        offset=0,
+                        page_size=10,
+                        sort_by='CreateTime',
+                        sort_order='Descend'):
+        return self.model_client.list_perf_tasks(task_id=task_id,
+                                                 job_id=job_id,
+                                                 offset=offset,
+                                                 page_size=page_size,
+                                                 sort_by=sort_by,
+                                                 sort_order=sort_order)
+
+    def update_perf_task(self, task_id: str, task_status=None):
+        return self.model_client.update_perf_task(task_id=task_id,
+                                                  task_status=task_status)
+
+    def calcel_perf_task(self, task_id: str):
+        return self.model_client.cancel_perf_task(task_id=task_id)

@@ -15,6 +15,7 @@ SERVICE_HOSTS = {
 TOS_REGION_ENDPOINT_URLS = {
     BOE_ENV: {
         'cn-north-1': 'http://boe-s3-official-test.volces.com',
+        'cn-north-4': 'http://boe-s3-official-test.volces.com',
     },
     PROD_ENV: {
         'cn-qingdao': 'http://tos-s3-cn-qingdao.volces.com',
