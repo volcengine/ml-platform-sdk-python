@@ -3,30 +3,32 @@
 import argparse
 import os
 import re
+import sys
 
 import numpy as np
 import tensorflow as tf
 
-from samples.models.swin_transformer import SwinTransformer
+sys.path.append("../..")
+from samples.models.swin_transformer_tensorflow import SwinTransformer
 from volcengine_ml_platform.models.model import Model
 from volcengine_ml_platform.tos import tos
 from volcengine_ml_platform.util import metric, cache_dir
+from volcengine_ml_platform import constant
 
-try:
-    from samples import env
-
-    env.init()
-except ImportError or AttributeError:
-    pass
-
-CACHE_DIR = cache_dir.create("flower_classification/swin_transformer")
+BUCKET = constant.get_public_examples_readonly_bucket()
+CACHE_DIR = cache_dir.create("flower_classification/swin_transformer_tf")
 
 AUTO = tf.data.experimental.AUTOTUNE
 
-DATASET_PATH = 's3://tfrecord/flower-classification-with-tpus/tfrecords-jpeg-224x224'
+client = tos.TOSClient()
+DATASET_PATH = 's3://{}/flower-classification/tfrecords/tfrecords-jpeg-224x224'.format(
+    BUCKET)
 TRAINING_FILENAMES = tf.io.gfile.glob(DATASET_PATH + '/train/*.tfrec')
 VALIDATION_FILENAMES = tf.io.gfile.glob(DATASET_PATH + '/val/*.tfrec')
 TEST_FILENAMES = tf.io.gfile.glob(DATASET_PATH + '/test/*.tfrec')
+
+CHECKPOINT_PATH = 's3://{}/flower-classification/checkpoints/tf/cp.ckpt'.format(
+    BUCKET)
 
 CLASSES = [
     'pink primrose',
@@ -261,17 +263,11 @@ def download_pretrained_ckpt_from_tos():
     file_name = "swin_tiny_224.tar.gz"
     dst_path = CACHE_DIR.subpath(file_name)
     tos_client.download_file(file_path=dst_path,
-                             bucket="tfrecord",
-                             key=file_name)
-    pretrained_ckpt = tf.keras.utils.get_file(file_name,
-                                              "",
-                                              extract=True,
-                                              cache_dir=CACHE_DIR.root,
-                                              cache_subdir='')
-    print(
-        "time-cost(ms)={}, finish dowload pretrain_ckpt from tos, and extract to {}"
-        .format(metric.cost_time(start_time), pretrained_ckpt))
-    return pretrained_ckpt
+                             bucket=BUCKET,
+                             key='flower-classification/swin_tiny_224.tar.gz')
+    print("time-cost(ms)={}, finish dowload pretrain_ckpt from tos".format(
+        metric.cost_time(start_time)))
+    return CACHE_DIR.get_root_path()
 
 
 if __name__ == '__main__':
@@ -287,19 +283,27 @@ if __name__ == '__main__':
                         help='number of epochs to train')
     parser.add_argument('--steps-per-epoch',
                         type=int,
-                        help='number of epochs to train')
+                        help='number of steps per epoch to train')
     parser.add_argument('--validation-steps',
                         type=int,
-                        help='number of epochs to train')
+                        help='number of validation steps per epoch to train')
+    parser.add_argument('--strategy',
+                        type=str,
+                        default="mirrored",
+                        help='number of validation steps per epoch to train')
+    parser.add_argument('--checkpoint',
+                        type=str,
+                        help='the path to load checkpoints')
 
     args = parser.parse_args()
 
-    # detect GPUs
-    strategy = tf.distribute.MirroredStrategy()  # for GPU or multi-GPU machines
-    # strategy = tf.distribute.get_strategy()
-    # default strategy that works on CPU and single GPU
-    # strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
-    # # for clusters of multi-GPU machines
+    # select a strategy
+    if args.strategy == "default":
+        strategy = tf.distribute.get_strategy(
+        )  # default strategy that works on CPU and single GPU
+    elif args.strategy == "mirrored":
+        strategy = tf.distribute.MirroredStrategy(
+        )  # for GPU or multi-GPU machines
     print("Number of accelerators: ", strategy.num_replicas_in_sync)
 
     IMAGE_SIZE = [224, 224
@@ -328,12 +332,16 @@ if __name__ == '__main__':
         pretrained_model = SwinTransformer('swin_tiny_224',
                                            num_classes=len(CLASSES),
                                            include_top=False,
-                                           pretrained_ckpt=pretrained_ckpt_path)
+                                           cache_dir=pretrained_ckpt_path)
 
         model = tf.keras.Sequential([
             img_adjust_layer, pretrained_model,
             tf.keras.layers.Dense(len(CLASSES), activation='softmax')
         ])
+
+        if args.checkpoint is not None:
+            model.load_weights(args.checkpoint)
+            print("load checkpoint successfully")
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5,
                                                      epsilon=1e-8),
@@ -341,12 +349,18 @@ if __name__ == '__main__':
                   metrics=['sparse_categorical_accuracy'])
     model.summary()
 
+    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=CHECKPOINT_PATH, save_weights_only=True, verbose=1)
+
     # tensorboard
     log_dir = os.getenv("TENSORBOARD_LOG_PATH",
-                        CACHE_DIR.subpath("tensorboard_logs"))
-    tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
-                                                 write_images=False,
-                                                 histogram_freq=1)
+                        default=os.path.join(os.path.dirname(__file__),
+                                             "tensorboard_logs"))
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
+                                                          write_images=False,
+                                                          histogram_freq=1)
+
+    callbacks = [model_checkpoint_callback, tensorboard_callback]
 
     # train models
     HISTORY = model.fit(get_training_dataset(),
@@ -354,7 +368,7 @@ if __name__ == '__main__':
                         epochs=EPOCHS,
                         validation_data=get_validation_dataset(),
                         validation_steps=VALIDATION_STEPS,
-                        callbacks=[tb_callback])
+                        callbacks=callbacks)
 
     SAVED_MODEL_PATH = CACHE_DIR.subpath("tf_saved_model")
     model.save(SAVED_MODEL_PATH)
@@ -370,9 +384,9 @@ if __name__ == '__main__':
     model.print()
 
     # deploy the selected model_version
-    inference_service = model.deploy(
-        flavor='ml.highcpu.large',
-        replica=1,
-        model_version=1,
-        image_url=
-        "cr-stg-cn-beijing.volces.com/machinelearning/tfserving:tf-cuda11.0")
+    # inference_service = model.deploy(
+    #     flavor='ml.highcpu.large',
+    #     replica=1,
+    #     model_version=1,
+    #     image_url=
+    #     "cr-stg-cn-beijing.volces.com/machinelearning/tfserving:tf-cuda11.0")
