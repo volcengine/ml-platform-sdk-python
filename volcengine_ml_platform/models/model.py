@@ -295,9 +295,9 @@ class Model:
             self,
             force: Optional[bool] = False,
             flavor: Optional[str] = 'ml.highcpu.large',
-            image_url:
+            image_id:
         Optional[
-            str] = 'cr-stg-cn-beijing.ivolces.com/machinelearning/cuda10:1.0.10',
+            str] = 'machinelearning/cuda10:1.0.10',
             model_version: Optional[int] = None,
             envs=None,
             replica: Optional[int] = 1,
@@ -315,16 +315,12 @@ class Model:
 
         inference_service = InferenceService(
             service_name=self.model_name,
-            image_url=image_url,
+            image_id=image_id,
             flavor_id=self.model_client.get_unique_flavor(
                 self.resource_client.list_resource(name=flavor,
                                                    sort_by='vCPU')),
-            model_name=self.model_name,
             model_id=self.model_id,
             model_version_id=self.model_version_id,
-            model_version=self.model_version,
-            model_path=self.remote_path,
-            model_type=self.model_type,
             envs=envs,
             replica=replica,
             description=description)
