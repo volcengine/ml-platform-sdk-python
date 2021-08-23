@@ -23,7 +23,11 @@ TOS_REGION_ENDPOINT_URLS = {
     }
 }
 
-PUBLIC_EXAMPLES_TOS_BUCKET = "mlplatform-public-examples"
+PUBLIC_EXAMPLES_TOS_REGION = "cn-beijing"
+PUBLIC_EXAMPLES_TOS_BUCKET = 'mlplatform-public-examples-{}'.format(PUBLIC_EXAMPLES_TOS_REGION)
 
 DATASET_LOCAL_METADATA_FILENAME = 'local_metadata.manifest'
 ENCRYPTED_KEY_ENV_NAME = 'ENCRYPTED_KEY'
+
+def get_public_examples_readonly_bucket():
+    return PUBLIC_EXAMPLES_TOS_BUCKET

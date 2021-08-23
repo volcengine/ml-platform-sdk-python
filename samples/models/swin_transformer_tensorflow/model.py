@@ -198,7 +198,7 @@ def drop_path(inputs, drop_prob, is_training):
     # (tf.experimental.numpy.ndim(inputs) - 1)
 
     shape = (tf.shape(inputs)[0],) + (1,) * \
-       (tf.experimental.numpy.ndim(inputs) - 1)
+            (tf.experimental.numpy.ndim(inputs) - 1)
 
     random_tensor += tf.random.uniform(shape, dtype=inputs.dtype)
     binary_tensor = tf.floor(random_tensor)
@@ -587,7 +587,7 @@ class SwinTransformerModel(tf.keras.Model):
 
 
 def SwinTransformer(model_name='swin_tiny_224',
-                    pretrained_ckpt=None,
+                    cache_dir=None,
                     num_classes=1000,
                     include_top=True,
                     pretrained=True,
@@ -605,7 +605,11 @@ def SwinTransformer(model_name='swin_tiny_224',
     net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], 3)))
     if pretrained is True:
         url = f'https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/{model_name}.tgz'
-        pretrained_ckpt = tf.keras.utils.get_file(model_name, url, untar=True)
+        pretrained_ckpt = tf.keras.utils.get_file(model_name,
+                                                  url,
+                                                  untar=True,
+                                                  cache_dir=cache_dir,
+                                                  cache_subdir='')
     else:
         pretrained_ckpt = pretrained
 
