@@ -9,7 +9,7 @@ def get_annotation_section(annotation_line):
 
 def get_content(annotation_line):
     data = annotation_line['Data']
-    with open(data['FilePath'], 'rb') as fd:
+    with open(data['FilePath'], mode='rb', encoding='utf-8') as fd:
         content = fd.read()
         return content
 
@@ -83,7 +83,7 @@ class Annotation:
         return labels
 
     def _build_label_index(self):
-        with open(self.manifest_file) as fd:
+        with open(self.manifest_file, encoding='utf-8') as fd:
             for manifest_line in fd:
                 manifest_data = json.loads(manifest_line.strip('\n'))
                 self.annotation_data.append(manifest_data)

@@ -113,7 +113,7 @@ class TOSClient:
             key = file_path
         # if file size <= 25MB, upload single file
         if file_size <= part_size + threshold:
-            with open(file_path, 'rb') as file:
+            with open(file_path, mode='rb', encoding='utf-8') as file:
                 self.s3_client.upload_fileobj(file, bucket, key)
         # otherwise
         else:
@@ -131,7 +131,7 @@ class TOSClient:
 
             upload_id = rsp["UploadId"]
             uploaded_parts = {'Parts': []}
-            with open(file_path, 'rb') as file:
+            with open(file_path, mode='rb', encoding='utf-8') as file:
                 # upload parts
                 for i in range(1, part_number + 1):
                     read_size = min(part_size, file_size - (i - 1) * part_size)

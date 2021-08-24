@@ -56,8 +56,8 @@ class BaseClient(Service):
 
     def common_json_handler(self, api, body):
         start_time = metric.current_ts()
-        params = dict()
-        res_json = dict()
+        params = {}
+        res_json = {}
         try:
             body = json.dumps(body)
             res_json = self.json2(api, params, body)

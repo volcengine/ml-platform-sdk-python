@@ -73,18 +73,20 @@ class InferenceService:
         self.service_status = result['ServiceDeployment']['Status']
         self.endpoint_url = result['ServiceDeployment']['EndpointURL']
         self.replicas = result['ServiceDeployment']['Replicas']
-        self.service_version_id = result['ServiceDeployment']['ServiceVersionID']
-        self.envs = self._envs_list_to_dict(result['ServiceDeployment']['Envs'] or [])
+        self.service_version_id = result['ServiceDeployment'][
+            'ServiceVersionID']
+        self.envs = self._envs_list_to_dict(result['ServiceDeployment'].get(
+            'Envs', []))
 
     def print(self):
         self._sync()
 
-        json_output = dict()
+        json_output = {}
         json_output['service_id'] = self.service_id
         json_output['endpoint_url'] = self.endpoint_url
         json_output['replicas'] = self.replicas
         json_output['service_status'] = self.service_status
-        json_output['models'] = dict()
+        json_output['models'] = {}
         json_output['models']['name'] = self.model_name
         json_output['models']['version'] = self.model_version
         json_output['models']['type'] = self.model_type
@@ -130,8 +132,7 @@ class InferenceService:
     def scale(self, replicas: Optional[int] = None):
         try:
             self.inference_service_client.scale_service(
-                service_id=self.service_id,
-                replicas=replicas)
+                service_id=self.service_id, replicas=replicas)
             self._sync()
         except Exception as e:
             logging.warning('Inference failed to scale')
@@ -147,13 +148,9 @@ class InferenceService:
             return envs
         rvs = []
         for key in envs:
-            rvs.append(
-                {
-                    "Name": key,
-                    "Value": str(envs[key])
-                }
-            )
+            rvs.append({"Name": key, "Value": str(envs[key])})
         return rvs
+
     def _envs_list_to_dict(self, envs):
         if isinstance(envs, dict):
             return envs

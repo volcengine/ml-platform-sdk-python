@@ -355,11 +355,11 @@ class InferenceServiceClient(BaseClient):
             raise Exception('rollback_service_version failed') from e
 
     def list_inference_service_instances(self,
-                                     service_id: str,
-                                     offset=0,
-                                     page_size=10,
-                                     sort_by='CreateTime',
-                                     sort_order='Descend'):
+                                         service_id: str,
+                                         offset=0,
+                                         page_size=10,
+                                         sort_by='CreateTime',
+                                         sort_order='Descend'):
         """list service instances
 
         Args:
@@ -384,8 +384,8 @@ class InferenceServiceClient(BaseClient):
         }
 
         try:
-            res_json = self.common_json_handler(api='ListInferenceServiceInstances',
-                                                body=body)
+            res_json = self.common_json_handler(
+                api='ListInferenceServiceInstances', body=body)
             return res_json
         except Exception as e:
             logging.error(
@@ -394,7 +394,7 @@ class InferenceServiceClient(BaseClient):
             raise Exception('list_inference_service_instances failed') from e
 
     def get_inference_service_instance_status(self, service_id: str,
-                                          instance_id_list: list):
+                                              instance_id_list: list):
         """get the status of inference service instance
 
         Args:
@@ -417,4 +417,5 @@ class InferenceServiceClient(BaseClient):
             logging.error(
                 'Failed to get inference service instance status, service_id: %s, error: %s',
                 service_id, e)
-            raise Exception('get_inference_service_instance_status failed') from e
+            raise Exception(
+                'get_inference_service_instance_status failed') from e

@@ -56,7 +56,7 @@ class EnvHolder:
         if os.environ.get('HOME', None) is not None:
             path = os.environ['HOME'] + '/.volc/config'
             if os.path.isfile(path):
-                with open(path, 'r') as f:
+                with open(path, mode='r', encoding='utf-8') as f:
                     conf = json.load(f)
 
         final_ak = cls.pickup_non_blank_value(

@@ -4,7 +4,6 @@ import os
 from typing import Optional
 
 import numpy as np
-from tqdm import tqdm
 
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
@@ -60,10 +59,12 @@ class VideoDataset(_Dataset):
             training_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
         test_metadata_path = os.path.join(
             testing_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
-        with open(test_metadata_path, 'w') as testing_manifest_file:
-            with open(train_metadata_path, 'w') as training_manifest_file:
+        with open(test_metadata_path, mode='w',
+                  encoding='utf-8') as testing_manifest_file:
+            with open(train_metadata_path, mode='w',
+                      encoding='utf-8') as training_manifest_file:
                 index = 0
-                with open(self._manifest_path()) as f:
+                with open(self._manifest_path(), encoding='utf-8') as f:
                     for line in f:
                         manifest_line = json.loads(line)
                         if index in test_index_set:
