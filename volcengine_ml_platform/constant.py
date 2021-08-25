@@ -12,6 +12,11 @@ SERVICE_HOSTS = {
     PROD_ENV: 'open.volcengineapi.com'
 }
 
+SERVICE_DIRECT_HOSTS = {
+    BOE_ENV: '10.228.109.27:30008',
+    PROD_ENV: '10.228.109.27:30018'
+}
+
 TOS_REGION_ENDPOINT_URLS = {
     BOE_ENV: {
         'cn-north-1': 'http://boe-s3-official-test.volces.com',
