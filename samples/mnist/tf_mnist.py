@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 
 import numpy as np
 import tensorflow as tf
@@ -9,6 +10,7 @@ from volcengine_ml_platform.util import metric, cache_dir
 
 try:
     from samples import env
+
     env.init()
 except Exception:
     pass
@@ -57,7 +59,12 @@ def main():
                   metrics=['accuracy'])
     model.summary()
 
-    model.fit(x_train, y_train, epochs=5)
+    log_dir = os.getenv("TENSORBOARD_LOG_PATH", "/tmp/tensorboard_logs/")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
+                                                          write_images=False,
+                                                          histogram_freq=1)
+
+    model.fit(x_train, y_train, epochs=5, callbacks=[tensorboard_callback])
 
     model.evaluate(x_test, y_test, verbose=2)
 
@@ -66,3 +73,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print("finish model training")
