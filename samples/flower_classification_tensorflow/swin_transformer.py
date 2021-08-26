@@ -384,9 +384,9 @@ if __name__ == '__main__':
     model.print()
 
     # deploy the selected model_version
-    # inference_service = model.deploy(
-    #     flavor='ml.highcpu.large',
-    #     replica=1,
-    #     model_version=1,
-    #     image_url=
-    #     "cr-stg-cn-beijing.volces.com/machinelearning/tfserving:tf-cuda11.0")
+    inference_service = model.deploy(
+        flavor='ml.highcpu.large',
+        replica=1,
+        model_version=1,
+        image_id=
+        "machinelearning/tfserving:tf-cuda11.0")
