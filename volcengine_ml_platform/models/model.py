@@ -165,7 +165,7 @@ class Model:
 
         response = self.model_client.get_model_version("{}-{}".format(
             model_id, model_version))
-        remote_path = response['Result']['VersionInfo']['Path']
+        remote_path = response['Result']['Path']
 
         self._download_model(remote_path, local_path)
         logging.info("model %s:%s download finished to %s", model_id,
