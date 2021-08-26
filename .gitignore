@@ -85,3 +85,4 @@ pylintrc.test
 
 samples/env.py
 tests/env.py
+/testdata

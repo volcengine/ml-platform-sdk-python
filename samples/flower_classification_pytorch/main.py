@@ -130,7 +130,7 @@ def get_manifest(url, file_path):
     key = parse_result.path[1:]
 
     tos_client = tos.TOSClient()
-    tos_client.download_file(file_path, bucket, key)
+    tos_client.download_file( bucket, key, file_path)
 
     with open(file_path, "r", encoding="utf-8") as f:
         manifest_info = json.load(f)
