@@ -388,5 +388,4 @@ if __name__ == '__main__':
         flavor='ml.highcpu.large',
         replica=1,
         model_version=1,
-        image_id=
-        "machinelearning/tfserving:tf-cuda11.0")
+        image_id="machinelearning/tfserving:tf-cuda11.0")

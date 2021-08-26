@@ -10,15 +10,14 @@ setup_requires = ['setuptools>=41.0.0']
 
 install_requires = [
     'volcengine>=1.0.19',
-    'boto3>=1.18.0',
+    'boto3>=1.18.29',
     'requests>=2.18.0',
     'six>=1.11.0',
     'Pillow>=4.0.0',
     'numpy>=1.14.0',
     'jsonschema>=3.0.0',
     'tqdm>=4.19.2',
-    'prettytable>=2.0.0',
-    'thrift',
+    'prettytable>=2.0.0'
 ]
 
 pytorch_requires = ['torch==1.8.0']

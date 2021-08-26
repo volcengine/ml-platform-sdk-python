@@ -79,7 +79,7 @@ class EnvHolder:
             os.environ.get('VOLC_ML_PLATFORM_ENV', None),
             ml_platform_conf.get("env", None), env_name)
 
-        if final_env_name is not None:
+        if final_env_name is not None and len(final_env_name) > 0:
             EnvHolder.ENV_NAME = final_env_name
         cls.GLOBAL_CREDENTIALS = Credentials.Credentials(
             ak=final_ak,
@@ -103,4 +103,4 @@ class EnvHolder:
         for arg in args:
             if arg is not None and len(arg.strip()) > 0:
                 return arg.strip()
-        return None
+        return ""
