@@ -1,9 +1,9 @@
+import logging
 import os
 import random
+import re
 import string
 import time
-import re
-import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -14,7 +14,7 @@ from volcengine_ml_platform.tos.tos import TOSClient
 test_upload_number = 10
 benchmark_upload_number = 50000
 
-bucket_prefix = "mlplatform-test-dataset-"
+bucket_prefix = 'mlplatform-test-dataset-'
 
 
 def test_create_dataset(tmp_path):
@@ -22,7 +22,7 @@ def test_create_dataset(tmp_path):
     upload_file_number = test_upload_number
     checkout_file_number = upload_file_number + 2
 
-    bucket = "mlplatform-test-dataset-" + genRandonString(20)
+    bucket = 'mlplatform-test-dataset-' + genRandonString(20)
     pic = Path('./tests/testdata/origin.jpg')
 
     # upload resource
@@ -33,28 +33,29 @@ def test_create_dataset(tmp_path):
     assert tos_cli.bucket_exists(bucket)
 
     for i in range(upload_file_number):
-        tos_cli.upload_file(str(pic), bucket, "origin{}.jpg".format(i))
-    url = "tos://" + bucket
+        tos_cli.upload_file(str(pic), bucket, f'origin{i}.jpg')
+    url = 'tos://' + bucket
 
     # create a dataset
     api_cli = DataSetClient()
-    dataset = "test-image-dataset-auto-" + genRandonString(5)
+    dataset = 'test-image-dataset-auto-' + genRandonString(5)
     request = {
-        "Name":
+        'Name':
             dataset,
-        "DataType":
-            "Image",
-        "AnnotationTemplate":
-            "ImageClassification",
-        "GenerationMode":
-            "Folder",
-        "Description":
-            "created by python sdk {}".format(
-                datetime.now().strftime("%Y %H:%M:%S")),
-        "SourcePath":
+        'DataType':
+            'Image',
+        'AnnotationTemplate':
+            'ImageClassification',
+        'GenerationMode':
+            'Folder',
+        'Description':
+            'created by python sdk {}'.format(
+                datetime.now().strftime('%Y %H:%M:%S'),
+            ),
+        'SourcePath':
             url,
-        "StorageType":
-            "TOS"
+        'StorageType':
+            'TOS',
     }
     resp = api_cli.create_dataset(body=request)
     dataset_id = resp['Result']['DatasetID']
@@ -71,10 +72,10 @@ def test_create_dataset(tmp_path):
             api_cli.delete_dataset(dataset_id)
             break
         except BaseException as e:
-            print("Err:", e)
+            print('Err:', e)
             continue
         finally:
-            print("try %d times", t + 1)
+            print('try %d times', t + 1)
 
 
 def genRandonString(n):
@@ -85,12 +86,12 @@ def clean_buckets():
     tos_cli = TOSClient()
     buckets = tos_cli.list_buckets()
     for bucket in buckets:
-        if re.match(bucket_prefix, bucket["Name"]):
-            tos_cli.clear_bucket_objects(bucket["Name"])
-            tos_cli.delete_bucket(bucket["Name"])
-            logging.info("delete bucket %s", bucket["Name"])
+        if re.match(bucket_prefix, bucket['Name']):
+            tos_cli.clear_bucket_objects(bucket['Name'])
+            tos_cli.delete_bucket(bucket['Name'])
+            logging.info('delete bucket %s', bucket['Name'])
 
 
-if __name__ == "__main__":
-    path = "./testdata"
+if __name__ == '__main__':
+    path = './testdata'
     test_create_dataset(path)

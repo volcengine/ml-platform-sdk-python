@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
 import logging
 
-from volcengine_ml_platform.openapi.base_client import define_api, BaseClient
+from volcengine_ml_platform.openapi.base_client import BaseClient
+from volcengine_ml_platform.openapi.base_client import define_api
 
-define_api("CreateResource")
-define_api("GetResource")
-define_api("DeleteResource")
-define_api("ListResource")
+define_api('CreateResource')
+define_api('GetResource')
+define_api('DeleteResource')
+define_api('ListResource')
 
 
 class ResourceClient(BaseClient):
-
     def __init__(self):
-        super(ResourceClient, self).__init__()
+        super().__init__()
 
     def create_resource(
         self,
@@ -51,11 +50,11 @@ class ResourceClient(BaseClient):
             'GPUType': gpu_type,
             'GPUNum': gpu_num,
             'Price': price,
-            'Region': region
+            'Region': region,
         }
 
         try:
-            res_json = self.common_json_handler("CreateResource", body)
+            res_json = self.common_json_handler('CreateResource', body)
             return res_json
         except Exception as e:
             logging.error('Failed to create resource, error: %s', e)
@@ -80,8 +79,8 @@ class ResourceClient(BaseClient):
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get resource info, flavor_id: %s, error: %s',
-                flavor_id, e)
+                'Failed to get resource info, flavor_id: %s, error: %s', flavor_id, e,
+            )
             raise Exception('get_resource failed') from e
 
     def delete_resource(self, flavor_id: str):
@@ -99,22 +98,27 @@ class ResourceClient(BaseClient):
         body = {'FlavorID': flavor_id}
 
         try:
-            res_json = self.common_json_handler(api='DeleteResource', body=body)
+            res_json = self.common_json_handler(
+                api='DeleteResource', body=body,
+            )
             return res_json
         except Exception as e:
-            logging.error('Failed to delete resource, flavor_id: %s, error: %s',
-                          flavor_id, e)
+            logging.error(
+                'Failed to delete resource, flavor_id: %s, error: %s', flavor_id, e,
+            )
             raise Exception('delete_resource failed') from e
 
-    def list_resource(self,
-                      name=None,
-                      name_contains=None,
-                      resource_type=None,
-                      tag: list = None,
-                      offset=0,
-                      page_size=10,
-                      sort_by='CreateTime',
-                      sort_order='Descend'):
+    def list_resource(
+        self,
+        name=None,
+        name_contains=None,
+        resource_type=None,
+        tag: list = None,
+        offset=0,
+        page_size=10,
+        sort_by='CreateTime',
+        sort_order='Descend',
+    ):
         """list resource with given service_id
 
         Args:

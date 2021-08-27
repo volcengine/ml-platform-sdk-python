@@ -1,32 +1,31 @@
-# -*- coding: utf-8 -*-
 import logging
 
-from volcengine_ml_platform.openapi.base_client import define_api, BaseClient
+from volcengine_ml_platform.openapi.base_client import BaseClient
+from volcengine_ml_platform.openapi.base_client import define_api
 
-define_api("CreateDataset")
-define_api("UpdateDataset")
-define_api("GetDataset")
-define_api("DeleteDataset")
-define_api("ListDatasets")
-define_api("ListAnnotationSets")
-define_api("UpdateAnnotationLabel")
-define_api("GetAnnotationSet")
-define_api("DeleteAnnotationSet")
-define_api("CreateAnnotaionSet")
-define_api("UpdateAnnotationData")
-define_api("ListAnnotationDatas")
-define_api("TryDeleteAnnotationLabel")
-define_api("ListAnnotationLabel")
+define_api('CreateDataset')
+define_api('UpdateDataset')
+define_api('GetDataset')
+define_api('DeleteDataset')
+define_api('ListDatasets')
+define_api('ListAnnotationSets')
+define_api('UpdateAnnotationLabel')
+define_api('GetAnnotationSet')
+define_api('DeleteAnnotationSet')
+define_api('CreateAnnotaionSet')
+define_api('UpdateAnnotationData')
+define_api('ListAnnotationDatas')
+define_api('TryDeleteAnnotationLabel')
+define_api('ListAnnotationLabel')
 
 
 class DataSetClient(BaseClient):
-
     def __init__(self):
-        super(DataSetClient, self).__init__()
+        super().__init__()
 
     def create_dataset(self, body):
         try:
-            res_json = self.common_json_handler("CreateDataset", body)
+            res_json = self.common_json_handler('CreateDataset', body)
             return res_json
         except Exception as e:
             logging.error('Failed to create datasets, error: %s', e)
@@ -34,7 +33,7 @@ class DataSetClient(BaseClient):
 
     def update_dataset(self, body):
         try:
-            res_json = self.common_json_handler("UpdateDataset", body)
+            res_json = self.common_json_handler('UpdateDataset', body)
             return res_json
         except Exception as e:
             logging.error('Failed to update datasets, error: %s', e)
@@ -57,8 +56,8 @@ class DataSetClient(BaseClient):
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get datasets info, dataset_id: %s, error: %s',
-                dataset_id, e)
+                'Failed to get datasets info, dataset_id: %s, error: %s', dataset_id, e,
+            )
             raise Exception('get_dataset failed') from e
 
     def delete_dataset(self, dataset_id: str):
@@ -77,18 +76,21 @@ class DataSetClient(BaseClient):
             res_json = self.common_json_handler(api='DeleteDataset', body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to delete dataset, dataset_id: %s, error: %s',
-                          dataset_id, e)
+            logging.error(
+                'Failed to delete dataset, dataset_id: %s, error: %s', dataset_id, e,
+            )
             raise Exception('delete_dataset failed') from e
 
-    def list_datasets(self,
-                      name=None,
-                      name_contains=None,
-                      status=None,
-                      offset=0,
-                      page_size=10,
-                      sort_by='CreateTime',
-                      sort_order='Descend'):
+    def list_datasets(
+        self,
+        name=None,
+        name_contains=None,
+        status=None,
+        offset=0,
+        page_size=10,
+        sort_by='CreateTime',
+        sort_order='Descend',
+    ):
         """list datasets
 
         Args:
@@ -141,19 +143,21 @@ class DataSetClient(BaseClient):
         body = {'DatasetID': dataset_id}
 
         try:
-            res_json = self.common_json_handler(api='ListAnnotationSets',
-                                                body=body)
+            res_json = self.common_json_handler(
+                api='ListAnnotationSets', body=body,
+            )
             return res_json
         except Exception as e:
             logging.error(
                 'Failed to list annotation sets, dataset_id: %s, error: %s',
-                dataset_id, e)
+                dataset_id,
+                e,
+            )
             raise Exception('list_annotation_sets failed') from e
 
-    def update_annotation_label(self,
-                                annotation_id: str,
-                                labels: list,
-                                default_label=None):
+    def update_annotation_label(
+        self, annotation_id: str, labels: list, default_label=None,
+    ):
         body = {
             'AnnotationID': annotation_id,
             'Labels': labels,
@@ -162,12 +166,14 @@ class DataSetClient(BaseClient):
             body.update({'DefaultLabel': default_label})
 
         try:
-            res_json = self.common_json_handler("UpdateAnnotationLabel", body)
+            res_json = self.common_json_handler('UpdateAnnotationLabel', body)
             return res_json
         except Exception as e:
             logging.error(
                 'Failed to update annotation label, annotation_id: %s, error: %s',
-                annotation_id, e)
+                annotation_id,
+                e,
+            )
             raise Exception('update_annotation_label failed') from e
 
     def get_annotation_set(self, dataset_id: str, annotation_id: str):
@@ -186,13 +192,17 @@ class DataSetClient(BaseClient):
         body = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
 
         try:
-            res_json = self.common_json_handler(api='GetAnnotationSet',
-                                                body=body)
+            res_json = self.common_json_handler(
+                api='GetAnnotationSet', body=body,
+            )
             return res_json
         except Exception as e:
             logging.error(
                 'Failed to get annotation set, dataset_id: %s, annotation_id: %s, error: %s',
-                dataset_id, annotation_id, e)
+                dataset_id,
+                annotation_id,
+                e,
+            )
             raise Exception('get_annotation_set failed') from e
 
     def delete_annotation_set(self, dataset_id: str, annotation_id: str):
@@ -211,13 +221,17 @@ class DataSetClient(BaseClient):
         body = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
 
         try:
-            res_json = self.common_json_handler(api='DeleteAnnotationSet',
-                                                body=body)
+            res_json = self.common_json_handler(
+                api='DeleteAnnotationSet', body=body,
+            )
             return res_json
         except Exception as e:
             logging.error(
                 'Failed to delete annotation set, dataset_id: %s, annotation_id: %s, error: %s',
-                dataset_id, annotation_id, e)
+                dataset_id,
+                annotation_id,
+                e,
+            )
             raise Exception('delete_annotation_set failed') from e
 
     def create_annotation_set(
@@ -246,7 +260,7 @@ class DataSetClient(BaseClient):
         body = {
             'DatasetID': dataset_id,
             'AnnotationType': annotation_type,
-            'AnnotationName': annotation_name
+            'AnnotationName': annotation_name,
         }
         if default_label:
             body.update({'DefaultLabel': default_label})
@@ -254,7 +268,7 @@ class DataSetClient(BaseClient):
             body.update({'Labels': labels})
 
         try:
-            res_json = self.common_json_handler("CreateAnnotataionSet", body)
+            res_json = self.common_json_handler('CreateAnnotataionSet', body)
             return res_json
         except Exception as e:
             logging.error('Failed to create annotation set, error: %s', e)
@@ -277,20 +291,24 @@ class DataSetClient(BaseClient):
         body = {'AnnotationID': annotation_id, 'Datas': datas}
 
         try:
-            res_json = self.common_json_handler("UpdateAnnotationData", body)
+            res_json = self.common_json_handler('UpdateAnnotationData', body)
             return res_json
         except Exception as e:
             logging.error(
                 'Failed to update annotation data, annotation_id: %s, error: %s',
-                annotation_id, e)
+                annotation_id,
+                e,
+            )
             raise Exception('update_annotation_data failed') from e
 
-    def list_annotation_datas(self,
-                              annotation_id: str,
-                              label_names: list = None,
-                              status: int = None,
-                              offset=0,
-                              page_size=10):
+    def list_annotation_datas(
+        self,
+        annotation_id: str,
+        label_names: list = None,
+        status: int = None,
+        offset=0,
+        page_size=10,
+    ):
         """list annotation datas with given annotation_id
 
         Args:
@@ -317,8 +335,9 @@ class DataSetClient(BaseClient):
             body.update({'LabelNames': label_names})
 
         try:
-            res_json = self.common_json_handler(api='ListAnnotationDatas',
-                                                body=body)
+            res_json = self.common_json_handler(
+                api='ListAnnotationDatas', body=body,
+            )
             return res_json
         except Exception as e:
             logging.error('Failed to list annotation datas, error: %s', e)
@@ -328,13 +347,16 @@ class DataSetClient(BaseClient):
         body = {'AnnotationID': annotation_id, 'Label': label}
 
         try:
-            res_json = self.common_json_handler("TryDeleteAnnotationLabel",
-                                                body)
+            res_json = self.common_json_handler(
+                'TryDeleteAnnotationLabel', body,
+            )
             return res_json
         except Exception as e:
             logging.error(
                 'Failed to try delete annotation label, annotation_id: %s, error: %s',
-                annotation_id, e)
+                annotation_id,
+                e,
+            )
             raise Exception('try_delete_annotation_label failed') from e
 
     def list_annotation_label(self, dataset_id: str, annotation_id: str):
@@ -354,8 +376,9 @@ class DataSetClient(BaseClient):
         body = {'DatasetID': dataset_id, 'AnnotationID': annotation_id}
 
         try:
-            res_json = self.common_json_handler(api='ListAnnotationLabel',
-                                                body=body)
+            res_json = self.common_json_handler(
+                api='ListAnnotationLabel', body=body,
+            )
             return res_json
         except Exception as e:
             logging.error('Failed to list annotation label, error: %s', e)

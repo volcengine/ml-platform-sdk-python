@@ -4,10 +4,10 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ze Liu
 # --------------------------------------------------------
-
+import io
 import os
 import zipfile
-import io
+
 import numpy as np
 from PIL import Image
 from PIL import ImageFile
@@ -20,12 +20,13 @@ def is_zip_path(img_or_path):
     return '.zip@' in img_or_path
 
 
-class ZipReader(object):
+class ZipReader:
     """A class to read zipped files"""
+
     zip_bank = dict()
 
     def __init__(self):
-        super(ZipReader, self).__init__()
+        super().__init__()
 
     @staticmethod
     def get_zipfile(path):
@@ -38,7 +39,9 @@ class ZipReader(object):
     @staticmethod
     def split_zip_style_path(path):
         pos_at = path.index('@')
-        assert pos_at != -1, "character '@' is not found from the given path '%s'" % path
+        assert pos_at != -1, (
+            "character '@' is not found from the given path '%s'" % path
+        )
 
         zip_path = path[0:pos_at]
         folder_path = path[pos_at + 1:]
@@ -53,9 +56,11 @@ class ZipReader(object):
         folder_list = []
         for file_foler_name in zfile.namelist():
             file_foler_name = str.strip(file_foler_name, '/')
-            if file_foler_name.startswith(folder_path) and \
-                    len(os.path.splitext(file_foler_name)[-1]) == 0 and \
-                    file_foler_name != folder_path:
+            if (
+                file_foler_name.startswith(folder_path)
+                and len(os.path.splitext(file_foler_name)[-1]) == 0
+                and file_foler_name != folder_path
+            ):
                 if len(folder_path) == 0:
                     folder_list.append(file_foler_name)
                 else:
@@ -73,8 +78,11 @@ class ZipReader(object):
         file_lists = []
         for file_foler_name in zfile.namelist():
             file_foler_name = str.strip(file_foler_name, '/')
-            if file_foler_name.startswith(folder_path) and \
-                    str.lower(os.path.splitext(file_foler_name)[-1]) in extension:
+            if (
+                file_foler_name.startswith(folder_path) and str.lower(
+                    os.path.splitext(file_foler_name)[-1],
+                ) in extension
+            ):
                 if len(folder_path) == 0:
                     file_lists.append(file_foler_name)
                 else:
@@ -96,8 +104,8 @@ class ZipReader(object):
         data = zfile.read(path_img)
         try:
             im = Image.open(io.BytesIO(data))
-        except:
-            print("ERROR IMG LOADED: ", path_img)
+        except BaseException:
+            print('ERROR IMG LOADED: ', path_img)
             random_img = np.random.rand(224, 224, 3) * 255
             im = Image.fromarray(np.uint8(random_img))
         return im

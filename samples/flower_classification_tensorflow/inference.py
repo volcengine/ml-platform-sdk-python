@@ -1,11 +1,11 @@
 import json
 import os
 
-import requests
 import numpy as np
+import requests
 from PIL import Image
 
-END_POINT = "inference-demo.byted.org/s-20210803143929-vfspk/rest"
+END_POINT = 'inference-demo.byted.org/s-20210803143929-vfspk/rest'
 CLASSES = [
     'pink primrose',
     'hard-leaved pocket orchid',
@@ -110,24 +110,25 @@ CLASSES = [
     'trumpet creeper',
     'blackberry lily',
     'common tulip',
-    'wild rose'
+    'wild rose',
 ]
 
 
 def request_demo():
     try:
-        headers = {"content-type": "application/json"}
-        test_img_path = np.os.path.join(os.path.dirname(__file__),
-                                        'test_sample/34.jpg')
+        headers = {'content-type': 'application/json'}
+        test_img_path = np.os.path.join(
+            os.path.dirname(__file__), 'test_sample/34.jpg',
+        )
         image = np.array(Image.open(test_img_path))
-        data = json.dumps({
-            "signature_name": "serving_default",
-            "inputs": [image.tolist()]
-        })
+        data = json.dumps(
+            {'signature_name': 'serving_default', 'inputs': [image.tolist()]},
+        )
         json_response = requests.post(
-            'http://{}/v1/models/default:predict'.format(END_POINT),
+            f'http://{END_POINT}/v1/models/default:predict',
             data=data,
-            headers=headers)
+            headers=headers,
+        )
         return json_response.json()
     except Exception as e:
         print(e)

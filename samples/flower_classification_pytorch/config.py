@@ -4,8 +4,8 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ze Liu
 # --------------------------------------------------------'
-
 import os
+
 import yaml
 from yacs.config import CfgNode as CN
 
@@ -67,7 +67,7 @@ _C.MODEL.SWIN.EMBED_DIM = 96
 _C.MODEL.SWIN.DEPTHS = [2, 2, 6, 2]
 _C.MODEL.SWIN.NUM_HEADS = [3, 6, 12, 24]
 _C.MODEL.SWIN.WINDOW_SIZE = 7
-_C.MODEL.SWIN.MLP_RATIO = 4.
+_C.MODEL.SWIN.MLP_RATIO = 4.0
 _C.MODEL.SWIN.QKV_BIAS = True
 _C.MODEL.SWIN.QK_SCALE = None
 _C.MODEL.SWIN.APE = False
@@ -81,7 +81,7 @@ _C.MODEL.SWIN_MLP.EMBED_DIM = 96
 _C.MODEL.SWIN_MLP.DEPTHS = [2, 2, 6, 2]
 _C.MODEL.SWIN_MLP.NUM_HEADS = [3, 6, 12, 24]
 _C.MODEL.SWIN_MLP.WINDOW_SIZE = 7
-_C.MODEL.SWIN_MLP.MLP_RATIO = 4.
+_C.MODEL.SWIN_MLP.MLP_RATIO = 4.0
 _C.MODEL.SWIN_MLP.APE = False
 _C.MODEL.SWIN_MLP.PATCH_NORM = True
 
@@ -187,14 +187,15 @@ _C.DEVICE = 'cuda'
 
 def _update_config_from_file(config, cfg_file):
     config.defrost()
-    with open(cfg_file, 'r') as f:
+    with open(cfg_file) as f:
         yaml_cfg = yaml.load(f, Loader=yaml.FullLoader)
 
     for cfg in yaml_cfg.setdefault('BASE', ['']):
         if cfg:
             _update_config_from_file(
-                config, os.path.join(os.path.dirname(cfg_file), cfg))
-    print('=> merge config from {}'.format(cfg_file))
+                config, os.path.join(os.path.dirname(cfg_file), cfg),
+            )
+    print(f'=> merge config from {cfg_file}')
     config.merge_from_file(cfg_file)
     config.freeze()
 

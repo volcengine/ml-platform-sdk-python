@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 import json
 import logging
 import threading
 
 from volcengine.ApiInfo import ApiInfo
-from volcengine.ServiceInfo import ServiceInfo
 from volcengine.base.Service import Service
+from volcengine.ServiceInfo import ServiceInfo
 
 import volcengine_ml_platform
 from volcengine_ml_platform import constant
@@ -14,9 +12,7 @@ from volcengine_ml_platform.util import id_gen
 
 
 class MLSTSTokenResponse:
-
     class ResponseMetadata:
-
         def __init__(self, resp_json_meta):
             self.RequestId = resp_json_meta['RequestId']
             self.Action = resp_json_meta['Action']
@@ -25,7 +21,6 @@ class MLSTSTokenResponse:
             self.Region = resp_json_meta['Region']
 
     class Result:
-
         def __init__(self, resp_json_result):
             self.ExpiredTime = resp_json_result['ExpiredTime']
             self.CurrentTime = resp_json_result['CurrentTime']
@@ -36,7 +31,8 @@ class MLSTSTokenResponse:
     def __init__(self, resp_json):
         self.resp_json = resp_json
         self.ResponseMetadata = self.ResponseMetadata(
-            resp_json['ResponseMetadata'])
+            resp_json['ResponseMetadata'],
+        )
         self.Result = self.Result(resp_json['Result'])
 
     def get_raw_json(self):
@@ -58,8 +54,9 @@ class MLSTSTokenService(Service):
         self.duration = duration
         self.api_info = self.get_api_info()
         self.service_info = self.get_service_info()
-        super(MLSTSTokenService, self).__init__(self.service_info,
-                                                self.api_info)
+        super().__init__(
+            self.service_info, self.api_info,
+        )
 
     def get_sts_token(self):
         encrypted_key = volcengine_ml_platform.get_encrypted_key()
@@ -79,10 +76,14 @@ class MLSTSTokenService(Service):
             raise Exception('get_sts_token failed') from e
 
     def get_service_info(self):
-        return ServiceInfo(volcengine_ml_platform.get_service_direct_host(),
-                           self.get_latest_header(),
-                           volcengine_ml_platform.get_credentials(), 10, 10,
-                           'http')
+        return ServiceInfo(
+            volcengine_ml_platform.get_service_direct_host(),
+            self.get_latest_header(),
+            volcengine_ml_platform.get_credentials(),
+            10,
+            10,
+            'http',
+        )
 
     def get_latest_header(self):
         headers = {

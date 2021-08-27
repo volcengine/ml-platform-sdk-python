@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from typing import Optional, Dict
-from collections.abc import Callable
 import io
+from collections.abc import Callable
+from typing import Dict
+from typing import Optional
+
 import torch
 from PIL import Image
 
@@ -10,12 +10,13 @@ from volcengine_ml_platform.tos import tos
 
 
 class TorchTOSDataset:
-
-    def __init__(self,
-                 manifest_info: Optional[Dict] = None,
-                 decode: Optional[Callable] = None,
-                 transform: Optional[Callable] = None,
-                 target_transform: Optional[Callable] = None):
+    def __init__(
+        self,
+        manifest_info: Optional[Dict] = None,
+        decode: Optional[Callable] = None,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+    ):
         self.decode = decode
         self.transform = transform
         self.target_transform = target_transform
@@ -38,16 +39,19 @@ class TorchTOSDataset:
         return Image.open(io.BytesIO(raw_data)).convert('RGB')
 
     def _target_transform(self, target):
-        target = int(target['Result'][0]["Data"][0]["Label"])
+        target = int(target['Result'][0]['Data'][0]['Label'])
         return target
 
     def __getitem__(self, index):
         torch.set_num_threads(1)
         # get each process a TOS client
-        if not hasattr(self, "tos_client"):
+        if not hasattr(self, 'tos_client'):
             self.tos_client = tos.TOSClient()
-        bucket, key, annotation = self.buckets[index], self.keys[
-            index], self.annotations[index]
+        bucket, key, annotation = (
+            self.buckets[index],
+            self.keys[index],
+            self.annotations[index],
+        )
         rsp = self.tos_client.get_object(bucket=bucket, key=key)
         data = rsp.read()
         rsp.close()
