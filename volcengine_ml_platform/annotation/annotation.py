@@ -1,6 +1,6 @@
 import json
 from typing import Optional
-from volcengine_ml_platform.annotation.type import AnnotationDataType
+from volcengine_ml_platform.annotation.ttypes import AnnotationDataType
 
 
 def get_annotation_section(annotation_line):

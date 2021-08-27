@@ -3,7 +3,7 @@
 BOE_ENV = "BOE"
 PROD_ENV = "PROD"
 
-DEFAULT_REGION = 'cn-north-4'
+DEFAULT_REGION = 'cn-beijing'
 SERVICE_NAME = 'ml_platform'
 SERVICE_VERSION = '2021-10-01'
 
