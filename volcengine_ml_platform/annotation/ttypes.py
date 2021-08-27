@@ -9,25 +9,25 @@ class AnnotationTemplate:
     TimeSeriesPrediction = 102
 
     _VALUES_TO_NAMES = {
-        1: "TextClassification",
-        2: "TextEntity",
-        3: "ImageClassification",
-        4: "ImageDetection",
-        5: "ImageSegmentation",
-        6: "VideoClassification",
-        101: "TabularPrediction",
-        102: "TimeSeriesPrediction",
+        1: 'TextClassification',
+        2: 'TextEntity',
+        3: 'ImageClassification',
+        4: 'ImageDetection',
+        5: 'ImageSegmentation',
+        6: 'VideoClassification',
+        101: 'TabularPrediction',
+        102: 'TimeSeriesPrediction',
     }
 
     _NAMES_TO_VALUES = {
-        "TextClassification": 1,
-        "TextEntity": 2,
-        "ImageClassification": 3,
-        "ImageDetection": 4,
-        "ImageSegmentation": 5,
-        "VideoClassification": 6,
-        "TabularPrediction": 101,
-        "TimeSeriesPrediction": 102,
+        'TextClassification': 1,
+        'TextEntity': 2,
+        'ImageClassification': 3,
+        'ImageDetection': 4,
+        'ImageSegmentation': 5,
+        'VideoClassification': 6,
+        'TabularPrediction': 101,
+        'TimeSeriesPrediction': 102,
     }
 
 
@@ -37,15 +37,15 @@ class AnnotationDataType:
     BlankFilling = 3
 
     _VALUES_TO_NAMES = {
-        1: "SingleSelector",
-        2: "MultipleSelector",
-        3: "BlankFilling",
+        1: 'SingleSelector',
+        2: 'MultipleSelector',
+        3: 'BlankFilling',
     }
 
     _NAMES_TO_VALUES = {
-        "SingleSelector": 1,
-        "MultipleSelector": 2,
-        "BlankFilling": 3,
+        'SingleSelector': 1,
+        'MultipleSelector': 2,
+        'BlankFilling': 3,
     }
 
 
@@ -55,26 +55,26 @@ class AnnotationStatus:
     Invalid = 3
 
     _VALUES_TO_NAMES = {
-        1: "Init",
-        2: "Marked",
-        3: "Invalid",
+        1: 'Init',
+        2: 'Marked',
+        3: 'Invalid',
     }
 
     _NAMES_TO_VALUES = {
-        "Init": 1,
-        "Marked": 2,
-        "Invalid": 3,
+        'Init': 1,
+        'Marked': 2,
+        'Invalid': 3,
     }
 
 
 class Data:
     """
-  Attributes:
-   - ImageURL
-   - VideoURL
-   - TextURL
-   - FilePath
-  """
+    Attributes:
+     - ImageURL
+     - VideoURL
+     - TextURL
+     - FilePath
+    """
 
     def __init__(
         self,
@@ -91,10 +91,10 @@ class Data:
 
 class TextSelector:
     """
-  Attributes:
-   - Pos
-   - Len
-  """
+    Attributes:
+     - Pos
+     - Len
+    """
 
     def __init__(
         self,
@@ -107,12 +107,12 @@ class TextSelector:
 
 class AnnotationData:
     """
-  Attributes:
-   - Type
-   - Options
-   - Label
-   - Labels
-  """
+    Attributes:
+     - Type
+     - Options
+     - Label
+     - Labels
+    """
 
     def __init__(
         self,
@@ -129,12 +129,12 @@ class AnnotationData:
 
 class AnnotationResult:
     """
-  Attributes:
-   - Bbox
-   - Segmentation
-   - Text
-   - Data
-  """
+    Attributes:
+     - Bbox
+     - Segmentation
+     - Text
+     - Data
+    """
 
     def __init__(
         self,
@@ -151,12 +151,12 @@ class AnnotationResult:
 
 class Annotation:
     """
-  Attributes:
-   - Type
-   - ItemID
-   - Result
-   - Status
-  """
+    Attributes:
+     - Type
+     - ItemID
+     - Result
+     - Status
+    """
 
     def __init__(
         self,
@@ -173,10 +173,10 @@ class Annotation:
 
 class Resolution:
     """
-  Attributes:
-   - Width
-   - Height
-  """
+    Attributes:
+     - Width
+     - Height
+    """
 
     def __init__(
         self,
@@ -189,13 +189,13 @@ class Resolution:
 
 class ImagePayload:
     """
-  Attributes:
-   - TOSURL
-   - MimeType
-   - ContentURL
-   - ThumbnailURL
-   - Resolution
-  """
+    Attributes:
+     - TOSURL
+     - MimeType
+     - ContentURL
+     - ThumbnailURL
+     - Resolution
+    """
 
     def __init__(
         self,
@@ -214,14 +214,14 @@ class ImagePayload:
 
 class VideoPayload:
     """
-  Attributes:
-   - TOSURL
-   - MimeType
-   - ContentURL
-   - ThumbnailURL
-   - duration
-   - Resolution
-  """
+    Attributes:
+     - TOSURL
+     - MimeType
+     - ContentURL
+     - ThumbnailURL
+     - duration
+     - Resolution
+    """
 
     def __init__(
         self,
@@ -242,10 +242,10 @@ class VideoPayload:
 
 class TextPayload:
     """
-  Attributes:
-   - TOSURL
-   - TrucatedContent
-  """
+    Attributes:
+     - TOSURL
+     - TrucatedContent
+    """
 
     def __init__(
         self,
@@ -258,11 +258,11 @@ class TextPayload:
 
 class Payload:
     """
-  Attributes:
-   - Image
-   - Video
-   - Text
-  """
+    Attributes:
+     - Image
+     - Video
+     - Text
+    """
 
     def __init__(
         self,
@@ -277,11 +277,11 @@ class Payload:
 
 class FileLine:
     """
-  Attributes:
-   - Data
-   - Annotation
-   - Payload
-  """
+    Attributes:
+     - Data
+     - Annotation
+     - Payload
+    """
 
     def __init__(
         self,

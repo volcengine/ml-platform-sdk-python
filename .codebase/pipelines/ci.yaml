@@ -13,14 +13,7 @@ jobs:
       - commands:
           # Environment setup
           - apt-get update && apt-get install -y build-essential libsnappy-dev
-          - yes | apt-get install --assume-yes git
-          # install python packages
-          - pip3 install -i https://bytedpypi.byted.org/simple pylint yapf
-          - python setup.py install
           - pip3 install -i https://bytedpypi.byted.org/simple -r requirements.txt
 
-          # Static analysis starts here
-          - bash -ex presubmit/py_static_analysis.sh presubmit "$CI_EVENT_CHANGE_TARGET_SHA" "$CI_EVENT_CHANGE_SOURCE_SHA"
-
           # Unit test starts here
-          - bash -ex presubmit/py_unit_test.sh
+          - bash -ex scripts/py_unit_test.sh

@@ -1,21 +1,24 @@
 import math
 import os
-
-from logging import warning, error, debug
-from urllib.parse import urlparse
-from multiprocessing.dummy import Pool, Process, Queue
+from logging import debug
+from logging import error
+from logging import warning
+from multiprocessing.dummy import Pool
+from multiprocessing.dummy import Process
+from multiprocessing.dummy import Queue
 from typing import Optional
-from tqdm import tqdm
+from urllib.parse import urlparse
 
 import boto3
 import botocore
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
+from tqdm import tqdm
+
 import volcengine_ml_platform
 
 
 class TOSClient:
-
     def __init__(self):
         # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
         credentials = volcengine_ml_platform.get_credentials()
@@ -25,7 +28,8 @@ class TOSClient:
             region_name=credentials.region,
             aws_access_key_id=credentials.ak,
             aws_secret_access_key=credentials.sk,
-            endpoint_url=volcengine_ml_platform.get_tos_endpoint_url())
+            endpoint_url=volcengine_ml_platform.get_tos_endpoint_url(),
+        )
         self.dir_record = set()
 
     def bucket_exists(self, bucket_name):
@@ -42,7 +46,7 @@ class TOSClient:
                 exists = False
         return exists
 
-    def create_bucket(self, bucket_name, region=""):
+    def create_bucket(self, bucket_name, region=''):
         """Create an S3 bucket in a specified region
 
         param bucket_name: Bucket to create
@@ -55,10 +59,12 @@ class TOSClient:
             # location = {'LocationConstraint': region}
             # self.s3_client.create_bucket(Bucket=bucket_name,
             #                              CreateBucketConfiguration=location)
-            if region not in ("", self.region_name):
+            if region not in ('', self.region_name):
                 location = {'LocationConstraint': region}
-                self.s3_client.create_bucket(Bucket=bucket_name,
-                                             CreateBucketConfiguration=location)
+                self.s3_client.create_bucket(
+                    Bucket=bucket_name,
+                    CreateBucketConfiguration=location,
+                )
             else:
                 self.s3_client.create_bucket(Bucket=bucket_name)
         except ClientError as e:
@@ -69,7 +75,7 @@ class TOSClient:
     def delete_bucket(self, bucket):
         """Delete a bucket, an error will be raised if it is not empty"""
         try:
-            response = self.s3_client.delete_bucket(Bucket=bucket)
+            _ = self.s3_client.delete_bucket(Bucket=bucket)
             return True
         except ClientError as e:
             error(e)
@@ -98,7 +104,8 @@ class TOSClient:
             )
 
             if object_info is None or 'Contents' not in object_info or len(
-                    object_info['Contents']) == 0:
+                    object_info['Contents'],
+            ) == 0:
                 break
             for item in object_info['Contents']:
                 key = item['Key']
@@ -114,18 +121,22 @@ class TOSClient:
             Key=key,
         )
 
-    def list_objects(self, bucket, delimiter, encoding_type, marker, max_keys,
-                     prefix):
+    def list_objects(
+        self, bucket, delimiter, encoding_type, marker, max_keys,
+        prefix,
+    ):
         """List S3 objects with given object
 
         return a list of Object infos
         """
-        return self.s3_client.list_objects(Bucket=bucket,
-                                           Delimiter=delimiter,
-                                           EncodingType=encoding_type,
-                                           Marker=marker,
-                                           MaxKeys=max_keys,
-                                           Prefix=prefix)
+        return self.s3_client.list_objects(
+            Bucket=bucket,
+            Delimiter=delimiter,
+            EncodingType=encoding_type,
+            Marker=marker,
+            MaxKeys=max_keys,
+            Prefix=prefix,
+        )
 
     def put_object(self, bucket, key, body):
         """Upload single object, object size should not exceed 5MB"""
@@ -135,11 +146,13 @@ class TOSClient:
         """Download single object"""
         return self.s3_client.get_object(Bucket=bucket, Key=key)['Body']
 
-    def upload_file_low_level(self,
-                              file_path,
-                              bucket,
-                              key=None,
-                              part_size=20971520):
+    def upload_file_low_level(
+        self,
+        file_path,
+        bucket,
+        key=None,
+        part_size=20971520,
+    ):
         """Implemented with low level S3 API, edit for desired info"""
         file_size = os.path.getsize(file_path)
         threshold = 5242880
@@ -161,10 +174,12 @@ class TOSClient:
                 part_number = math.ceil(float(file_size) % float(part_size))
 
             # start multipart upload
-            rsp = self.s3_client.create_multipart_upload(Bucket=bucket, Key=key)
+            rsp = self.s3_client.create_multipart_upload(
+                Bucket=bucket, Key=key,
+            )
             debug('Multipart upload initiated: %s', rsp)
 
-            upload_id = rsp["UploadId"]
+            upload_id = rsp['UploadId']
             uploaded_parts = {'Parts': []}
             with open(file_path, mode='rb', encoding='utf-8') as file:
                 # upload parts
@@ -174,22 +189,26 @@ class TOSClient:
                     body = file.read(read_size)  # 20MiB
                     if body == b'':
                         break
-                    rsp = self.s3_client.upload_part(Bucket=bucket,
-                                                     Key=key,
-                                                     PartNumber=i,
-                                                     UploadId=upload_id,
-                                                     Body=body)
+                    rsp = self.s3_client.upload_part(
+                        Bucket=bucket,
+                        Key=key,
+                        PartNumber=i,
+                        UploadId=upload_id,
+                        Body=body,
+                    )
 
-                    uploaded_parts['Parts'].append({
-                        'PartNumber': i,
-                        'ETag': rsp['ETag']
-                    })
+                    uploaded_parts['Parts'].append(
+                        {
+                            'PartNumber': i,
+                            'ETag': rsp['ETag'],
+                        }, )
             # upload complete
             rsp = self.s3_client.complete_multipart_upload(
                 Bucket=bucket,
                 Key=key,
                 UploadId=upload_id,
-                MultipartUpload=uploaded_parts)
+                MultipartUpload=uploaded_parts,
+            )
             debug('Multipart upload completed: %s', rsp)
 
     def upload_file(self, file_path, bucket, key=None, part_size=20971520):
@@ -199,10 +218,12 @@ class TOSClient:
         transfer_config = TransferConfig(multipart_threshold=part_size)
 
         # Perform the transfer
-        self.s3_client.upload_file(file_path,
-                                   bucket,
-                                   key,
-                                   Config=transfer_config)
+        self.s3_client.upload_file(
+            file_path,
+            bucket,
+            key,
+            Config=transfer_config,
+        )
 
     def download_file(
         self,
@@ -236,21 +257,23 @@ class TOSClient:
 
         if tos_url is not None:
             parse_result = urlparse(tos_url)
-            if parse_result.scheme != "tos":
-                raise "invalid scheme. url: " + tos_url
-            bucket = parse_result.netloc.split(".")[0]
+            if parse_result.scheme != 'tos':
+                raise 'invalid scheme. url: ' + tos_url
+            bucket = parse_result.netloc.split('.')[0]
             key = parse_result.path[1:]
 
             if file_path is None:
                 file_path = os.path.join(dir_path, key)
             self._create_dir(dir_path)
 
-        debug("download file: bucket %s, key %s", bucket, key)
+        debug('download file: bucket %s, key %s', bucket, key)
         # Download an S3 object
-        self.s3_client.download_file(bucket,
-                                     key,
-                                     file_path,
-                                     Config=transfer_config)
+        self.s3_client.download_file(
+            bucket,
+            key,
+            file_path,
+            Config=transfer_config,
+        )
 
         if que:
             que.put(file_path)
@@ -265,13 +288,15 @@ class TOSClient:
                 warning('Cannot create download directory: %s', dir_path)
         return dir_path
 
-    def download_files(self,
-                       bucket: str = None,
-                       keys: Optional[list] = None,
-                       file_paths: Optional[list] = None,
-                       dir_path: Optional[str] = None,
-                       tos_urls: Optional[list] = None,
-                       parallelism=1):
+    def download_files(
+        self,
+        bucket: str = None,
+        keys: Optional[list] = None,
+        file_paths: Optional[list] = None,
+        dir_path: Optional[str] = None,
+        tos_urls: Optional[list] = None,
+        parallelism=1,
+    ):
         """download files by parallelism
         You only can call the function as follow:
            1. download_file(bucket="xxx", keys=["xxx","yyy"], file_paths=["./dataset/a.csv", "./dataset/b.csv"]),
@@ -288,7 +313,7 @@ class TOSClient:
         """
 
         if file_paths is None and dir_path is None:
-            raise ValueError("Please set a correct dir_path or file_path")
+            raise ValueError('Please set a correct dir_path or file_path')
 
         self.dir_record = set()
         que = Queue()
@@ -300,25 +325,31 @@ class TOSClient:
             data_count = len(tos_urls)
             for url in tos_urls:
                 async_res.append(
-                    pool.apply_async(self.download_file,
-                                     kwds={
-                                         "tos_url": url,
-                                         "dir_path": dir_path,
-                                         "que": que
-                                     }))
+                    pool.apply_async(
+                        self.download_file,
+                        kwds={
+                            'tos_url': url,
+                            'dir_path': dir_path,
+                            'que': que,
+                        },
+                    ),
+                )
         elif tos_urls:
             data_count = len(keys)
             for file_path, key in zip(file_paths, keys):
                 async_res.append(
-                    pool.apply_async(self.download_file,
-                                     kwds={
-                                         "bucket": bucket,
-                                         "key": key,
-                                         "file_path": file_path,
-                                         "que": que
-                                     }))
+                    pool.apply_async(
+                        self.download_file,
+                        kwds={
+                            'bucket': bucket,
+                            'key': key,
+                            'file_path': file_path,
+                            'que': que,
+                        },
+                    ),
+                )
         else:
-            raise ValueError("Please set correct urls or (buckets + keys)")
+            raise ValueError('Please set correct urls or (buckets + keys)')
 
         counter = Process(target=self.download_counter, args=(data_count, que))
         counter.start()

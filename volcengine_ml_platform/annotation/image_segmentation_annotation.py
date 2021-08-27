@@ -1,9 +1,11 @@
 from typing import Optional
-from volcengine_ml_platform.annotation.annotation import Annotation, get_data_section, get_annotation_section
+
+from volcengine_ml_platform.annotation.annotation import Annotation
+from volcengine_ml_platform.annotation.annotation import get_annotation_section
+from volcengine_ml_platform.annotation.annotation import get_data_section
 
 
 class ImageSegmentationAnnotation(Annotation):
-
     def __init__(self, manifest_file: Optional[str] = None):
         Annotation.__init__(self, manifest_file)
 
@@ -21,8 +23,10 @@ class ImageSegmentationAnnotation(Annotation):
                 pos = result.get('Bbox')
             elif result.get('Segmentation') is not None:
                 pos = result.get('Segmentation')
-            label_result.append({
-                'labels': labels,
-                'box': pos,
-            })
+            label_result.append(
+                {
+                    'labels': labels,
+                    'box': pos,
+                },
+            )
         return label_result

@@ -27,11 +27,11 @@ export VOLC_ACCESSKEY="replace_with_your_ak"
 export VOLC_SECRETKEY="replace_with_your_sk"
 export VOLC_REGION="replace_with_region_the_region_you_use_the_most"
 export VOLC_ML_PLATFORM_ENV="PROD/BOE"            # optional
-``` 
+```
 
 
 * edit ~/.volc/config
-    
+
 ```json
 {
     "ak": "replace_with_your_ak",
@@ -44,7 +44,7 @@ export VOLC_ML_PLATFORM_ENV="PROD/BOE"            # optional
 ```
 > the key of ml_platform is optional
 
-* edit samples/env.py 
+* edit samples/env.py
 ```
 cp samples/env.py.template samples/env.py
 # edit the content of samples/env.py
@@ -66,7 +66,6 @@ cp samples/env.py.template samples/env.py
 
 
 
-
 ## To start developing SDK
 ### Installation dependencies
 ```
@@ -74,23 +73,17 @@ python setup.py install
 pip install -r requirements.txt
 ```
 ### Code style
-Format code
 ```
-yapf -ipr .
-```
-Python linter (Google style)
-```
-pylint volcengine_ml_platform
+pip install pre-commit
+pre-commit install           # install pre-commit hook to git
 ```
 
-### Unit And End2End Test
+### Unittest
 ```
-pytest
-```
-
-## Git hooks
-Pre-commit hook to check format and style for changed files
-```
-ln -s -f presubmit/pre_commit.sh .git/hooks/pre-commit
+make unit_test
 ```
 
+### end2end test
+```
+make end2end_test
+```

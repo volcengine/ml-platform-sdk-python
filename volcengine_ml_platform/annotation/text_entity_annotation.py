@@ -1,9 +1,11 @@
 from typing import Optional
-from volcengine_ml_platform.annotation.annotation import Annotation, get_data_section, get_annotation_section
+
+from volcengine_ml_platform.annotation.annotation import Annotation
+from volcengine_ml_platform.annotation.annotation import get_annotation_section
+from volcengine_ml_platform.annotation.annotation import get_data_section
 
 
 class TextEntitySetAnnotation(Annotation):
-
     def __init__(self, manifest_file: Optional[str] = None):
         Annotation.__init__(self, manifest_file)
 
@@ -18,8 +20,7 @@ class TextEntitySetAnnotation(Annotation):
         for result in annotation['Result']:
             labels = self._get_labels(result)
             text_selector = result['Text']
-            label_result.append({
-                'labels': labels,
-                'text_selector': text_selector
-            })
+            label_result.append(
+                {'labels': labels, 'text_selector': text_selector},
+            )
         return label_result

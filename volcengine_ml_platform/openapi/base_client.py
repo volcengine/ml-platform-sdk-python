@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-
 import json
 import logging
 import threading
 
 from volcengine.ApiInfo import ApiInfo
-from volcengine.ServiceInfo import ServiceInfo
-from volcengine.base.Service import Service
 from volcengine.auth.SignerV4 import SignerV4
+from volcengine.base.Service import Service
+from volcengine.ServiceInfo import ServiceInfo
 
 import volcengine_ml_platform
 from volcengine_ml_platform import constant
@@ -16,29 +14,31 @@ from volcengine_ml_platform.util import metric
 API_INFOS = {}
 
 
-def define_api(name, method="POST"):
+def define_api(name, method='POST'):
     header = {}
     stress_flag = volcengine_ml_platform.get_stress_flag()
     if stress_flag is not None and len(stress_flag.strip()) > 0:
-        header.update("X-Tt-Stress", stress_flag.strip())
+        header.update('X-Tt-Stress', stress_flag.strip())
 
-    API_INFOS[name] = ApiInfo(method, "/", {
-        "Action": name,
-        "Version": constant.SERVICE_VERSION
-    }, {}, header)
+    API_INFOS[name] = ApiInfo(
+        method, '/', {
+            'Action': name,
+            'Version': constant.SERVICE_VERSION,
+        }, {}, header,
+    )
 
 
-define_api("GetTOSUploadPath")
-define_api("GetSTSToken")
+define_api('GetTOSUploadPath')
+define_api('GetSTSToken')
 
 
 class BaseClient(Service):
     _instance_lock = threading.Lock()
 
     def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "_instance"):
+        if not hasattr(cls, '_instance'):
             with cls._instance_lock:
-                if not hasattr(cls, "_instance"):
+                if not hasattr(cls, '_instance'):
                     cls._instance = object.__new__(cls)
         return cls._instance
 
@@ -46,13 +46,17 @@ class BaseClient(Service):
         self.service_info = ServiceInfo(
             volcengine_ml_platform.get_service_host(),
             {'Accept': 'application/json'},
-            volcengine_ml_platform.get_credentials(), 10, 10, "http")
+            volcengine_ml_platform.get_credentials(),
+            10,
+            10,
+            'http',
+        )
         self.api_info = API_INFOS
         self.domain_cache = {}
         self.fallback_domain_weights = {}
         self.update_interval = 10
         self.lock = threading.Lock()
-        super(BaseClient, self).__init__(self.service_info, self.api_info)
+        super().__init__(self.service_info, self.api_info)
 
     def common_json_handler(self, api, body):
         start_time = metric.current_ts()
@@ -62,22 +66,24 @@ class BaseClient(Service):
             body = json.dumps(body)
             res_json = self.json2(api, params, body)
         except Exception as e:
-            msg = "time-cost(ms)={}, The server returns an error: api={}, error={}".format(
-                metric.cost_time(start_time), api, json.dumps(res_json))
+            msg = 'time-cost(ms)={}, The server returns an error: api={}, error={}'.format(
+                metric.cost_time(start_time), api, json.dumps(res_json),
+            )
             logging.error(msg)
             raise e
 
         err = res_json['ResponseMetadata'].get('Error', None)
         if err is not None:
-            msg = "time-cost(ms)={}, The server returns an error: api={}, error={}".format(
-                metric.cost_time(start_time), api, json.dumps(err))
+            msg = 'time-cost(ms)={}, The server returns an error: api={}, error={}'.format(
+                metric.cost_time(start_time), api, json.dumps(err),
+            )
             logging.error(msg)
             raise Exception(msg) from err
         return res_json
 
     def json2(self, api, params, body):
         if api not in self.api_info:
-            raise Exception("no such api")
+            raise Exception('no such api')
         api_info = self.api_info[api]
         r = self.prepare_request(api_info, params)
         r.headers['Content-Type'] = 'application/json'
@@ -86,11 +92,15 @@ class BaseClient(Service):
         SignerV4.sign(r, self.service_info.credentials)
 
         url = r.build()
-        resp = self.session.post(url,
-                                 headers=r.headers,
-                                 data=r.body,
-                                 timeout=(self.service_info.connection_timeout,
-                                          self.service_info.socket_timeout))
+        resp = self.session.post(
+            url,
+            headers=r.headers,
+            data=r.body,
+            timeout=(
+                self.service_info.connection_timeout,
+                self.service_info.socket_timeout,
+            ),
+        )
         if resp.status_code == 200:
             return resp.json()
         raise Exception(resp.text)
@@ -109,8 +119,9 @@ class BaseClient(Service):
             body.update({'Path': path})
 
         try:
-            res_json = self.common_json_handler(api='GetTOSUploadPath',
-                                                body=body)
+            res_json = self.common_json_handler(
+                api='GetTOSUploadPath', body=body,
+            )
             return res_json
         except Exception as e:
             logging.error('Failed to GetTOSUploadPath, error: %s', e)
@@ -127,8 +138,8 @@ class BaseClient(Service):
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get sts token, encrypt_code: %s, error: %s',
-                encrypt_code, e)
+                'Failed to get sts token, encrypt_code: %s, error: %s', encrypt_code, e,
+            )
             raise Exception('get_sts_token failed') from e
 
     def get_unique_flavor(self, list_flavor_result):

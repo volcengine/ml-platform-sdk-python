@@ -1,32 +1,34 @@
-# -*- coding: utf-8 -*-
-
 import math
 import os
 from typing import Optional
+
 import numpy as np
 
 from volcengine_ml_platform.datasets.dataset import _Dataset
 
 
 class TabularDataset(_Dataset):
-
     def download(self, local_path: Optional[str] = None):
         if local_path is not None:
             self.local_path = local_path
         self.tabular_path = self._download_file(
-            self._get_storage_path(),  # TODO tabular file hasn't storage_path()
-            self.local_path)
+            self._get_storage_path(
+            ),  # TODO tabular file hasn't storage_path()
+            self.local_path,
+        )
         self.created = True
 
         # count number of lines, not including header line
         with open(self.tabular_path, encoding='utf-8') as f:
             self.data_count = sum(1 for line in f) - 1
 
-    def split(self,
-              training_dir: str,
-              testing_dir: str,
-              ratio=0.8,
-              random_state=0):
+    def split(
+        self,
+        training_dir: str,
+        testing_dir: str,
+        ratio=0.8,
+        random_state=0,
+    ):
         """split dataset and return two dataset objects
 
         Args:
@@ -44,7 +46,8 @@ class TabularDataset(_Dataset):
 
         if training_dir == testing_dir:
             raise ValueError(
-                'training directory can not be the same as testing directory')
+                'training directory can not be the same as testing directory',
+            )
 
         csv_name = os.path.basename(self.tabular_path)
         train_csv_path = os.path.join(training_dir, csv_name)
@@ -53,9 +56,11 @@ class TabularDataset(_Dataset):
         line_count = self.data_count
         np.random.seed(random_state)
         test_index_set = set(
-            np.random.choice(line_count,
-                             math.floor(line_count * (1 - ratio)),
-                             replace=False))
+            np.random.choice(
+                line_count,
+                math.floor(line_count * (1 - ratio)),
+                replace=False,
+            ), )
         os.makedirs(testing_dir, exist_ok=True)
         os.makedirs(training_dir, exist_ok=True)
 
@@ -66,7 +71,11 @@ class TabularDataset(_Dataset):
         train_dataset.data_count = line_count - test_dataset.data_count
 
         with open(test_csv_path, mode='w', encoding='utf-8') as test_file:
-            with open(train_csv_path, mode='w', encoding='utf-8') as train_file:
+            with open(
+                    train_csv_path,
+                    mode='w',
+                    encoding='utf-8',
+            ) as train_file:
                 index = -1
                 with open(self.tabular_path, encoding='utf-8') as input_file:
                     for line in input_file:

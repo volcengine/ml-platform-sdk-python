@@ -1,5 +1,8 @@
 import json
+from typing import Dict
+from typing import List
 from typing import Optional
+
 from volcengine_ml_platform.annotation.ttypes import AnnotationDataType
 
 
@@ -25,8 +28,8 @@ class Annotation:
 
     def __init__(self, manifest_file: Optional[str] = None):
         self.manifest_file = manifest_file
-        self.label_index = {}
-        self.annotation_data = []
+        self.label_index: Dict[str, List] = {}
+        self.annotation_data: List[str] = []
         self.iter_index = 0
         self._build_label_index()
 
@@ -54,7 +57,7 @@ class Annotation:
         return annotation
 
     def extract_annotation_with_data(self, manifest_line):
-        """ get content and annotation
+        """get content and annotation
         Args:
             manifest line data
         Return:
@@ -75,8 +78,10 @@ class Annotation:
         labels = []
         for data in annotation_result['Data']:
             data_type = data['Type']
-            if data_type in (AnnotationDataType.SingleSelector,
-                             AnnotationDataType.BlankFilling):
+            if data_type in (
+                    AnnotationDataType.SingleSelector,
+                    AnnotationDataType.BlankFilling,
+            ):
                 labels.append(data['Label'])
             elif data_type == AnnotationDataType.MultipleSelector:
                 labels.extend(data['Labels'])

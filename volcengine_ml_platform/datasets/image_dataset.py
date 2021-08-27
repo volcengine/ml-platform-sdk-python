@@ -8,25 +8,21 @@ import numpy as np
 from PIL import Image
 
 from volcengine_ml_platform import constant
-from volcengine_ml_platform.datasets.dataset import _Dataset, dataset_copy_file
+from volcengine_ml_platform.datasets.dataset import _Dataset
+from volcengine_ml_platform.datasets.dataset import dataset_copy_file
 from volcengine_ml_platform.io.tos_files_io import TorchTOSDataset
 
 
 class ImageDataset(_Dataset):
-
     def download(self, local_path: Optional[str] = None, limit=-1):
         """download datasets from source
 
         Args:
             limit (int, optional): download size. Defaults to -1 (no limit).
         """
-        self._create_mainfest_dataset(local_path, "ImageURL")
+        self._create_mainfest_dataset(local_path, 'ImageURL')
 
-    def split(self,
-              training_dir: str,
-              testing_dir: str,
-              ratio=0.8,
-              random_state=0):
+    def split(self, training_dir: str, testing_dir: str, ratio=0.8, random_state=0):
         """split datasets and return two datasets objects
 
         Args:
@@ -45,9 +41,10 @@ class ImageDataset(_Dataset):
 
         np.random.seed(random_state)
         test_index_set = set(
-            np.random.choice(line_count,
-                             math.floor(line_count * (1 - ratio)),
-                             replace=False))
+            np.random.choice(
+                line_count, math.floor(line_count * (1 - ratio)), replace=False,
+            ),
+        )
         os.makedirs(testing_dir, exist_ok=True)
         os.makedirs(training_dir, exist_ok=True)
 
@@ -59,25 +56,31 @@ class ImageDataset(_Dataset):
 
         # generate training and testing datasets's manifest file
         train_metadata_path = os.path.join(
-            training_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
+            training_dir, constant.DATASET_LOCAL_METADATA_FILENAME,
+        )
         test_metadata_path = os.path.join(
-            testing_dir, constant.DATASET_LOCAL_METADATA_FILENAME)
-        with open(test_metadata_path, mode='w',
-                  encoding='utf-8') as testing_manifest_file:
-            with open(train_metadata_path, mode='w',
-                      encoding='utf-8') as training_manifest_file:
+            testing_dir, constant.DATASET_LOCAL_METADATA_FILENAME,
+        )
+        with open(
+            test_metadata_path, mode='w', encoding='utf-8',
+        ) as testing_manifest_file:
+            with open(
+                train_metadata_path, mode='w', encoding='utf-8',
+            ) as training_manifest_file:
                 index = 0
                 with open(self._manifest_path(), encoding='utf-8') as f:
                     for line in f:
                         manifest_line = json.loads(line)
                         if index in test_index_set:
-                            dataset_copy_file(manifest_line, self.local_path,
-                                              testing_dir)
+                            dataset_copy_file(
+                                manifest_line, self.local_path, testing_dir,
+                            )
                             json.dump(manifest_line, testing_manifest_file)
                             testing_manifest_file.write('\n')
                         else:
-                            dataset_copy_file(manifest_line, self.local_path,
-                                              training_dir)
+                            dataset_copy_file(
+                                manifest_line, self.local_path, training_dir,
+                            )
                             json.dump(manifest_line, training_manifest_file)
                             training_manifest_file.write('\n')
                         index = index + 1
@@ -125,15 +128,21 @@ class ImageDataset(_Dataset):
                 key = url.split(f'{bucket}/')[1]
                 manifest_info['buckets'].append(bucket)
                 manifest_info['keys'].append(key)
-                manifest_info['annotations'].append(manifest_line['Annotation'])
+                manifest_info['annotations'].append(
+                    manifest_line['Annotation'],
+                )
         return manifest_info
 
-    def init_torch_dataset(self,
-                           transform: Optional[Callable] = None,
-                           target_transform: Optional[Callable] = None):
+    def init_torch_dataset(
+        self,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+    ):
         manifest_info = self.get_manifest_info(self.parse_image_manifest)
-        torch_dataset = TorchTOSDataset(manifest_info=manifest_info,
-                                        transform=transform,
-                                        target_transform=target_transform)
+        torch_dataset = TorchTOSDataset(
+            manifest_info=manifest_info,
+            transform=transform,
+            target_transform=target_transform,
+        )
 
         return torch_dataset
