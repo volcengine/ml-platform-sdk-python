@@ -49,4 +49,4 @@ repos:
     hooks:
     -   id: mypy
         additional_dependencies: [types-all]
-        exclude: ^testing/resources/
+        exclude: ^samples/models/

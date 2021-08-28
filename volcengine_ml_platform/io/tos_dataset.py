@@ -6,7 +6,7 @@ from typing import Optional
 import torch
 from PIL import Image
 
-from volcengine_ml_platform.tos import tos
+from volcengine_ml_platform.io import tos
 
 
 class TorchTOSDataset:

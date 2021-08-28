@@ -8,8 +8,8 @@ from datetime import datetime
 from pathlib import Path
 
 from volcengine_ml_platform.datasets.image_dataset import ImageDataset
+from volcengine_ml_platform.io.tos import TOSClient
 from volcengine_ml_platform.openapi.dataset_client import DataSetClient
-from volcengine_ml_platform.tos.tos import TOSClient
 
 test_upload_number = 10
 benchmark_upload_number = 50000

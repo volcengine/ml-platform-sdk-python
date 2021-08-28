@@ -8,10 +8,10 @@ from prettytable import PrettyTable
 from tqdm import tqdm
 
 from volcengine_ml_platform.inferences.inference import InferenceService
+from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.models import validation
 from volcengine_ml_platform.openapi import model_client
 from volcengine_ml_platform.openapi import resource_client
-from volcengine_ml_platform.tos import tos
 
 
 class Model:

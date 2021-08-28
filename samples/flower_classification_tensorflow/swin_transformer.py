@@ -8,8 +8,8 @@ import tensorflow as tf
 
 from samples.models.swin_transformer_tensorflow.model import SwinTransformer
 from volcengine_ml_platform import constant
+from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.models.model import Model
-from volcengine_ml_platform.tos import tos
 from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
 

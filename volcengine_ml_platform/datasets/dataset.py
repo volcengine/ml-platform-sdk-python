@@ -7,8 +7,8 @@ from typing import Optional
 from typing import Tuple
 
 from volcengine_ml_platform import constant
+from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.openapi import dataset_client
-from volcengine_ml_platform.tos import tos
 
 QUEUE_TIMEOUT_SECONDS = 4
 

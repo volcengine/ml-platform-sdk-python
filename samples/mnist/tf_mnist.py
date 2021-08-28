@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 from volcengine_ml_platform import constant
-from volcengine_ml_platform.tos import tos
+from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
 

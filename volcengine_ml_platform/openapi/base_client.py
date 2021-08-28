@@ -1,6 +1,7 @@
 import json
 import logging
 import threading
+from typing import Dict
 from typing import Union
 
 from volcengine.ApiInfo import ApiInfo
@@ -14,7 +15,7 @@ from volcengine_ml_platform.util import metric
 
 API_INFOS = {}
 
-BodyDict = dict[str, Union[str, int]]
+BodyDict = Dict[str, Union[str, int]]
 
 
 def define_api(name, method='POST'):

@@ -10,7 +10,7 @@ from PIL import Image
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.datasets.dataset import _Dataset
 from volcengine_ml_platform.datasets.dataset import dataset_copy_file
-from volcengine_ml_platform.io.tos_files_io import TorchTOSDataset
+from volcengine_ml_platform.io.tos_dataset import TorchTOSDataset
 
 
 class ImageDataset(_Dataset):

@@ -300,7 +300,7 @@ class TOSClient:
         keys: list = [],
         file_paths: list = [],
         dir_path: str = '',
-        tos_urls: list[str] = [],
+        tos_urls: List[str] = [],
         parallelism=1,
     ) -> List[str]:
         """download files by parallelism

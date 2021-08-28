@@ -30,7 +30,7 @@ from utils import save_checkpoint
 
 from samples.models.swin_transformer_pytorch.build import build_model
 from volcengine_ml_platform import constant
-from volcengine_ml_platform.tos import tos
+from volcengine_ml_platform.io import tos
 
 sys.path.append('../..')
 

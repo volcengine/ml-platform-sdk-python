@@ -9,7 +9,7 @@ import os
 import torch
 import torch.distributed as dist
 
-from volcengine_ml_platform.tos import tos
+from volcengine_ml_platform.io import tos
 
 try:
     # noinspection PyUnresolvedReferences
