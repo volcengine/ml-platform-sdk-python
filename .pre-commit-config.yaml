@@ -1,4 +1,5 @@
 repos:
+
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
@@ -10,21 +11,36 @@ repos:
     -   id: debug-statements
     -   id: name-tests-test
     -   id: requirements-txt-fixer
-    -   id: double-quote-string-fixer
-    # -   id: fix-encoding-pragma
+
+# black
+- repo: https://github.com/ambv/black
+  rev: stable
+  hooks:
+    - id: black
+      args: # arguments to configure black
+        - --line-length=88
+        - --include='\.pyi?$'
+
+        # these folders wont be formatted by black
+        - --exclude="""\.git |
+          \.__pycache__|
+          \.hg|
+          \.mypy_cache|
+          \.tox|
+          \.venv|
+          _build|
+          buck-out|
+          build|
+          dist"""
+      language_version: python3.7
 -   repo: https://github.com/PyCQA/flake8
     rev: 3.9.2
     hooks:
     -   id: flake8
         additional_dependencies: [flake8-typing-imports==1.10.0]
         args:
-            - --ignore=E501,E228,E226,E261,E266,E128,E402,W503
+            - --ignore=E501,E228,E226,E261,E266,E128,E402,W503,E203
             - --max-line-length=120
--   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5.7
-    hooks:
-    -   id: autopep8
-        args: ["-i"]
 -   repo: https://github.com/pre-commit/pre-commit
     rev: v2.14.0
     hooks:
@@ -39,14 +55,9 @@ repos:
     hooks:
     -   id: reorder-python-imports
         args: [--py3-plus]
--   repo: https://github.com/asottile/add-trailing-comma
-    rev: v2.1.0
-    hooks:
-    -   id: add-trailing-comma
-        args: [--py36-plus]
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.910
     hooks:
     -   id: mypy
         additional_dependencies: [types-all]
-        exclude: ^testing/resources/
+        exclude: ^samples/models/

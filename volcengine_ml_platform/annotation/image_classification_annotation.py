@@ -11,13 +11,13 @@ class ImageClassificationAnnotation(Annotation):
 
     def _get_url(self, manifest_line):
         data = get_data_section(manifest_line)
-        return data['ImageURL']
+        return data["ImageURL"]
 
     def extract_annotation(self, manifest_line):
         annotation = get_annotation_section(manifest_line)
 
         label_result = []
-        for result in annotation['Result']:
+        for result in annotation["Result"]:
             labels = self._get_labels(result)
-            label_result.append({'labels': labels})
+            label_result.append({"labels": labels})
         return label_result

@@ -6,7 +6,7 @@ from typing import Optional
 import torch
 from PIL import Image
 
-from volcengine_ml_platform.tos import tos
+from volcengine_ml_platform.io import tos
 
 
 class TorchTOSDataset:
@@ -20,9 +20,9 @@ class TorchTOSDataset:
         self.decode = decode
         self.transform = transform
         self.target_transform = target_transform
-        buckets = manifest_info['buckets']
-        keys = manifest_info['keys']
-        annotations = manifest_info['annotations']
+        buckets = manifest_info["buckets"]
+        keys = manifest_info["keys"]
+        annotations = manifest_info["annotations"]
         assert buckets is not None and keys is not None and annotations is not None
         assert len(buckets) == len(keys) and len(buckets) == len(annotations)
         self.set_dataset_indices(buckets, keys, annotations)
@@ -36,16 +36,16 @@ class TorchTOSDataset:
         return len(self.buckets)
 
     def _decode(self, raw_data):
-        return Image.open(io.BytesIO(raw_data)).convert('RGB')
+        return Image.open(io.BytesIO(raw_data)).convert("RGB")
 
     def _target_transform(self, target):
-        target = int(target['Result'][0]['Data'][0]['Label'])
+        target = int(target["Result"][0]["Data"][0]["Label"])
         return target
 
     def __getitem__(self, index):
         torch.set_num_threads(1)
         # get each process a TOS client
-        if not hasattr(self, 'tos_client'):
+        if not hasattr(self, "tos_client"):
             self.tos_client = tos.TOSClient()
         bucket, key, annotation = (
             self.buckets[index],

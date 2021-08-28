@@ -9,25 +9,25 @@ class AnnotationTemplate:
     TimeSeriesPrediction = 102
 
     _VALUES_TO_NAMES = {
-        1: 'TextClassification',
-        2: 'TextEntity',
-        3: 'ImageClassification',
-        4: 'ImageDetection',
-        5: 'ImageSegmentation',
-        6: 'VideoClassification',
-        101: 'TabularPrediction',
-        102: 'TimeSeriesPrediction',
+        1: "TextClassification",
+        2: "TextEntity",
+        3: "ImageClassification",
+        4: "ImageDetection",
+        5: "ImageSegmentation",
+        6: "VideoClassification",
+        101: "TabularPrediction",
+        102: "TimeSeriesPrediction",
     }
 
     _NAMES_TO_VALUES = {
-        'TextClassification': 1,
-        'TextEntity': 2,
-        'ImageClassification': 3,
-        'ImageDetection': 4,
-        'ImageSegmentation': 5,
-        'VideoClassification': 6,
-        'TabularPrediction': 101,
-        'TimeSeriesPrediction': 102,
+        "TextClassification": 1,
+        "TextEntity": 2,
+        "ImageClassification": 3,
+        "ImageDetection": 4,
+        "ImageSegmentation": 5,
+        "VideoClassification": 6,
+        "TabularPrediction": 101,
+        "TimeSeriesPrediction": 102,
     }
 
 
@@ -37,15 +37,15 @@ class AnnotationDataType:
     BlankFilling = 3
 
     _VALUES_TO_NAMES = {
-        1: 'SingleSelector',
-        2: 'MultipleSelector',
-        3: 'BlankFilling',
+        1: "SingleSelector",
+        2: "MultipleSelector",
+        3: "BlankFilling",
     }
 
     _NAMES_TO_VALUES = {
-        'SingleSelector': 1,
-        'MultipleSelector': 2,
-        'BlankFilling': 3,
+        "SingleSelector": 1,
+        "MultipleSelector": 2,
+        "BlankFilling": 3,
     }
 
 
@@ -55,15 +55,15 @@ class AnnotationStatus:
     Invalid = 3
 
     _VALUES_TO_NAMES = {
-        1: 'Init',
-        2: 'Marked',
-        3: 'Invalid',
+        1: "Init",
+        2: "Marked",
+        3: "Invalid",
     }
 
     _NAMES_TO_VALUES = {
-        'Init': 1,
-        'Marked': 2,
-        'Invalid': 3,
+        "Init": 1,
+        "Marked": 2,
+        "Invalid": 3,
     }
 
 

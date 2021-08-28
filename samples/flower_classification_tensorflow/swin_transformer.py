@@ -8,135 +8,135 @@ import tensorflow as tf
 
 from samples.models.swin_transformer_tensorflow.model import SwinTransformer
 from volcengine_ml_platform import constant
+from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.models.model import Model
-from volcengine_ml_platform.tos import tos
 from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
 
-sys.path.append('../..')
+sys.path.append("../..")
 
 BUCKET = constant.get_public_examples_readonly_bucket()
-CACHE_DIR = cache_dir.create('flower_classification/swin_transformer_tf')
+CACHE_DIR = cache_dir.create("flower_classification/swin_transformer_tf")
 
 AUTO = tf.data.experimental.AUTOTUNE
 
 client = tos.TOSClient()
-DATASET_PATH = 's3://{}/flower-classification/tfrecords/tfrecords-jpeg-224x224'.format(
+DATASET_PATH = "s3://{}/flower-classification/tfrecords/tfrecords-jpeg-224x224".format(
     BUCKET,
 )
-TRAINING_FILENAMES = tf.io.gfile.glob(DATASET_PATH + '/train/*.tfrec')
-VALIDATION_FILENAMES = tf.io.gfile.glob(DATASET_PATH + '/val/*.tfrec')
-TEST_FILENAMES = tf.io.gfile.glob(DATASET_PATH + '/test/*.tfrec')
+TRAINING_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/train/*.tfrec")
+VALIDATION_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/val/*.tfrec")
+TEST_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/test/*.tfrec")
 
-CHECKPOINT_PATH = 's3://{}/flower-classification/checkpoints/tf/cp.ckpt'.format(
+CHECKPOINT_PATH = "s3://{}/flower-classification/checkpoints/tf/cp.ckpt".format(
     BUCKET,
 )
 
 CLASSES = [
-    'pink primrose',
-    'hard-leaved pocket orchid',
-    'canterbury bells',
-    'sweet pea',
-    'wild geranium',
-    'tiger lily',
-    'moon orchid',
-    'bird of paradise',
-    'monkshood',
-    'globe thistle',  # 00 - 09
-    'snapdragon',
+    "pink primrose",
+    "hard-leaved pocket orchid",
+    "canterbury bells",
+    "sweet pea",
+    "wild geranium",
+    "tiger lily",
+    "moon orchid",
+    "bird of paradise",
+    "monkshood",
+    "globe thistle",  # 00 - 09
+    "snapdragon",
     "colt's foot",
-    'king protea',
-    'spear thistle',
-    'yellow iris',
-    'globe-flower',
-    'purple coneflower',
-    'peruvian lily',
-    'balloon flower',
-    'giant white arum lily',  # 10 - 19
-    'fire lily',
-    'pincushion flower',
-    'fritillary',
-    'red ginger',
-    'grape hyacinth',
-    'corn poppy',
-    'prince of wales feathers',
-    'stemless gentian',
-    'artichoke',
-    'sweet william',  # 20 - 29
-    'carnation',
-    'garden phlox',
-    'love in the mist',
-    'cosmos',
-    'alpine sea holly',
-    'ruby-lipped cattleya',
-    'cape flower',
-    'great masterwort',
-    'siam tulip',
-    'lenten rose',  # 30 - 39
-    'barberton daisy',
-    'daffodil',
-    'sword lily',
-    'poinsettia',
-    'bolero deep blue',
-    'wallflower',
-    'marigold',
-    'buttercup',
-    'daisy',
-    'common dandelion',  # 40 - 49
-    'petunia',
-    'wild pansy',
-    'primula',
-    'sunflower',
-    'lilac hibiscus',
-    'bishop of llandaff',
-    'gaura',
-    'geranium',
-    'orange dahlia',
-    'pink-yellow dahlia',  # 50 - 59
-    'cautleya spicata',
-    'japanese anemone',
-    'black-eyed susan',
-    'silverbush',
-    'californian poppy',
-    'osteospermum',
-    'spring crocus',
-    'iris',
-    'windflower',
-    'tree poppy',  # 60 - 69
-    'gazania',
-    'azalea',
-    'water lily',
-    'rose',
-    'thorn apple',
-    'morning glory',
-    'passion flower',
-    'lotus',
-    'toad lily',
-    'anthurium',  # 70 - 79
-    'frangipani',
-    'clematis',
-    'hibiscus',
-    'columbine',
-    'desert-rose',
-    'tree mallow',
-    'magnolia',
-    'cyclamen ',
-    'watercress',
-    'canna lily',  # 80 - 89
-    'hippeastrum ',
-    'bee balm',
-    'pink quill',
-    'foxglove',
-    'bougainvillea',
-    'camellia',
-    'mallow',
-    'mexican petunia',
-    'bromelia',
-    'blanket flower',  # 90 - 99
-    'trumpet creeper',
-    'blackberry lily',
-    'common tulip',
-    'wild rose',
+    "king protea",
+    "spear thistle",
+    "yellow iris",
+    "globe-flower",
+    "purple coneflower",
+    "peruvian lily",
+    "balloon flower",
+    "giant white arum lily",  # 10 - 19
+    "fire lily",
+    "pincushion flower",
+    "fritillary",
+    "red ginger",
+    "grape hyacinth",
+    "corn poppy",
+    "prince of wales feathers",
+    "stemless gentian",
+    "artichoke",
+    "sweet william",  # 20 - 29
+    "carnation",
+    "garden phlox",
+    "love in the mist",
+    "cosmos",
+    "alpine sea holly",
+    "ruby-lipped cattleya",
+    "cape flower",
+    "great masterwort",
+    "siam tulip",
+    "lenten rose",  # 30 - 39
+    "barberton daisy",
+    "daffodil",
+    "sword lily",
+    "poinsettia",
+    "bolero deep blue",
+    "wallflower",
+    "marigold",
+    "buttercup",
+    "daisy",
+    "common dandelion",  # 40 - 49
+    "petunia",
+    "wild pansy",
+    "primula",
+    "sunflower",
+    "lilac hibiscus",
+    "bishop of llandaff",
+    "gaura",
+    "geranium",
+    "orange dahlia",
+    "pink-yellow dahlia",  # 50 - 59
+    "cautleya spicata",
+    "japanese anemone",
+    "black-eyed susan",
+    "silverbush",
+    "californian poppy",
+    "osteospermum",
+    "spring crocus",
+    "iris",
+    "windflower",
+    "tree poppy",  # 60 - 69
+    "gazania",
+    "azalea",
+    "water lily",
+    "rose",
+    "thorn apple",
+    "morning glory",
+    "passion flower",
+    "lotus",
+    "toad lily",
+    "anthurium",  # 70 - 79
+    "frangipani",
+    "clematis",
+    "hibiscus",
+    "columbine",
+    "desert-rose",
+    "tree mallow",
+    "magnolia",
+    "cyclamen ",
+    "watercress",
+    "canna lily",  # 80 - 89
+    "hippeastrum ",
+    "bee balm",
+    "pink quill",
+    "foxglove",
+    "bougainvillea",
+    "camellia",
+    "mallow",
+    "mexican petunia",
+    "bromelia",
+    "blanket flower",  # 90 - 99
+    "trumpet creeper",
+    "blackberry lily",
+    "common tulip",
+    "wild rose",
 ]
 
 
@@ -150,27 +150,27 @@ def decode_image(image_data):
 def read_labeled_tfrecord(example):
     labeled_tfrec_format = {
         # tf.string means bytestring
-        'image': tf.io.FixedLenFeature([], tf.string),
+        "image": tf.io.FixedLenFeature([], tf.string),
         # shape [] means single element
-        'class': tf.io.FixedLenFeature([], tf.int64),
+        "class": tf.io.FixedLenFeature([], tf.int64),
     }
     example = tf.io.parse_single_example(example, labeled_tfrec_format)
-    image = decode_image(example['image'])
-    label = tf.cast(example['class'], tf.int32)
+    image = decode_image(example["image"])
+    label = tf.cast(example["class"], tf.int32)
     return image, label  # returns a dataset of (image, label) pairs
 
 
 def read_unlabeled_tfrecord(example):
     unlabeled_tfrec_format = {
         # tf.string means bytestring
-        'image': tf.io.FixedLenFeature([], tf.string),
+        "image": tf.io.FixedLenFeature([], tf.string),
         # shape [] means single element
-        'id': tf.io.FixedLenFeature([], tf.string),
+        "id": tf.io.FixedLenFeature([], tf.string),
         # class is missing
     }
     example = tf.io.parse_single_example(example, unlabeled_tfrec_format)
-    image = decode_image(example['image'])
-    idnum = example['id']
+    image = decode_image(example["image"])
+    idnum = example["id"]
     return image, idnum  # returns a dataset of image(s)
 
 
@@ -183,7 +183,8 @@ def load_dataset(filenames, labeled=True, ordered=False):
         ignore_order.experimental_deterministic = False  # disable order, increase speed
 
     dataset = tf.data.TFRecordDataset(
-        filenames, num_parallel_reads=AUTO,
+        filenames,
+        num_parallel_reads=AUTO,
     )  # automatically interleaves reads from multiple files
     dataset = dataset.with_options(
         ignore_order,
@@ -243,7 +244,7 @@ def count_data_items(filenames):
     # the number of data items is written in the name of the .tfrec files
     # i.e. flowers00-230.tfrec = 230 data items
     num = [
-        int(re.compile(r'-([0-9]*)\.').search(filename).group(1))
+        int(re.compile(r"-([0-9]*)\.").search(filename).group(1))
         for filename in filenames
     ]
     return np.sum(num)
@@ -254,8 +255,10 @@ def get_datasets_info():
     num_validation_images = count_data_items(VALIDATION_FILENAMES)
     num_test_images = count_data_items(TEST_FILENAMES)
     print(
-        'Dataset: {} training images, {} validation images, {} unlabeled test images'.format(
-            num_training_images, num_validation_images, num_test_images,
+        "Dataset: {} training images, {} validation images, {} unlabeled test images".format(
+            num_training_images,
+            num_validation_images,
+            num_test_images,
         ),
     )
     return num_training_images, num_validation_images, num_test_images
@@ -264,62 +267,69 @@ def get_datasets_info():
 def download_pretrained_ckpt_from_tos():
     start_time = metric.current_ts()
     tos_client = tos.TOSClient()
-    file_name = 'swin_tiny_224.tar.gz'
+    file_name = "swin_tiny_224.tar.gz"
     dst_path = CACHE_DIR.subpath(file_name)
     tos_client.download_file(
         file_path=dst_path,
         bucket=BUCKET,
-        key='flower-classification/swin_tiny_224.tar.gz',
+        key="flower-classification/swin_tiny_224.tar.gz",
     )
     print(
-        'time-cost(ms)={}, finish dowload pretrain_ckpt from tos'.format(
+        "time-cost(ms)={}, finish dowload pretrain_ckpt from tos".format(
             metric.cost_time(start_time),
         ),
     )
     return CACHE_DIR.get_root_path()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # args parser
     parser = argparse.ArgumentParser(
-        description='Swin Transformer Training Example',
+        description="Swin Transformer Training Example",
     )
     parser.add_argument(
-        '--batch-size', type=int,
-        help='input batch size for training',
-    )
-    parser.add_argument(
-        '--epochs', type=int, default=10, help='number of epochs to train',
-    )
-    parser.add_argument(
-        '--steps-per-epoch', type=int, help='number of steps per epoch to train',
-    )
-    parser.add_argument(
-        '--validation-steps',
+        "--batch-size",
         type=int,
-        help='number of validation steps per epoch to train',
+        help="input batch size for training",
     )
     parser.add_argument(
-        '--strategy',
+        "--epochs",
+        type=int,
+        default=10,
+        help="number of epochs to train",
+    )
+    parser.add_argument(
+        "--steps-per-epoch",
+        type=int,
+        help="number of steps per epoch to train",
+    )
+    parser.add_argument(
+        "--validation-steps",
+        type=int,
+        help="number of validation steps per epoch to train",
+    )
+    parser.add_argument(
+        "--strategy",
         type=str,
-        default='mirrored',
-        help='number of validation steps per epoch to train',
+        default="mirrored",
+        help="number of validation steps per epoch to train",
     )
     parser.add_argument(
-        '--checkpoint', type=str,
-        help='the path to load checkpoints',
+        "--checkpoint",
+        type=str,
+        help="the path to load checkpoints",
     )
 
     args = parser.parse_args()
 
     # select a strategy
-    if args.strategy == 'default':
+    if args.strategy == "default":
         strategy = (
             tf.distribute.get_strategy()
         )  # default strategy that works on CPU and single GPU
-    elif args.strategy == 'mirrored':
+    elif args.strategy == "mirrored":
         strategy = tf.distribute.MirroredStrategy()  # for GPU or multi-GPU machines
-    print('Number of accelerators: ', strategy.num_replicas_in_sync)
+    print("Number of accelerators: ", strategy.num_replicas_in_sync)
 
     # For GPU training, please select 224 x 224 px image size.
     IMAGE_SIZE = [224, 224]
@@ -351,12 +361,13 @@ if __name__ == '__main__':
     with strategy.scope():
         img_adjust_layer = tf.keras.layers.Lambda(
             lambda data: tf.keras.applications.imagenet_utils.preprocess_input(
-                tf.cast(data, tf.float32), mode='torch',
+                tf.cast(data, tf.float32),
+                mode="torch",
             ),
             input_shape=[*IMAGE_SIZE, 3],
         )
         pretrained_model = SwinTransformer(
-            'swin_tiny_224',
+            "swin_tiny_224",
             num_classes=len(CLASSES),
             include_top=False,
             cache_dir=pretrained_ckpt_path,
@@ -366,32 +377,36 @@ if __name__ == '__main__':
             [
                 img_adjust_layer,
                 pretrained_model,
-                tf.keras.layers.Dense(len(CLASSES), activation='softmax'),
+                tf.keras.layers.Dense(len(CLASSES), activation="softmax"),
             ],
         )
 
         if args.checkpoint is not None:
             model.load_weights(args.checkpoint)
-            print('load checkpoint successfully')
+            print("load checkpoint successfully")
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, epsilon=1e-8),
-        loss='sparse_categorical_crossentropy',
-        metrics=['sparse_categorical_accuracy'],
+        loss="sparse_categorical_crossentropy",
+        metrics=["sparse_categorical_accuracy"],
     )
     model.summary()
 
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        filepath=CHECKPOINT_PATH, save_weights_only=True, verbose=1,
+        filepath=CHECKPOINT_PATH,
+        save_weights_only=True,
+        verbose=1,
     )
 
     # tensorboard
     log_dir = os.getenv(
-        'TENSORBOARD_LOG_PATH',
-        default=os.path.join(os.path.dirname(__file__), 'tensorboard_logs'),
+        "TENSORBOARD_LOG_PATH",
+        default=os.path.join(os.path.dirname(__file__), "tensorboard_logs"),
     )
     tensorboard_callback = tf.keras.callbacks.TensorBoard(
-        log_dir=log_dir, write_images=False, histogram_freq=1,
+        log_dir=log_dir,
+        write_images=False,
+        histogram_freq=1,
     )
 
     callbacks = [model_checkpoint_callback, tensorboard_callback]
@@ -406,16 +421,16 @@ if __name__ == '__main__':
         callbacks=callbacks,
     )
 
-    SAVED_MODEL_PATH = CACHE_DIR.subpath('tf_saved_model')
+    SAVED_MODEL_PATH = CACHE_DIR.subpath("tf_saved_model")
     model.save(SAVED_MODEL_PATH)
 
     # register new model_version to mlplatform.model_repo
     model = Model(local_path=SAVED_MODEL_PATH)
     model.register(
-        model_name='test-swin-transformer-model',
-        model_format='SavedModel',
-        model_type='TensorFlow:2.4',
-        description='Flower Classification Model',
+        model_name="test-swin-transformer-model",
+        model_format="SavedModel",
+        model_type="TensorFlow:2.4",
+        description="Flower Classification Model",
     )
 
     # get models detail
@@ -423,8 +438,8 @@ if __name__ == '__main__':
 
     # deploy the selected model_version
     inference_service = model.deploy(
-        flavor='ml.highcpu.large',
+        flavor="ml.highcpu.large",
         replica=1,
         model_version=1,
-        image_id='machinelearning/tfserving:tf-cuda11.0',
+        image_id="machinelearning/tfserving:tf-cuda11.0",
     )

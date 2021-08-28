@@ -77,6 +77,10 @@ pip install -r requirements.txt
 pip install pre-commit
 pre-commit install           # install pre-commit hook to git
 ```
+You can also manually check all files with the following command
+```
+pre-commit run --all-files
+```
 
 ### Unittest
 ```

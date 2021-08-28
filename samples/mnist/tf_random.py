@@ -32,21 +32,25 @@ def create_model():
     return tf.keras.models.Sequential(
         [
             tf.keras.layers.Flatten(input_shape=(28, 28)),
-            tf.keras.layers.Dense(512, activation='relu'),
+            tf.keras.layers.Dense(512, activation="relu"),
             tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(10, activation='softmax'),
+            tf.keras.layers.Dense(10, activation="softmax"),
         ],
     )
 
 
 model = create_model()
 model.compile(
-    optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'],
+    optimizer="adam",
+    loss="sparse_categorical_crossentropy",
+    metrics=["accuracy"],
 )
 
-log_dir = os.getenv('TENSORBOARD_LOG_PATH', '/tmp/tensorboard_logs/')
+log_dir = os.getenv("TENSORBOARD_LOG_PATH", "/tmp/tensorboard_logs/")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(
-    log_dir=log_dir, write_images=False, histogram_freq=1,
+    log_dir=log_dir,
+    write_images=False,
+    histogram_freq=1,
 )
 
 model.fit(
@@ -57,4 +61,4 @@ model.fit(
     callbacks=[tensorboard_callback],
 )
 
-print('finish model training')
+print("finish model training")

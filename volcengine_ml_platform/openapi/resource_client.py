@@ -3,10 +3,10 @@ import logging
 from volcengine_ml_platform.openapi.base_client import BaseClient
 from volcengine_ml_platform.openapi.base_client import define_api
 
-define_api('CreateResource')
-define_api('GetResource')
-define_api('DeleteResource')
-define_api('ListResource')
+define_api("CreateResource")
+define_api("GetResource")
+define_api("DeleteResource")
+define_api("ListResource")
 
 
 class ResourceClient(BaseClient):
@@ -43,22 +43,22 @@ class ResourceClient(BaseClient):
             json response
         """
         body = {
-            'Name': name,
-            'Type': resource_type,
-            'vCPU': v_cpu,
-            'Memory': memory,
-            'GPUType': gpu_type,
-            'GPUNum': gpu_num,
-            'Price': price,
-            'Region': region,
+            "Name": name,
+            "Type": resource_type,
+            "vCPU": v_cpu,
+            "Memory": memory,
+            "GPUType": gpu_type,
+            "GPUNum": gpu_num,
+            "Price": price,
+            "Region": region,
         }
 
         try:
-            res_json = self.common_json_handler('CreateResource', body)
+            res_json = self.common_json_handler("CreateResource", body)
             return res_json
         except Exception as e:
-            logging.error('Failed to create resource, error: %s', e)
-            raise Exception('create_resource failed') from e
+            logging.error("Failed to create resource, error: %s", e)
+            raise Exception("create_resource failed") from e
 
     def get_resource(self, flavor_id: str):
         """get resource with given flavor_id
@@ -72,16 +72,18 @@ class ResourceClient(BaseClient):
         Returns:
             json response
         """
-        body = {'FlavorID': flavor_id}
+        body = {"FlavorID": flavor_id}
 
         try:
-            res_json = self.common_json_handler(api='GetResource', body=body)
+            res_json = self.common_json_handler(api="GetResource", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get resource info, flavor_id: %s, error: %s', flavor_id, e,
+                "Failed to get resource info, flavor_id: %s, error: %s",
+                flavor_id,
+                e,
             )
-            raise Exception('get_resource failed') from e
+            raise Exception("get_resource failed") from e
 
     def delete_resource(self, flavor_id: str):
         """delete resource with given flavor id
@@ -95,18 +97,21 @@ class ResourceClient(BaseClient):
         Returns:
             json response
         """
-        body = {'FlavorID': flavor_id}
+        body = {"FlavorID": flavor_id}
 
         try:
             res_json = self.common_json_handler(
-                api='DeleteResource', body=body,
+                api="DeleteResource",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to delete resource, flavor_id: %s, error: %s', flavor_id, e,
+                "Failed to delete resource, flavor_id: %s, error: %s",
+                flavor_id,
+                e,
             )
-            raise Exception('delete_resource failed') from e
+            raise Exception("delete_resource failed") from e
 
     def list_resource(
         self,
@@ -116,8 +121,8 @@ class ResourceClient(BaseClient):
         tag: list = None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list resource with given service_id
 
@@ -141,24 +146,24 @@ class ResourceClient(BaseClient):
             json response
         """
         body = {
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
 
         if name:
-            body.update({'Name': name})
+            body.update({"Name": name})
         if name_contains:
-            body.update({'NameContains': name_contains})
+            body.update({"NameContains": name_contains})
         if resource_type:
-            body.update({'Type': resource_type})
+            body.update({"Type": resource_type})
         if tag:
-            body.update({'Tag': tag})
+            body.update({"Tag": tag})
 
         try:
-            res_json = self.common_json_handler(api='ListResource', body=body)
+            res_json = self.common_json_handler(api="ListResource", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to list resource, error: %s', e)
-            raise Exception('list_resource failed') from e
+            logging.error("Failed to list resource, error: %s", e)
+            raise Exception("list_resource failed") from e

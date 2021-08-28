@@ -1,6 +1,7 @@
 import json
 import logging
 import threading
+from typing import Dict
 from typing import Union
 
 from volcengine.ApiInfo import ApiInfo
@@ -14,45 +15,49 @@ from volcengine_ml_platform.util import metric
 
 API_INFOS = {}
 
-BodyDict = dict[str, Union[str, int]]
+BodyDict = Dict[str, Union[str, int]]
 
 
-def define_api(name, method='POST'):
+def define_api(name, method="POST"):
     header = {}
     stress_flag = volcengine_ml_platform.get_stress_flag()
     if stress_flag is not None and len(stress_flag.strip()) > 0:
-        header.update('X-Tt-Stress', stress_flag.strip())
+        header.update("X-Tt-Stress", stress_flag.strip())
 
     API_INFOS[name] = ApiInfo(
-        method, '/', {
-            'Action': name,
-            'Version': constant.SERVICE_VERSION,
-        }, {}, header,
+        method,
+        "/",
+        {
+            "Action": name,
+            "Version": constant.SERVICE_VERSION,
+        },
+        {},
+        header,
     )
 
 
-define_api('GetTOSUploadPath')
-define_api('GetSTSToken')
+define_api("GetTOSUploadPath")
+define_api("GetSTSToken")
 
 
 class BaseClient(Service):
     _instance_lock = threading.Lock()
 
     def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, '_instance'):
+        if not hasattr(cls, "_instance"):
             with cls._instance_lock:
-                if not hasattr(cls, '_instance'):
+                if not hasattr(cls, "_instance"):
                     cls._instance = object.__new__(cls)
         return cls._instance
 
     def __init__(self):
         self.service_info = ServiceInfo(
             volcengine_ml_platform.get_service_host(),
-            {'Accept': 'application/json'},
+            {"Accept": "application/json"},
             volcengine_ml_platform.get_credentials(),
             10,
             10,
-            'http',
+            "http",
         )
         self.api_info = API_INFOS
         self.domain_cache = {}
@@ -69,16 +74,20 @@ class BaseClient(Service):
             body = json.dumps(body)
             res_json = self.json2(api, params, body)
         except Exception as e:
-            msg = 'time-cost(ms)={}, The server returns an error: api={}, error={}'.format(
-                metric.cost_time(start_time), api, json.dumps(res_json),
+            msg = "time-cost(ms)={}, The server returns an error: api={}, error={}".format(
+                metric.cost_time(start_time),
+                api,
+                json.dumps(res_json),
             )
             logging.error(msg)
             raise e
 
-        err = res_json['ResponseMetadata'].get('Error', None)
+        err = res_json["ResponseMetadata"].get("Error", None)
         if err is not None:
-            msg = 'time-cost(ms)={}, The server returns an error: api={}, error={}'.format(
-                metric.cost_time(start_time), api, json.dumps(err),
+            msg = "time-cost(ms)={}, The server returns an error: api={}, error={}".format(
+                metric.cost_time(start_time),
+                api,
+                json.dumps(err),
             )
             logging.error(msg)
             raise Exception(msg) from err
@@ -86,10 +95,10 @@ class BaseClient(Service):
 
     def json2(self, api, params, body):
         if api not in self.api_info:
-            raise Exception('no such api')
+            raise Exception("no such api")
         api_info = self.api_info[api]
         r = self.prepare_request(api_info, params)
-        r.headers['Content-Type'] = 'application/json'
+        r.headers["Content-Type"] = "application/json"
         r.body = body
 
         SignerV4.sign(r, self.service_info.credentials)
@@ -117,37 +126,40 @@ class BaseClient(Service):
         Returns:
 
         """
-        body: BodyDict = {'ServiceName': service_name}
+        body: BodyDict = {"ServiceName": service_name}
         if path:
-            body.update({'Path': path})
+            body.update({"Path": path})
 
         try:
             res_json = self.common_json_handler(
-                api='GetTOSUploadPath', body=body,
+                api="GetTOSUploadPath",
+                body=body,
             )
             return res_json
         except Exception as e:
-            logging.error('Failed to GetTOSUploadPath, error: %s', e)
-            raise Exception('GetTOSUploadPath failed') from e
+            logging.error("Failed to GetTOSUploadPath, error: %s", e)
+            raise Exception("GetTOSUploadPath failed") from e
 
     def get_sts_token(self, encrypt_code: str, duration: int = None):
-        body: BodyDict = {'EncryptCode': encrypt_code}
+        body: BodyDict = {"EncryptCode": encrypt_code}
 
         if duration:
-            body.update({'Duration': duration})
+            body.update({"Duration": duration})
 
         try:
-            res_json = self.common_json_handler(api='GetSTSToken', body=body)
+            res_json = self.common_json_handler(api="GetSTSToken", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get sts token, encrypt_code: %s, error: %s', encrypt_code, e,
+                "Failed to get sts token, encrypt_code: %s, error: %s",
+                encrypt_code,
+                e,
             )
-            raise Exception('get_sts_token failed') from e
+            raise Exception("get_sts_token failed") from e
 
     def get_unique_flavor(self, list_flavor_result):
-        flavor_map = list_flavor_result['Result']['List']
+        flavor_map = list_flavor_result["Result"]["List"]
         for _, v in flavor_map.items():
             if v and len(v):
-                return v[0]['FlavorID']
-        return ''
+                return v[0]["FlavorID"]
+        return ""

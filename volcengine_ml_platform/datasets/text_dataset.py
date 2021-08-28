@@ -10,14 +10,15 @@ from volcengine_ml_platform.datasets.dataset import dataset_copy_file
 
 
 class TextDataset(_Dataset):
-    def download(self, local_path: str = 'TextDataset', limit=-1):
+    def download(self, local_path: str = "TextDataset", limit=-1):
         """download datasets from source
 
         Args:
             limit (int, optional): download size. Defaults to -1 (no limit).
         """
         self._create_mainfest_dataset(
-            local_path=local_path, manifest_keyword='TextURL',
+            local_path=local_path,
+            manifest_keyword="TextURL",
         )
 
     def split(self, training_dir: str, testing_dir: str, ratio=0.8, random_state=0):
@@ -34,13 +35,15 @@ class TextDataset(_Dataset):
             two datasets, first one is the training set
         """
         if not self.created:
-            raise Exception('datasets has not been created')
+            raise Exception("datasets has not been created")
         line_count = self.data_count
 
         np.random.seed(random_state)
         test_index_set = set(
             np.random.choice(
-                line_count, math.floor(line_count * (1 - ratio)), replace=False,
+                line_count,
+                math.floor(line_count * (1 - ratio)),
+                replace=False,
             ),
         )
         os.makedirs(testing_dir, exist_ok=True)
@@ -54,33 +57,43 @@ class TextDataset(_Dataset):
 
         # generate training and testing datasets's manifest file
         train_metadata_path = os.path.join(
-            training_dir, constant.DATASET_LOCAL_METADATA_FILENAME,
+            training_dir,
+            constant.DATASET_LOCAL_METADATA_FILENAME,
         )
         test_metadata_path = os.path.join(
-            testing_dir, constant.DATASET_LOCAL_METADATA_FILENAME,
+            testing_dir,
+            constant.DATASET_LOCAL_METADATA_FILENAME,
         )
         with open(
-            test_metadata_path, mode='w', encoding='utf-8',
+            test_metadata_path,
+            mode="w",
+            encoding="utf-8",
         ) as testing_manifest_file:
             with open(
-                train_metadata_path, mode='w', encoding='utf-8',
+                train_metadata_path,
+                mode="w",
+                encoding="utf-8",
             ) as training_manifest_file:
                 index = 0
-                with open(self._manifest_path(), encoding='utf-8') as f:
+                with open(self._manifest_path(), encoding="utf-8") as f:
                     for line in f:
                         manifest_line = json.loads(line)
                         if index in test_index_set:
                             dataset_copy_file(
-                                manifest_line, self.local_path, testing_dir,
+                                manifest_line,
+                                self.local_path,
+                                testing_dir,
                             )
                             json.dump(manifest_line, testing_manifest_file)
-                            testing_manifest_file.write('\n')
+                            testing_manifest_file.write("\n")
                         else:
                             dataset_copy_file(
-                                manifest_line, self.local_path, training_dir,
+                                manifest_line,
+                                self.local_path,
+                                training_dir,
                             )
                             json.dump(manifest_line, training_manifest_file)
-                            training_manifest_file.write('\n')
+                            training_manifest_file.write("\n")
                         index = index + 1
 
         train_dataset.created = True

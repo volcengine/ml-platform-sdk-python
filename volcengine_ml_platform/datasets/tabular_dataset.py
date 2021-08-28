@@ -7,21 +7,20 @@ from volcengine_ml_platform.datasets.dataset import _Dataset
 
 
 class TabularDataset(_Dataset):
-    def download(self, local_path: str = 'TabularDataset'):
+    def download(self, local_path: str = "TabularDataset"):
         if local_path is not None:
             self.local_path = local_path
 
         self.tabular_path = self._download_file(
-            tos_url=self._get_storage_path(
-            ),  # TODO tabular file hasn't storage_path()
+            tos_url=self._get_storage_path(),  # TODO tabular file hasn't storage_path()
             file_path=self.local_path,
         )
         self.created = True
 
         if not self.tabular_path:
-            raise ValueError('Empty value(self.tabular_path)')
+            raise ValueError("Empty value(self.tabular_path)")
         # count number of lines, not including header line
-        with open(self.tabular_path, encoding='utf-8') as f:
+        with open(self.tabular_path, encoding="utf-8") as f:
             self.data_count = sum(1 for line in f) - 1
 
     def split(
@@ -44,14 +43,14 @@ class TabularDataset(_Dataset):
             two datasets, first one is the training set
         """
         if not self.created:
-            raise Exception('dataset has not been created')
+            raise Exception("dataset has not been created")
 
         if training_dir == testing_dir:
             raise ValueError(
-                'training directory can not be the same as testing directory',
+                "training directory can not be the same as testing directory",
             )
         if not self.tabular_path:
-            raise ValueError('Empty value(tabular_path)')
+            raise ValueError("Empty value(tabular_path)")
         csv_name = os.path.basename(self.tabular_path)
         train_csv_path = os.path.join(training_dir, csv_name)
         test_csv_path = os.path.join(testing_dir, csv_name)
@@ -63,7 +62,8 @@ class TabularDataset(_Dataset):
                 line_count,
                 math.floor(line_count * (1 - ratio)),
                 replace=False,
-            ), )
+            ),
+        )
         os.makedirs(testing_dir, exist_ok=True)
         os.makedirs(training_dir, exist_ok=True)
 
@@ -73,16 +73,16 @@ class TabularDataset(_Dataset):
         test_dataset.data_count = math.floor(line_count * (1 - ratio))
         train_dataset.data_count = line_count - test_dataset.data_count
 
-        with open(test_csv_path, mode='w', encoding='utf-8') as test_file:
+        with open(test_csv_path, mode="w", encoding="utf-8") as test_file:
             with open(
-                    train_csv_path,
-                    mode='w',
-                    encoding='utf-8',
+                train_csv_path,
+                mode="w",
+                encoding="utf-8",
             ) as train_file:
                 index = -1
                 if not self.tabular_path:
-                    raise ValueError('Empty Value(tabular_path)')
-                with open(self.tabular_path, encoding='utf-8') as input_file:
+                    raise ValueError("Empty Value(tabular_path)")
+                with open(self.tabular_path, encoding="utf-8") as input_file:
                     for line in input_file:
                         # write header
                         if index == -1:

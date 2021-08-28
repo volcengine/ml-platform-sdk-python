@@ -50,12 +50,15 @@ def window_partition(x, window_size):
     """
     B, H, W, C = x.shape
     x = x.view(
-        B, H // window_size, window_size,
-        W // window_size, window_size, C,
+        B,
+        H // window_size,
+        window_size,
+        W // window_size,
+        window_size,
+        C,
     )
     windows = (
-        x.permute(0, 1, 3, 2, 4, 5).contiguous(
-        ).view(-1, window_size, window_size, C)
+        x.permute(0, 1, 3, 2, 4, 5).contiguous().view(-1, window_size, window_size, C)
     )
     return windows
 
@@ -73,7 +76,12 @@ def window_reverse(windows, window_size, H, W):
     """
     B = int(windows.shape[0] / (H * W / window_size / window_size))
     x = windows.view(
-        B, H // window_size, W // window_size, window_size, window_size, -1,
+        B,
+        H // window_size,
+        W // window_size,
+        window_size,
+        window_size,
+        -1,
     )
     x = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(B, H, W, -1)
     return x
@@ -121,7 +129,7 @@ class SwinMLPBlock(nn.Module):
             self.window_size = min(self.input_resolution)
         assert (
             0 <= self.shift_size < self.window_size
-        ), 'shift_size must in 0-window_size'
+        ), "shift_size must in 0-window_size"
 
         self.padding = [
             self.window_size - self.shift_size,
@@ -139,9 +147,13 @@ class SwinMLPBlock(nn.Module):
             groups=self.num_heads,
         )
 
-        self.drop_path = DropPath(
-            drop_path,
-        ) if drop_path > 0.0 else nn.Identity()
+        self.drop_path = (
+            DropPath(
+                drop_path,
+            )
+            if drop_path > 0.0
+            else nn.Identity()
+        )
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(
@@ -154,7 +166,7 @@ class SwinMLPBlock(nn.Module):
     def forward(self, x):
         H, W = self.input_resolution
         B, L, C = x.shape
-        assert L == H * W, 'input feature has wrong size'
+        assert L == H * W, "input feature has wrong size"
 
         shortcut = x
         x = self.norm1(x)
@@ -163,25 +175,32 @@ class SwinMLPBlock(nn.Module):
         # shift
         if self.shift_size > 0:
             P_l, P_r, P_t, P_b = self.padding
-            shifted_x = F.pad(x, [0, 0, P_l, P_r, P_t, P_b], 'constant', 0)
+            shifted_x = F.pad(x, [0, 0, P_l, P_r, P_t, P_b], "constant", 0)
         else:
             shifted_x = x
         _, _H, _W, _ = shifted_x.shape
 
         # partition windows
         x_windows = window_partition(
-            shifted_x, self.window_size,
+            shifted_x,
+            self.window_size,
         )  # nW*B, window_size, window_size, C
         x_windows = x_windows.view(
-            -1, self.window_size * self.window_size, C,
+            -1,
+            self.window_size * self.window_size,
+            C,
         )  # nW*B, window_size*window_size, C
 
         # Window/Shifted-Window Spatial MLP
         x_windows_heads = x_windows.view(
-            -1, self.window_size * self.window_size, self.num_heads, C // self.num_heads,
+            -1,
+            self.window_size * self.window_size,
+            self.num_heads,
+            C // self.num_heads,
         )
         x_windows_heads = x_windows_heads.transpose(
-            1, 2,
+            1,
+            2,
         )  # nW*B, nH, window_size*window_size, C//nH
         x_windows_heads = x_windows_heads.reshape(
             -1,
@@ -192,18 +211,29 @@ class SwinMLPBlock(nn.Module):
             x_windows_heads,
         )  # nW*B, nH*window_size*window_size, C//nH
         spatial_mlp_windows = spatial_mlp_windows.view(
-            -1, self.num_heads, self.window_size * self.window_size, C // self.num_heads,
+            -1,
+            self.num_heads,
+            self.window_size * self.window_size,
+            C // self.num_heads,
         ).transpose(1, 2)
         spatial_mlp_windows = spatial_mlp_windows.reshape(
-            -1, self.window_size * self.window_size, C,
+            -1,
+            self.window_size * self.window_size,
+            C,
         )
 
         # merge windows
         spatial_mlp_windows = spatial_mlp_windows.reshape(
-            -1, self.window_size, self.window_size, C,
+            -1,
+            self.window_size,
+            self.window_size,
+            C,
         )
         shifted_x = window_reverse(
-            spatial_mlp_windows, self.window_size, _H, _W,
+            spatial_mlp_windows,
+            self.window_size,
+            _H,
+            _W,
         )  # B H' W' C
 
         # reverse shift
@@ -222,8 +252,8 @@ class SwinMLPBlock(nn.Module):
 
     def extra_repr(self) -> str:
         return (
-            f'dim={self.dim}, input_resolution={self.input_resolution}, num_heads={self.num_heads}, '
-            f'window_size={self.window_size}, shift_size={self.shift_size}, mlp_ratio={self.mlp_ratio}'
+            f"dim={self.dim}, input_resolution={self.input_resolution}, num_heads={self.num_heads}, "
+            f"window_size={self.window_size}, shift_size={self.shift_size}, mlp_ratio={self.mlp_ratio}"
         )
 
     def flops(self):
@@ -272,8 +302,8 @@ class PatchMerging(nn.Module):
         """
         H, W = self.input_resolution
         B, L, C = x.shape
-        assert L == H * W, 'input feature has wrong size'
-        assert H % 2 == 0 and W % 2 == 0, f'x size ({H}*{W}) are not even.'
+        assert L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."
 
         x = x.view(B, H, W, C)
 
@@ -290,7 +320,7 @@ class PatchMerging(nn.Module):
         return x
 
     def extra_repr(self) -> str:
-        return f'input_resolution={self.input_resolution}, dim={self.dim}'
+        return f"input_resolution={self.input_resolution}, dim={self.dim}"
 
     def flops(self):
         H, W = self.input_resolution
@@ -360,7 +390,9 @@ class BasicLayer(nn.Module):
         # patch merging layer
         if downsample is not None:
             self.downsample = downsample(
-                input_resolution, dim=dim, norm_layer=norm_layer,
+                input_resolution,
+                dim=dim,
+                norm_layer=norm_layer,
             )
         else:
             self.downsample = None
@@ -376,7 +408,7 @@ class BasicLayer(nn.Module):
         return x
 
     def extra_repr(self) -> str:
-        return f'dim={self.dim}, input_resolution={self.input_resolution}, depth={self.depth}'
+        return f"dim={self.dim}, input_resolution={self.input_resolution}, depth={self.depth}"
 
     def flops(self):
         flops = 0
@@ -399,7 +431,12 @@ class PatchEmbed(nn.Module):
     """
 
     def __init__(
-        self, img_size=224, patch_size=4, in_chans=3, embed_dim=96, norm_layer=None,
+        self,
+        img_size=224,
+        patch_size=4,
+        in_chans=3,
+        embed_dim=96,
+        norm_layer=None,
     ):
         super().__init__()
         img_size = to_2tuple(img_size)
@@ -417,7 +454,10 @@ class PatchEmbed(nn.Module):
         self.embed_dim = embed_dim
 
         self.proj = nn.Conv2d(
-            in_chans, embed_dim, kernel_size=patch_size, stride=patch_size,
+            in_chans,
+            embed_dim,
+            kernel_size=patch_size,
+            stride=patch_size,
         )
         if norm_layer is not None:
             self.norm = norm_layer(embed_dim)
@@ -539,11 +579,9 @@ class SwinMLP(nn.Module):
                 window_size=window_size,
                 mlp_ratio=self.mlp_ratio,
                 drop=drop_rate,
-                drop_path=dpr[sum(depths[:i_layer]): sum(depths[: i_layer + 1])],
+                drop_path=dpr[sum(depths[:i_layer]) : sum(depths[: i_layer + 1])],
                 norm_layer=norm_layer,
-                downsample=PatchMerging if (
-                    i_layer < self.num_layers - 1
-                ) else None,
+                downsample=PatchMerging if (i_layer < self.num_layers - 1) else None,
                 use_checkpoint=use_checkpoint,
             )
             self.layers.append(layer)
@@ -569,11 +607,11 @@ class SwinMLP(nn.Module):
 
     @torch.jit.ignore
     def no_weight_decay(self):
-        return {'absolute_pos_embed'}
+        return {"absolute_pos_embed"}
 
     @torch.jit.ignore
     def no_weight_decay_keywords(self):
-        return {'relative_position_bias_table'}
+        return {"relative_position_bias_table"}
 
     def forward_features(self, x):
         x = self.patch_embed(x)

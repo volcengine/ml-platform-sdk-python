@@ -10,7 +10,7 @@ from .swin_transformer import SwinTransformer
 
 def build_model(config):
     model_type = config.MODEL.TYPE
-    if model_type == 'swin':
+    if model_type == "swin":
         model = SwinTransformer(
             img_size=config.DATA.IMG_SIZE,
             patch_size=config.MODEL.SWIN.PATCH_SIZE,
@@ -29,7 +29,7 @@ def build_model(config):
             patch_norm=config.MODEL.SWIN.PATCH_NORM,
             use_checkpoint=config.TRAIN.USE_CHECKPOINT,
         )
-    elif model_type == 'swin_mlp':
+    elif model_type == "swin_mlp":
         model = SwinMLP(
             img_size=config.DATA.IMG_SIZE,
             patch_size=config.MODEL.SWIN_MLP.PATCH_SIZE,
@@ -47,6 +47,6 @@ def build_model(config):
             use_checkpoint=config.TRAIN.USE_CHECKPOINT,
         )
     else:
-        raise NotImplementedError(f'Unkown model: {model_type}')
+        raise NotImplementedError(f"Unkown model: {model_type}")
 
     return model
