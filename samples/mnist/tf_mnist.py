@@ -8,13 +8,6 @@ from volcengine_ml_platform.tos import tos
 from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
 
-try:
-    from samples import env
-
-    env.init()
-except Exception:
-    pass
-
 CACHE_DIR = cache_dir.create('mnist/tf_mnist')
 
 

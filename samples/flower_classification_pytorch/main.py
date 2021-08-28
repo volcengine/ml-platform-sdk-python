@@ -17,7 +17,7 @@ import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 from config import get_config
-from data import build_loader
+from data.build import build_loader
 from logger import create_logger
 from lr_scheduler import build_scheduler
 from optimizer import build_optimizer
@@ -28,7 +28,7 @@ from utils import load_checkpoint
 from utils import reduce_tensor
 from utils import save_checkpoint
 
-from samples.models.swin_transformer_pytorch import build_model
+from samples.models.swin_transformer_pytorch.build import build_model
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.tos import tos
 

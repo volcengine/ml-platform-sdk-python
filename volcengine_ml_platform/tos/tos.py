@@ -6,7 +6,7 @@ from logging import warning
 from multiprocessing.dummy import Pool
 from multiprocessing.dummy import Process
 from multiprocessing.dummy import Queue
-from typing import Optional
+from typing import List
 from urllib.parse import urlparse
 
 import boto3
@@ -227,14 +227,14 @@ class TOSClient:
 
     def download_file(
         self,
-        bucket: Optional[str] = None,
-        key: Optional[str] = None,
-        file_path: Optional[str] = None,
-        dir_path: Optional[str] = None,
-        tos_url: Optional[str] = None,
-        max_concurrence=10,
-        que=None,
-    ):
+        bucket: str = '',
+        key: str = '',
+        file_path: str = '',
+        dir_path: str = '',
+        tos_url: str = '',
+        max_concurrence: int = 10,
+        que: Queue = None,
+    ) -> str:
         """download dataset by bucket
         You call the function as follow:
             download_file(bucket="xxx", key="xxx", file_path="./dataset/a.csv"), or
@@ -255,10 +255,16 @@ class TOSClient:
         # To consume less downstream bandwidth, decrease the maximum concurrency
         transfer_config = TransferConfig(max_concurrency=max_concurrence)
 
-        if tos_url is not None:
+        if (not bucket or not key) and not tos_url:
+            raise ValueError('Please assign a set of value as non-None')
+
+        if not file_path and not dir_path:
+            raise ValueError('Please set a correct dir_path or file_path')
+
+        if tos_url:
             parse_result = urlparse(tos_url)
             if parse_result.scheme != 'tos':
-                raise 'invalid scheme. url: ' + tos_url
+                raise ValueError('invalid scheme. url: ' + tos_url)
             bucket = parse_result.netloc.split('.')[0]
             key = parse_result.path[1:]
 
@@ -290,13 +296,13 @@ class TOSClient:
 
     def download_files(
         self,
-        bucket: str = None,
-        keys: Optional[list] = None,
-        file_paths: Optional[list] = None,
-        dir_path: Optional[str] = None,
-        tos_urls: Optional[list] = None,
+        bucket: str = '',
+        keys: list = [],
+        file_paths: list = [],
+        dir_path: str = '',
+        tos_urls: list[str] = [],
         parallelism=1,
-    ):
+    ) -> List[str]:
         """download files by parallelism
         You only can call the function as follow:
            1. download_file(bucket="xxx", keys=["xxx","yyy"], file_paths=["./dataset/a.csv", "./dataset/b.csv"]),
@@ -312,16 +318,19 @@ class TOSClient:
         return: the list of download filepaths
         """
 
-        if file_paths is None and dir_path is None:
+        if (not bucket or not keys) and not tos_urls:
+            raise ValueError('Please assign a set of value as non-None')
+
+        if not file_paths and not dir_path:
             raise ValueError('Please set a correct dir_path or file_path')
 
         self.dir_record = set()
-        que = Queue()
+        que: Queue = Queue()
         async_res = []
 
         pool = Pool(processes=parallelism)
         data_count = 0
-        if bucket is None or keys is None:
+        if tos_urls:
             data_count = len(tos_urls)
             for url in tos_urls:
                 async_res.append(
@@ -334,7 +343,7 @@ class TOSClient:
                         },
                     ),
                 )
-        elif tos_urls:
+        elif bucket and keys:
             data_count = len(keys)
             for file_path, key in zip(file_paths, keys):
                 async_res.append(

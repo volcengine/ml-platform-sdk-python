@@ -133,8 +133,10 @@ class InferenceService:
             logging.warning('Inference failed to start')
             raise Exception('Inference is invalid') from e
 
-    def scale(self, replicas: Optional[int] = None):
+    def scale(self, replicas: int):
         try:
+            if not self.service_id or not self.replicas:
+                raise ValueError('Empty value(service_id or replicas)')
             self.inference_service_client.scale_service(
                 service_id=self.service_id, replicas=replicas,
             )
