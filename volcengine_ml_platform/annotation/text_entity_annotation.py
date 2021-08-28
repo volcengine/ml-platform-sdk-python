@@ -11,16 +11,16 @@ class TextEntitySetAnnotation(Annotation):
 
     def _get_url(self, manifest_line):
         data = get_data_section(manifest_line)
-        return data['TextUrl']
+        return data["TextUrl"]
 
     def extract_annotation(self, manifest_line):
         annotation = get_annotation_section(manifest_line)
 
         label_result = []
-        for result in annotation['Result']:
+        for result in annotation["Result"]:
             labels = self._get_labels(result)
-            text_selector = result['Text']
+            text_selector = result["Text"]
             label_result.append(
-                {'labels': labels, 'text_selector': text_selector},
+                {"labels": labels, "text_selector": text_selector},
             )
         return label_result

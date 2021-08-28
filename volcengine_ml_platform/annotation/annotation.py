@@ -7,18 +7,18 @@ from volcengine_ml_platform.annotation.ttypes import AnnotationDataType
 
 
 def get_annotation_section(annotation_line):
-    return annotation_line['Annotation']
+    return annotation_line["Annotation"]
 
 
 def get_content(annotation_line):
-    data = annotation_line['Data']
-    with open(data['FilePath'], mode='rb', encoding='utf-8') as fd:
+    data = annotation_line["Data"]
+    with open(data["FilePath"], mode="rb", encoding="utf-8") as fd:
         content = fd.read()
         return content
 
 
 def get_data_section(annotation_line):
-    return annotation_line['Data']
+    return annotation_line["Data"]
 
 
 class Annotation:
@@ -48,7 +48,7 @@ class Annotation:
             annotation of data, diff data has diff struct
         """
         if index < 0 or index >= len(self.annotation_data):
-            raise Exception('out of range')
+            raise Exception("out of range")
         manifest_data = self.annotation_data[index]
         return self.extract_annotation_with_data(manifest_data)
 
@@ -66,7 +66,7 @@ class Annotation:
         """
         content = get_content(manifest_line)
         annotation = self.extract_annotation(manifest_line)
-        return {'content': content, 'annotation': annotation}
+        return {"content": content, "annotation": annotation}
 
     def _get_labels(self, annotation_result):
         """
@@ -76,24 +76,24 @@ class Annotation:
             annotation labels
         """
         labels = []
-        for data in annotation_result['Data']:
-            data_type = data['Type']
+        for data in annotation_result["Data"]:
+            data_type = data["Type"]
             if data_type in (
-                    AnnotationDataType.SingleSelector,
-                    AnnotationDataType.BlankFilling,
+                AnnotationDataType.SingleSelector,
+                AnnotationDataType.BlankFilling,
             ):
-                labels.append(data['Label'])
+                labels.append(data["Label"])
             elif data_type == AnnotationDataType.MultipleSelector:
-                labels.extend(data['Labels'])
+                labels.extend(data["Labels"])
         return labels
 
     def _build_label_index(self):
-        with open(self.manifest_file, encoding='utf-8') as fd:
+        with open(self.manifest_file, encoding="utf-8") as fd:
             for manifest_line in fd:
-                manifest_data = json.loads(manifest_line.strip('\n'))
+                manifest_data = json.loads(manifest_line.strip("\n"))
                 self.annotation_data.append(manifest_data)
                 annotation = get_annotation_section(manifest_data)
-                for result in annotation['Result']:
+                for result in annotation["Result"]:
                     labels = self._get_labels(result)
                     for label in labels:
                         match_record = self.label_index.get(label, [])

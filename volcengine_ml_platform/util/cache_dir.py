@@ -1,8 +1,8 @@
 import os
 
-HOME_DIR = os.environ.get('HOME', default='/tmp')
+HOME_DIR = os.environ.get("HOME", default="/tmp")
 
-SAMPLES_ROOT = '.volcengine_ml_platform/samples/'
+SAMPLES_ROOT = ".volcengine_ml_platform/samples/"
 
 
 def create(name):
@@ -14,7 +14,7 @@ class CacheDir:
         print(os.path.dirname(__file__))
         self.root_path = os.path.join(HOME_DIR, SAMPLES_ROOT, name)
         os.makedirs(self.root_path, exist_ok=True)
-        print('use cache dir: ' + self.root_path)
+        print("use cache dir: " + self.root_path)
 
     def get_root_path(self):
         return self.root_path

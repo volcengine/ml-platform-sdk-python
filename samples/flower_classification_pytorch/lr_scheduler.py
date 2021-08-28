@@ -18,7 +18,7 @@ def build_scheduler(config, optimizer, n_iter_per_epoch):
     )
 
     lr_scheduler = None
-    if config.TRAIN.LR_SCHEDULER.NAME == 'cosine':
+    if config.TRAIN.LR_SCHEDULER.NAME == "cosine":
         lr_scheduler = CosineLRScheduler(
             optimizer,
             t_initial=num_steps,
@@ -29,7 +29,7 @@ def build_scheduler(config, optimizer, n_iter_per_epoch):
             cycle_limit=1,
             t_in_epochs=False,
         )
-    elif config.TRAIN.LR_SCHEDULER.NAME == 'linear':
+    elif config.TRAIN.LR_SCHEDULER.NAME == "linear":
         lr_scheduler = LinearLRScheduler(
             optimizer,
             t_initial=num_steps,
@@ -38,7 +38,7 @@ def build_scheduler(config, optimizer, n_iter_per_epoch):
             warmup_t=warmup_steps,
             t_in_epochs=False,
         )
-    elif config.TRAIN.LR_SCHEDULER.NAME == 'step':
+    elif config.TRAIN.LR_SCHEDULER.NAME == "step":
         lr_scheduler = StepLRScheduler(
             optimizer,
             decay_t=decay_steps,
@@ -68,7 +68,7 @@ class LinearLRScheduler(Scheduler):
     ) -> None:
         super().__init__(
             optimizer,
-            param_group_field='lr',
+            param_group_field="lr",
             noise_range_t=noise_range_t,
             noise_pct=noise_pct,
             noise_std=noise_std,

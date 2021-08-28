@@ -4,6 +4,6 @@ from volcengine_ml_platform.annotation.image_classification_annotation import (
 )
 
 __all__ = (
-    'Annotation',
-    'ImageClassificationAnnotation',
+    "Annotation",
+    "ImageClassificationAnnotation",
 )

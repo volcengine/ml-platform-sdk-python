@@ -27,7 +27,7 @@ def build_loader(config, manifest_info):
     )
     config.freeze()
     print(
-        f'local rank {config.LOCAL_RANK} / global rank {dist.get_rank()} successfully build train dataset',
+        f"local rank {config.LOCAL_RANK} / global rank {dist.get_rank()} successfully build train dataset",
     )
     dataset_val, _ = build_dataset(
         is_train=False,
@@ -35,12 +35,12 @@ def build_loader(config, manifest_info):
         manifest_info=manifest_info[1],
     )
     print(
-        f'local rank {config.LOCAL_RANK} / global rank {dist.get_rank()} successfully build val dataset',
+        f"local rank {config.LOCAL_RANK} / global rank {dist.get_rank()} successfully build val dataset",
     )
 
     num_tasks = dist.get_world_size()
     global_rank = dist.get_rank()
-    if config.DATA.ZIP_MODE and config.DATA.CACHE_MODE == 'part':
+    if config.DATA.ZIP_MODE and config.DATA.CACHE_MODE == "part":
         indices = np.arange(
             dist.get_rank(),
             len(dataset_train),
@@ -86,17 +86,17 @@ def build_loader(config, manifest_info):
 
 def build_dataset(is_train, config, manifest_info):
     transform = build_transform(is_train, config)
-    if config.DATA.DATASET == 'imagenet':
-        prefix = 'train' if is_train else 'val'
+    if config.DATA.DATASET == "imagenet":
+        prefix = "train" if is_train else "val"
         if config.DATA.ZIP_MODE:
-            ann_file = prefix + '_map.txt'
-            prefix = prefix + '.zip@/'
+            ann_file = prefix + "_map.txt"
+            prefix = prefix + ".zip@/"
             dataset = CachedImageFolder(
                 config.DATA.DATA_PATH,
                 ann_file,
                 prefix,
                 transform,
-                cache_mode=config.DATA.CACHE_MODE if is_train else 'part',
+                cache_mode=config.DATA.CACHE_MODE if is_train else "part",
             )
         else:
             # root = os.path.join(config.DATA.DATA_PATH, prefix)
@@ -107,7 +107,7 @@ def build_dataset(is_train, config, manifest_info):
             )
         nb_classes = 1000
     else:
-        raise NotImplementedError('We only support ImageNet Now.')
+        raise NotImplementedError("We only support ImageNet Now.")
 
     return dataset, nb_classes
 
@@ -120,9 +120,11 @@ def build_transform(is_train, config):
             input_size=config.DATA.IMG_SIZE,
             is_training=True,
             color_jitter=config.AUG.COLOR_JITTER
-            if config.AUG.COLOR_JITTER > 0 else None,
+            if config.AUG.COLOR_JITTER > 0
+            else None,
             auto_augment=config.AUG.AUTO_AUGMENT
-            if config.AUG.AUTO_AUGMENT != 'none' else None,
+            if config.AUG.AUTO_AUGMENT != "none"
+            else None,
             re_prob=config.AUG.REPROB,
             re_mode=config.AUG.REMODE,
             re_count=config.AUG.RECOUNT,
@@ -154,7 +156,8 @@ def build_transform(is_train, config):
                 transforms.Resize(
                     (config.DATA.IMG_SIZE, config.DATA.IMG_SIZE),
                     interpolation=_pil_interp(config.DATA.INTERPOLATION),
-                ), )
+                ),
+            )
 
     t.append(transforms.ToTensor())
     t.append(transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD))

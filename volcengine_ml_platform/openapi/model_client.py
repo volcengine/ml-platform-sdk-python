@@ -4,22 +4,22 @@ import logging
 from volcengine_ml_platform.openapi.base_client import BaseClient
 from volcengine_ml_platform.openapi.base_client import define_api
 
-define_api('DeleteModel')
-define_api('ListModels')
-define_api('GetModel')
-define_api('CreateModel')
-define_api('GetModelNextVersion')
-define_api('DeleteModelVersion')
-define_api('ListModelVersions')
-define_api('UpdateModelVersion')
-define_api('GetModelVersion')
-define_api('UpdateModel')
-define_api('CreatePerfJob')
-define_api('ListPerfJobs')
-define_api('CreatePerfJob')
-define_api('ListPerfTasks')
-define_api('UpdatePerfTask')
-define_api('CancelPerfTask')
+define_api("DeleteModel")
+define_api("ListModels")
+define_api("GetModel")
+define_api("CreateModel")
+define_api("GetModelNextVersion")
+define_api("DeleteModelVersion")
+define_api("ListModelVersions")
+define_api("UpdateModelVersion")
+define_api("GetModelVersion")
+define_api("UpdateModel")
+define_api("CreatePerfJob")
+define_api("ListPerfJobs")
+define_api("CreatePerfJob")
+define_api("ListPerfTasks")
+define_api("UpdatePerfTask")
+define_api("CancelPerfTask")
 
 
 class ModelClient(BaseClient):
@@ -36,7 +36,7 @@ class ModelClient(BaseClient):
         description=None,
         tensor_config=None,
         model_metrics=None,
-        source_type='TOS',
+        source_type="TOS",
     ):
         """create models
 
@@ -60,31 +60,31 @@ class ModelClient(BaseClient):
         """
         try:
             body = {
-                'ModelName': model_name,
-                'VersionInfo': {
-                    'ModelFormat': model_format,
-                    'ModelType': model_type,
-                    'Path': path,
-                    'SourceType': source_type,
+                "ModelName": model_name,
+                "VersionInfo": {
+                    "ModelFormat": model_format,
+                    "ModelType": model_type,
+                    "Path": path,
+                    "SourceType": source_type,
                 },
             }
             if description is not None:
-                body['VersionInfo'].update({'Description': description})
+                body["VersionInfo"].update({"Description": description})
 
             if model_id is not None:
-                body.update({'ModelID': model_id})
+                body.update({"ModelID": model_id})
 
             if tensor_config is not None:
-                body['VersionInfo'].update({'TensorConfig': tensor_config})
+                body["VersionInfo"].update({"TensorConfig": tensor_config})
 
             if model_metrics is not None:
-                body['VersionInfo'].update({'MetricsList': model_metrics})
+                body["VersionInfo"].update({"MetricsList": model_metrics})
 
-            res_json = self.common_json_handler(api='CreateModel', body=body)
+            res_json = self.common_json_handler(api="CreateModel", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to create models, error: %s', e)
-            raise Exception('create_model failed') from e
+            logging.error("Failed to create models, error: %s", e)
+            raise Exception("create_model failed") from e
 
     def get_model_next_version(self, model_id=None):
         """get next models version with given model_id
@@ -98,20 +98,21 @@ class ModelClient(BaseClient):
 
         body = {}
         if model_id:
-            body.update({'ModelID': model_id})
+            body.update({"ModelID": model_id})
 
         try:
             res_json = self.common_json_handler(
-                api='GetModelNextVersion', body=body,
+                api="GetModelNextVersion",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get models next version, model_id: %s, error: %s',
+                "Failed to get models next version, model_id: %s, error: %s",
                 model_id,
                 e,
             )
-            raise Exception('get_model_next_version failed') from e
+            raise Exception("get_model_next_version failed") from e
 
     def list_models(
         self,
@@ -119,8 +120,8 @@ class ModelClient(BaseClient):
         model_name_contains=None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list models
 
@@ -140,23 +141,23 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
         if model_name:
-            body.update({'ModelName': model_name})
+            body.update({"ModelName": model_name})
 
         if model_name_contains:
-            body.update({'ModelNameContains': model_name_contains})
+            body.update({"ModelNameContains": model_name_contains})
 
         try:
-            res_json = self.common_json_handler(api='ListModels', body=body)
+            res_json = self.common_json_handler(api="ListModels", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to list models, error: %s', e)
-            raise Exception('list_models failed') from e
+            logging.error("Failed to list models, error: %s", e)
+            raise Exception("list_models failed") from e
 
     def delete_model(self, model_id: str):
         """delete models with given models id
@@ -171,16 +172,18 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'ModelID': model_id,
+            "ModelID": model_id,
         }
         try:
-            res_json = self.common_json_handler(api='DeleteModel', body=body)
+            res_json = self.common_json_handler(api="DeleteModel", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to delete models, model_id: %s, error: %s', model_id, e,
+                "Failed to delete models, model_id: %s, error: %s",
+                model_id,
+                e,
             )
-            raise Exception('delete_model failed') from e
+            raise Exception("delete_model failed") from e
 
     def get_model(self, model_id: str):
         """get models with given models id
@@ -195,16 +198,18 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'ModelID': model_id,
+            "ModelID": model_id,
         }
         try:
-            res_json = self.common_json_handler(api='GetModel', body=body)
+            res_json = self.common_json_handler(api="GetModel", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get models, model_id: %s, error: %s', model_id, e,
+                "Failed to get models, model_id: %s, error: %s",
+                model_id,
+                e,
             )
-            raise Exception('Get model failed') from e
+            raise Exception("Get model failed") from e
 
     def list_model_versions(
         self,
@@ -212,8 +217,8 @@ class ModelClient(BaseClient):
         model_version: int = None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list models versions with given model_id
 
@@ -232,25 +237,28 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'ModelID': model_id,
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "ModelID": model_id,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
         if model_version:
-            body.update({'ModelVersion': model_version})
+            body.update({"ModelVersion": model_version})
 
         try:
             res_json = self.common_json_handler(
-                api='ListModelVersions', body=body,
+                api="ListModelVersions",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to list models versions, model_id: %s, error: %s', model_id, e,
+                "Failed to list models versions, model_id: %s, error: %s",
+                model_id,
+                e,
             )
-            raise Exception('List model versions failed') from e
+            raise Exception("List model versions failed") from e
 
     def get_model_version(self, model_version_id: str):
         """get certain version of a models
@@ -264,20 +272,21 @@ class ModelClient(BaseClient):
         Returns:
             json response
         """
-        body = {'ModelVersionID': model_version_id}
+        body = {"ModelVersionID": model_version_id}
 
         try:
             res_json = self.common_json_handler(
-                api='GetModelVersion', body=body,
+                api="GetModelVersion",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get models version, model_version_id: %s, error: %s',
+                "Failed to get models version, model_version_id: %s, error: %s",
                 model_version_id,
                 e,
             )
-            raise Exception('Get model version failed') from e
+            raise Exception("Get model version failed") from e
 
     def delete_model_version(self, model_version_id: str):
         """delete certain version of a models
@@ -291,20 +300,21 @@ class ModelClient(BaseClient):
         Returns:
             json response
         """
-        body = {'ModelVersionID': model_version_id}
+        body = {"ModelVersionID": model_version_id}
 
         try:
             res_json = self.common_json_handler(
-                api='DeleteModelVersion', body=body,
+                api="DeleteModelVersion",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to delete models version, model_version_id: %s, error: %s',
+                "Failed to delete models version, model_version_id: %s, error: %s",
                 model_version_id,
                 e,
             )
-            raise Exception('Delete model version failed') from e
+            raise Exception("Delete model version failed") from e
 
     def update_model_version(
         self,
@@ -328,28 +338,29 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'ModelVersionID': model_version_id,
+            "ModelVersionID": model_version_id,
         }
         if description is not None:
-            body.update({'Description': description})
+            body.update({"Description": description})
 
         if tensor_config is not None:
-            body.update({'TensorConfig': tensor_config})
+            body.update({"TensorConfig": tensor_config})
 
         if model_metrics is not None:
-            body.update({'MetricsList': model_metrics})
+            body.update({"MetricsList": model_metrics})
         try:
             res_json = self.common_json_handler(
-                api='UpdateModelVersion', body=body,
+                api="UpdateModelVersion",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to update model version, model_version_id: %s, error: %s',
+                "Failed to update model version, model_version_id: %s, error: %s",
                 model_version_id,
                 e,
             )
-            raise Exception('Update model version failed') from e
+            raise Exception("Update model version failed") from e
 
     def update_model(self, model_id: str, model_name=None):
         """update model_name with given model_id
@@ -365,18 +376,20 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'ModelID': model_id,
+            "ModelID": model_id,
         }
         if model_name is not None:
-            body.update({'ModelName': model_name})
+            body.update({"ModelName": model_name})
         try:
-            res_json = self.common_json_handler(api='UpdateModel', body=body)
+            res_json = self.common_json_handler(api="UpdateModel", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to update models, model_id: %s, error: %s', model_id, e,
+                "Failed to update models, model_id: %s, error: %s",
+                model_id,
+                e,
             )
-            raise Exception('Update model failed') from e
+            raise Exception("Update model failed") from e
 
     def create_perf_job(
         self,
@@ -400,22 +413,22 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'ModelVersionID': model_version_id,
-            'TensorConfig': tensor_config,
-            'JobType': job_type,
-            'JobParamsList': job_params,
+            "ModelVersionID": model_version_id,
+            "TensorConfig": tensor_config,
+            "JobType": job_type,
+            "JobParamsList": job_params,
         }
 
         try:
-            res_json = self.common_json_handler(api='CreatePerfJob', body=body)
+            res_json = self.common_json_handler(api="CreatePerfJob", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to create perf job, model_version_id: %s, error: %s',
+                "Failed to create perf job, model_version_id: %s, error: %s",
                 model_version_id,
                 e,
             )
-            raise Exception('Create perf job failed') from e
+            raise Exception("Create perf job failed") from e
 
     def list_perf_jobs(
         self,
@@ -423,8 +436,8 @@ class ModelClient(BaseClient):
         job_id=None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list perf jobs
 
@@ -443,23 +456,23 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
         if model_version_id:
-            body.update({'ModelVersionID': model_version_id})
+            body.update({"ModelVersionID": model_version_id})
 
         if job_id:
-            body.update({'JobID': job_id})
+            body.update({"JobID": job_id})
 
         try:
-            res_json = self.common_json_handler(api='ListPerfJobs', body=body)
+            res_json = self.common_json_handler(api="ListPerfJobs", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to list perf jobs, error: %s', e)
-            raise Exception('List perf jobs failed') from e
+            logging.error("Failed to list perf jobs, error: %s", e)
+            raise Exception("List perf jobs failed") from e
 
     def cancel_perf_job(self, job_id: str):
         """cancel a perf job, including all of its tasks
@@ -474,15 +487,15 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'JobID': job_id,
+            "JobID": job_id,
         }
 
         try:
-            res_json = self.common_json_handler(api='CancelPerfJob', body=body)
+            res_json = self.common_json_handler(api="CancelPerfJob", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to cancel perf job, error: %s', e)
-            raise Exception('Cancel perf job failed') from e
+            logging.error("Failed to cancel perf job, error: %s", e)
+            raise Exception("Cancel perf job failed") from e
 
     def list_perf_tasks(
         self,
@@ -490,8 +503,8 @@ class ModelClient(BaseClient):
         job_id=None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list perf tasks
 
@@ -510,23 +523,23 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
         if task_id:
-            body.update({'TaskID': task_id})
+            body.update({"TaskID": task_id})
 
         if job_id:
-            body.update({'JobID': job_id})
+            body.update({"JobID": job_id})
 
         try:
-            res_json = self.common_json_handler(api='ListPerfTasks', body=body)
+            res_json = self.common_json_handler(api="ListPerfTasks", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to list perf tasks, error: %s', e)
-            raise Exception('List perf tasks failed') from e
+            logging.error("Failed to list perf tasks, error: %s", e)
+            raise Exception("List perf tasks failed") from e
 
     def update_perf_task(self, task_id: str, task_status=None):
         """update perf task
@@ -542,20 +555,23 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'TaskID': task_id,
+            "TaskID": task_id,
         }
         if task_status is not None:
-            body.update({'Status': task_status})
+            body.update({"Status": task_status})
         try:
             res_json = self.common_json_handler(
-                api='UpdatePerfTask', body=body,
+                api="UpdatePerfTask",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to update task, task_id: %s, error: %s', task_id, e,
+                "Failed to update task, task_id: %s, error: %s",
+                task_id,
+                e,
             )
-            raise Exception('Update perf task failed') from e
+            raise Exception("Update perf task failed") from e
 
     def cancel_perf_task(self, task_id: str):
         """cancel a perf task
@@ -569,14 +585,15 @@ class ModelClient(BaseClient):
             json response
         """
         body = {
-            'TaskID': task_id,
+            "TaskID": task_id,
         }
 
         try:
             res_json = self.common_json_handler(
-                api='CancelPerfTask', body=body,
+                api="CancelPerfTask",
+                body=body,
             )
             return res_json
         except Exception as e:
-            logging.error('Failed to cancel perf task, error: %s', e)
-            raise Exception('Cancel perf task failed') from e
+            logging.error("Failed to cancel perf task, error: %s", e)
+            raise Exception("Cancel perf task failed") from e

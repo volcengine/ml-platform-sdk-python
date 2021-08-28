@@ -15,7 +15,7 @@ from volcengine_ml_platform.openapi import resource_client
 
 
 class Model:
-    def __init__(self, local_path='.'):
+    def __init__(self, local_path="."):
         self.tos_client = tos.TOSClient()
         self.model_client = model_client.ModelClient()
         self.resource_client = resource_client.ResourceClient()
@@ -32,84 +32,83 @@ class Model:
         model_metrics: Optional[list] = None,
     ):
         if local_path is None:
-            logging.warning('Model local_path is empty')
+            logging.warning("Model local_path is empty")
             raise ValueError
         if not os.path.exists(local_path):
-            logging.warning('Model local_path not exists %s', local_path)
+            logging.warning("Model local_path not exists %s", local_path)
             raise ValueError
         if model_id is None:
             if model_name is None or model_format is None or model_type is None:
                 logging.warning(
-                    'Model register new model need model_name/model_format/model_type',
+                    "Model register new model need model_name/model_format/model_type",
                 )
                 raise ValueError
         else:
-            raw_model_name = self.model_client.get_model(
-                model_id=model_id, )['Result']['ModelName']
+            raw_model_name = self.model_client.get_model(model_id=model_id,)[
+                "Result"
+            ]["ModelName"]
             if raw_model_name != model_name:
                 logging.warning(
-                    'model name is diff from origin, use old model_name', )
+                    "model name is diff from origin, use old model_name",
+                )
         try:
             validation.validate_tensor_config(tensor_config)
         except Exception as e:
-            raise Exception('Invalid tensor config.') from e
+            raise Exception("Invalid tensor config.") from e
 
         try:
             validation.validate_metrics(model_metrics)
         except Exception as e:
-            raise Exception('Invalid models metrics.') from e
+            raise Exception("Invalid models metrics.") from e
 
     def _require_model_tos_storage(self) -> Tuple[str, str]:
         response = self.model_client.get_tos_upload_path(
-            service_name='modelrepo',
-            path=['from-sdk-repo'],
+            service_name="modelrepo",
+            path=["from-sdk-repo"],
         )
-        return response['Result']['Bucket'], response['Result']['KeyPrefix']
+        return response["Result"]["Bucket"], response["Result"]["KeyPrefix"]
 
     def _upload_tos(self, local_path) -> str:
         bucket, prefix = self._require_model_tos_storage()
 
         if os.path.isfile(local_path):
-            key = f'{prefix}{os.path.basename(local_path)}'
+            key = f"{prefix}{os.path.basename(local_path)}"
             self.tos_client.upload_file(local_path, bucket, key=key)
 
         if os.path.isdir(local_path):
-            self_prefix = os.path.basename(local_path.rstrip('/'))
-            if self_prefix != '.':
-                prefix = f'{prefix}{self_prefix}/'
+            self_prefix = os.path.basename(local_path.rstrip("/"))
+            if self_prefix != ".":
+                prefix = f"{prefix}{self_prefix}/"
 
             for root, _, files in os.walk(local_path):
                 for file in tqdm(files):
                     file_path = os.path.join(root, file)
                     rel_path = os.path.relpath(root, local_path)
-                    if rel_path == '.':
-                        key = f'{prefix}{file}'
+                    if rel_path == ".":
+                        key = f"{prefix}{file}"
                     else:
-                        key = f'{prefix}{rel_path}/{file}'
+                        key = f"{prefix}{rel_path}/{file}"
                     self.tos_client.upload_file(file_path, bucket, key=key)
-        return f'tos://{bucket}/{prefix}'
+        return f"tos://{bucket}/{prefix}"
 
     def _download_tos(self, bucket, key, prefix, local_path):
-        marker = ''
+        marker = ""
         while True:
             result = self.tos_client.list_objects(
                 bucket=bucket,
-                delimiter='/',
-                encoding_type='',
+                delimiter="/",
+                encoding_type="",
                 marker=marker,
                 max_keys=1000,
                 prefix=key,
             )
-            keys = [content['Key'] for content in result.get('Contents', [])]
-            dirs = [
-                content['Prefix']
-                for content in result.get('CommonPrefixes', [])
-            ]
+            keys = [content["Key"] for content in result.get("Contents", [])]
+            dirs = [content["Prefix"] for content in result.get("CommonPrefixes", [])]
 
             for d in tqdm(dirs):
                 dest_pathname = os.path.join(
                     local_path,
-                    os.path.relpath(d, prefix) + '/',
+                    os.path.relpath(d, prefix) + "/",
                 )
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
@@ -130,20 +129,20 @@ class Model:
                         dest_pathname,
                     )
 
-            if result['IsTruncated']:
-                marker = result['Contents'][-1]['Key']
+            if result["IsTruncated"]:
+                marker = result["Contents"][-1]["Key"]
                 continue
             break
 
     def _download_model(self, remote_path, local_path):
         parse_url = urlparse(remote_path)
         scheme = parse_url.scheme
-        if scheme == 'tos':
+        if scheme == "tos":
             bucket = parse_url.hostname
-            key = parse_url.path.lstrip('/')
+            key = parse_url.path.lstrip("/")
             self._download_tos(bucket, key, key, local_path)
         else:
-            logging.warning('unsupported remote_path, %s', remote_path)
+            logging.warning("unsupported remote_path, %s", remote_path)
 
     def register(
         self,
@@ -185,17 +184,17 @@ class Model:
         local_path: Optional[str] = None,
     ):
         if not model_id:
-            logging.warning('Model can not be download, model_id is empty')
+            logging.warning("Model can not be download, model_id is empty")
             raise ValueError
 
         response = self.model_client.get_model_version(
-            f'{model_id}-{model_version}',
+            f"{model_id}-{model_version}",
         )
-        remote_path = response['Result']['Path']
+        remote_path = response["Result"]["Path"]
 
         self._download_model(remote_path, local_path)
         logging.info(
-            'model %s:%s download finished to %s',
+            "model %s:%s download finished to %s",
             model_id,
             model_version,
             local_path,
@@ -203,11 +202,12 @@ class Model:
 
     def unregister(self, model_id: str, model_version: int):
         return self.model_client.delete_model_version(
-            f'{model_id}-{model_version}', )
+            f"{model_id}-{model_version}",
+        )
 
     def unregister_all_versions(self, model_id: str):
         if not model_id:
-            logging.warning('model_id is empty')
+            logging.warning("model_id is empty")
             return
 
         self.model_client.delete_model(model_id=model_id)
@@ -217,8 +217,8 @@ class Model:
         model_name_contains=None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         return self.model_client.list_models(
             model_name_contains=model_name_contains,
@@ -234,11 +234,11 @@ class Model:
         model_version: int = None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         if not model_id:
-            logging.warning('model_id is empty')
+            logging.warning("model_id is empty")
             return None
 
         response = self.model_client.list_model_versions(
@@ -251,25 +251,27 @@ class Model:
         )
         table = PrettyTable(
             [
-                'ModelID',
-                'Version',
-                'Format',
-                'Type',
-                'RemotePath',
-                'Description',
-                'CreateTime',
-            ], )
-        for model in response['Result']['List']:
+                "ModelID",
+                "Version",
+                "Format",
+                "Type",
+                "RemotePath",
+                "Description",
+                "CreateTime",
+            ],
+        )
+        for model in response["Result"]["List"]:
             table.add_row(
                 [
                     model_id,
-                    model['ModelVersion'],
-                    model['ModelFormat'],
-                    model['ModelType'],
-                    model['Path'],
-                    model['Description'],
-                    model['CreateTime'],
-                ], )
+                    model["ModelVersion"],
+                    model["ModelFormat"],
+                    model["ModelType"],
+                    model["Path"],
+                    model["Description"],
+                    model["CreateTime"],
+                ],
+            )
         print(table)
         return response
 
@@ -294,15 +296,15 @@ class Model:
         try:
             validation.validate_tensor_config(tensor_config)
         except Exception as e:
-            raise Exception('Invalid tensor config.') from e
+            raise Exception("Invalid tensor config.") from e
 
         try:
             validation.validate_metrics(model_metrics)
         except Exception as e:
-            raise Exception('Invalid models metrics.') from e
+            raise Exception("Invalid models metrics.") from e
 
         return self.model_client.update_model_version(
-            model_version_id=f'{model_id}-{model_version}',
+            model_version_id=f"{model_id}-{model_version}",
             description=description,
             tensor_config=tensor_config,
             model_metrics=model_metrics,
@@ -313,8 +315,8 @@ class Model:
         model_id: str,
         model_version: int,
         service_name: str,
-        flavor: str = 'ml.highcpu.large',
-        image_id: str = 'machinelearning/tfserving:tf-cuda10.1',
+        flavor: str = "ml.highcpu.large",
+        image_id: str = "machinelearning/tfserving:tf-cuda10.1",
         envs=None,
         replica: Optional[int] = 1,
         description: Optional[str] = None,
@@ -326,10 +328,11 @@ class Model:
             flavor_id=self.model_client.get_unique_flavor(
                 self.resource_client.list_resource(
                     name=flavor,
-                    sort_by='vCPU',
-                ), ),
+                    sort_by="vCPU",
+                ),
+            ),
             model_id=model_id,
-            model_version_id=f'{model_id}-{model_version}',
+            model_version_id=f"{model_id}-{model_version}",
             envs=envs,
             replica=replica,
             description=description,
@@ -347,7 +350,7 @@ class Model:
     ):
 
         return self.model_client.create_perf_job(
-            model_version_id=f'{model_id}-{model_version}',
+            model_version_id=f"{model_id}-{model_version}",
             tensor_config=tensor_config,
             job_type=job_type,
             job_params=job_params,
@@ -360,10 +363,10 @@ class Model:
         job_id=None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
-        model_version_id = f'{model_id}-{model_version}'
+        model_version_id = f"{model_id}-{model_version}"
         return self.model_client.list_perf_jobs(
             model_version_id=model_version_id,
             job_id=job_id,
@@ -382,8 +385,8 @@ class Model:
         job_id=None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         return self.model_client.list_perf_tasks(
             task_id=task_id,

@@ -7,48 +7,42 @@ from tensorflow.keras.layers import GlobalAveragePooling1D
 from tensorflow.keras.layers import LayerNormalization
 
 CFGS = {
-    'swin_tiny_224':
-    dict(
+    "swin_tiny_224": dict(
         input_size=(224, 224),
         window_size=7,
         embed_dim=96,
         depths=[2, 2, 6, 2],
         num_heads=[3, 6, 12, 24],
     ),
-    'swin_small_224':
-    dict(
+    "swin_small_224": dict(
         input_size=(224, 224),
         window_size=7,
         embed_dim=96,
         depths=[2, 2, 18, 2],
         num_heads=[3, 6, 12, 24],
     ),
-    'swin_base_224':
-    dict(
+    "swin_base_224": dict(
         input_size=(224, 224),
         window_size=7,
         embed_dim=128,
         depths=[2, 2, 18, 2],
         num_heads=[4, 8, 16, 32],
     ),
-    'swin_base_384':
-    dict(
+    "swin_base_384": dict(
         input_size=(384, 384),
         window_size=12,
         embed_dim=128,
         depths=[2, 2, 18, 2],
         num_heads=[4, 8, 16, 32],
     ),
-    'swin_large_224':
-    dict(
+    "swin_large_224": dict(
         input_size=(224, 224),
         window_size=7,
         embed_dim=192,
         depths=[2, 2, 18, 2],
         num_heads=[6, 12, 24, 48],
     ),
-    'swin_large_384':
-    dict(
+    "swin_large_384": dict(
         input_size=(384, 384),
         window_size=12,
         embed_dim=192,
@@ -65,13 +59,13 @@ class Mlp(tf.keras.layers.Layer):
         hidden_features=None,
         out_features=None,
         drop=0.0,
-        prefix='',
+        prefix="",
     ):
         super().__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
-        self.fc1 = Dense(hidden_features, name=f'{prefix}/mlp/fc1')
-        self.fc2 = Dense(out_features, name=f'{prefix}/mlp/fc2')
+        self.fc1 = Dense(hidden_features, name=f"{prefix}/mlp/fc1")
+        self.fc2 = Dense(out_features, name=f"{prefix}/mlp/fc2")
         self.drop = Dropout(drop)
 
     def call(self, x):
@@ -128,28 +122,28 @@ class WindowAttention(tf.keras.layers.Layer):
         qk_scale=None,
         attn_drop=0.0,
         proj_drop=0.0,
-        prefix='',
+        prefix="",
     ):
         super().__init__()
         self.dim = dim
         self.window_size = window_size
         self.num_heads = num_heads
         head_dim = dim // num_heads
-        self.scale = qk_scale or head_dim**-0.5
+        self.scale = qk_scale or head_dim ** -0.5
         self.prefix = prefix
 
         self.qkv = Dense(
             dim * 3,
             use_bias=qkv_bias,
-            name=f'{self.prefix}/attn/qkv',
+            name=f"{self.prefix}/attn/qkv",
         )
         self.attn_drop = Dropout(attn_drop)
-        self.proj = Dense(dim, name=f'{self.prefix}/attn/proj')
+        self.proj = Dense(dim, name=f"{self.prefix}/attn/proj")
         self.proj_drop = Dropout(proj_drop)
 
     def build(self, input_shape):
         self.relative_position_bias_table = self.add_weight(
-            f'{self.prefix}/attn/relative_position_bias_table',
+            f"{self.prefix}/attn/relative_position_bias_table",
             shape=(
                 (2 * self.window_size[0] - 1) * (2 * self.window_size[1] - 1),
                 self.num_heads,
@@ -160,11 +154,16 @@ class WindowAttention(tf.keras.layers.Layer):
 
         coords_h = np.arange(self.window_size[0])
         coords_w = np.arange(self.window_size[1])
-        coords = np.stack(np.meshgrid(coords_h, coords_w, indexing='ij'))
+        coords = np.stack(np.meshgrid(coords_h, coords_w, indexing="ij"))
         coords_flatten = coords.reshape(2, -1)
-        relative_coords = coords_flatten[
-            :, :,
-            None, ] - coords_flatten[:, None, :]
+        relative_coords = (
+            coords_flatten[
+                :,
+                :,
+                None,
+            ]
+            - coords_flatten[:, None, :]
+        )
         relative_coords = relative_coords.transpose([1, 2, 0])
         relative_coords[:, :, 0] += self.window_size[0] - 1
         relative_coords[:, :, 1] += self.window_size[1] - 1
@@ -173,7 +172,7 @@ class WindowAttention(tf.keras.layers.Layer):
         self.relative_position_index = tf.Variable(
             initial_value=tf.convert_to_tensor(relative_position_index),
             trainable=False,
-            name=f'{self.prefix}/attn/relative_position_index',
+            name=f"{self.prefix}/attn/relative_position_index",
         )
         self.built = True
 
@@ -210,16 +209,7 @@ class WindowAttention(tf.keras.layers.Layer):
 
         if mask is not None:
             nW = mask.get_shape()[0]  # tf.shape(mask)[0]
-            attn = tf.reshape(
-                attn,
-                shape=[
-                    -1,
-                    nW,
-                    self.num_heads,
-                    N,
-                    N,
-                ],
-            ) + tf.cast(
+            attn = tf.reshape(attn, shape=[-1, nW, self.num_heads, N, N]) + tf.cast(
                 tf.expand_dims(
                     tf.expand_dims(
                         mask,
@@ -256,8 +246,7 @@ def drop_path(inputs, drop_prob, is_training):
     # shape = (inputs.shape[0],) + (1,) * \
     # (tf.experimental.numpy.ndim(inputs) - 1)
 
-    shape = (tf.shape(inputs)[0],) + (1,) * \
-        (tf.experimental.numpy.ndim(inputs) - 1)
+    shape = (tf.shape(inputs)[0],) + (1,) * (tf.experimental.numpy.ndim(inputs) - 1)
 
     random_tensor += tf.random.uniform(shape, dtype=inputs.dtype)
     binary_tensor = tf.floor(random_tensor)
@@ -289,7 +278,7 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
         attn_drop=0.0,
         drop_path_prob=0.0,
         norm_layer=LayerNormalization,
-        prefix='',
+        prefix="",
     ):
         super().__init__()
         self.dim = dim
@@ -302,12 +291,11 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
             self.shift_size = 0
             self.window_size = min(self.input_resolution)
         assert (
-            0 <= self.shift_size
-            and self.shift_size < self.window_size
-        ), 'shift_size must in 0-window_size'
+            0 <= self.shift_size and self.shift_size < self.window_size
+        ), "shift_size must in 0-window_size"
         self.prefix = prefix
 
-        self.norm1 = norm_layer(epsilon=1e-5, name=f'{self.prefix}/norm1')
+        self.norm1 = norm_layer(epsilon=1e-5, name=f"{self.prefix}/norm1")
         self.attn = WindowAttention(
             dim,
             window_size=(self.window_size, self.window_size),
@@ -319,8 +307,9 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
             prefix=self.prefix,
         )
         self.drop_path = DropPath(
-            drop_path_prob if drop_path_prob > 0.0 else 0.0, )
-        self.norm2 = norm_layer(epsilon=1e-5, name=f'{self.prefix}/norm2')
+            drop_path_prob if drop_path_prob > 0.0 else 0.0,
+        )
+        self.norm2 = norm_layer(epsilon=1e-5, name=f"{self.prefix}/norm2")
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(
             in_features=dim,
@@ -364,7 +353,7 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
             self.attn_mask = tf.Variable(
                 initial_value=attn_mask,
                 trainable=False,
-                name=f'{self.prefix}/attn_mask',
+                name=f"{self.prefix}/attn_mask",
             )
         else:
             self.attn_mask = None
@@ -374,7 +363,7 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
     def call(self, x):
         H, W = self.input_resolution
         B, L, C = x.get_shape().as_list()
-        assert L == H * W, 'input feature has wrong size'
+        assert L == H * W, "input feature has wrong size"
 
         shortcut = x
         x = self.norm1(x)
@@ -434,7 +423,7 @@ class PatchMerging(tf.keras.layers.Layer):
         input_resolution,
         dim,
         norm_layer=LayerNormalization,
-        prefix='',
+        prefix="",
     ):
         super().__init__()
         self.input_resolution = input_resolution
@@ -442,15 +431,15 @@ class PatchMerging(tf.keras.layers.Layer):
         self.reduction = Dense(
             2 * dim,
             use_bias=False,
-            name=f'{prefix}/downsample/reduction',
+            name=f"{prefix}/downsample/reduction",
         )
-        self.norm = norm_layer(epsilon=1e-5, name=f'{prefix}/downsample/norm')
+        self.norm = norm_layer(epsilon=1e-5, name=f"{prefix}/downsample/norm")
 
     def call(self, x):
         H, W = self.input_resolution
         B, L, C = x.get_shape().as_list()
-        assert L == H * W, 'input feature has wrong size'
-        assert H % 2 == 0 and W % 2 == 0, f'x size ({H}*{W}) are not even.'
+        assert L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."
 
         x = tf.reshape(x, shape=[-1, H, W, C])
 
@@ -484,7 +473,7 @@ class BasicLayer(tf.keras.layers.Layer):
         norm_layer=LayerNormalization,
         downsample=None,
         use_checkpoint=False,
-        prefix='',
+        prefix="",
     ):
         super().__init__()
         self.dim = dim
@@ -506,14 +495,18 @@ class BasicLayer(tf.keras.layers.Layer):
                     qk_scale=qk_scale,
                     drop=drop,
                     attn_drop=attn_drop,
-                    drop_path_prob=drop_path_prob[i] if isinstance(
+                    drop_path_prob=drop_path_prob[i]
+                    if isinstance(
                         drop_path_prob,
                         list,
-                    ) else drop_path_prob,
+                    )
+                    else drop_path_prob,
                     norm_layer=norm_layer,
-                    prefix=f'{prefix}/blocks{i}',
-                ) for i in range(depth)
-            ], )
+                    prefix=f"{prefix}/blocks{i}",
+                )
+                for i in range(depth)
+            ],
+        )
         if downsample is not None:
             self.downsample = downsample(
                 input_resolution,
@@ -534,14 +527,14 @@ class BasicLayer(tf.keras.layers.Layer):
 
 class PatchEmbed(tf.keras.layers.Layer):
     def __init__(
-            self,
-            img_size=(224, 224),
-            patch_size=(4, 4),
-            in_chans=3,
-            embed_dim=96,
-            norm_layer=None,
+        self,
+        img_size=(224, 224),
+        patch_size=(4, 4),
+        in_chans=3,
+        embed_dim=96,
+        norm_layer=None,
     ):
-        super().__init__(name='patch_embed')
+        super().__init__(name="patch_embed")
         patches_resolution = [
             img_size[0] // patch_size[0],
             img_size[1] // patch_size[1],
@@ -558,10 +551,10 @@ class PatchEmbed(tf.keras.layers.Layer):
             embed_dim,
             kernel_size=patch_size,
             strides=patch_size,
-            name='proj',
+            name="proj",
         )
         if norm_layer is not None:
-            self.norm = norm_layer(epsilon=1e-5, name='norm')
+            self.norm = norm_layer(epsilon=1e-5, name="norm")
         else:
             self.norm = None
 
@@ -587,7 +580,7 @@ class PatchEmbed(tf.keras.layers.Layer):
 class SwinTransformerModel(tf.keras.Model):
     def __init__(
         self,
-        model_name='swin_tiny_patch4_window7_224',
+        model_name="swin_tiny_patch4_window7_224",
         include_top=False,
         img_size=(224, 224),
         patch_size=(4, 4),
@@ -618,7 +611,7 @@ class SwinTransformerModel(tf.keras.Model):
         self.embed_dim = embed_dim
         self.ape = ape
         self.patch_norm = patch_norm
-        self.num_features = int(embed_dim * 2**(self.num_layers - 1))
+        self.num_features = int(embed_dim * 2 ** (self.num_layers - 1))
         self.mlp_ratio = mlp_ratio
 
         # split image into non-overlapping patches
@@ -636,7 +629,7 @@ class SwinTransformerModel(tf.keras.Model):
         # absolute postion embedding
         if self.ape:
             self.absolute_pos_embed = self.add_weight(
-                'absolute_pos_embed',
+                "absolute_pos_embed",
                 shape=(1, num_patches, embed_dim),
                 initializer=tf.initializers.Zeros(),
             )
@@ -650,10 +643,10 @@ class SwinTransformerModel(tf.keras.Model):
         self.basic_layers = tf.keras.Sequential(
             [
                 BasicLayer(
-                    dim=int(embed_dim * 2**i_layer),
+                    dim=int(embed_dim * 2 ** i_layer),
                     input_resolution=(
-                        patches_resolution[0] // (2**i_layer),
-                        patches_resolution[1] // (2**i_layer),
+                        patches_resolution[0] // (2 ** i_layer),
+                        patches_resolution[1] // (2 ** i_layer),
                     ),
                     depth=depths[i_layer],
                     num_heads=num_heads[i_layer],
@@ -666,19 +659,22 @@ class SwinTransformerModel(tf.keras.Model):
                     drop_path_prob=dpr[
                         sum(
                             depths[:i_layer],
-                        ):sum(depths[:i_layer + 1])
+                        ) : sum(depths[: i_layer + 1])
                     ],
                     norm_layer=norm_layer,
-                    downsample=PatchMerging if
-                    (i_layer < self.num_layers - 1) else None,
+                    downsample=PatchMerging
+                    if (i_layer < self.num_layers - 1)
+                    else None,
                     use_checkpoint=use_checkpoint,
-                    prefix=f'layers{i_layer}',
-                ) for i_layer in range(self.num_layers)
-            ], )
-        self.norm = norm_layer(epsilon=1e-5, name='norm')
+                    prefix=f"layers{i_layer}",
+                )
+                for i_layer in range(self.num_layers)
+            ],
+        )
+        self.norm = norm_layer(epsilon=1e-5, name="norm")
         self.avgpool = GlobalAveragePooling1D()
         if self.include_top:
-            self.head = Dense(num_classes, name='head')
+            self.head = Dense(num_classes, name="head")
         else:
             self.head = None
 
@@ -701,7 +697,7 @@ class SwinTransformerModel(tf.keras.Model):
 
 
 def SwinTransformer(
-    model_name='swin_tiny_224',
+    model_name="swin_tiny_224",
     cache_dir=None,
     num_classes=1000,
     include_top=True,
@@ -714,32 +710,33 @@ def SwinTransformer(
         model_name=model_name,
         include_top=include_top,
         num_classes=num_classes,
-        img_size=cfg['input_size'],
-        window_size=cfg['window_size'],
-        embed_dim=cfg['embed_dim'],
-        depths=cfg['depths'],
-        num_heads=cfg['num_heads'],
+        img_size=cfg["input_size"],
+        window_size=cfg["window_size"],
+        embed_dim=cfg["embed_dim"],
+        depths=cfg["depths"],
+        num_heads=cfg["num_heads"],
     )
-    net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], 3)))
+    net(tf.keras.Input(shape=(cfg["input_size"][0], cfg["input_size"][1], 3)))
     if pretrained is True:
-        url = f'https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/{model_name}.tgz'
+        url = f"https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/{model_name}.tgz"
         pretrained_ckpt = tf.keras.utils.get_file(
             model_name,
             url,
             untar=True,
             cache_dir=cache_dir,
-            cache_subdir='',
+            cache_subdir="",
         )
     else:
         pretrained_ckpt = pretrained
 
     if pretrained_ckpt:
         if tf.io.gfile.isdir(pretrained_ckpt):
-            pretrained_ckpt = f'{pretrained_ckpt}/{model_name}.ckpt'
+            pretrained_ckpt = f"{pretrained_ckpt}/{model_name}.ckpt"
 
         if use_tpu:
             load_locally = tf.saved_model.LoadOptions(
-                experimental_io_device='/job:localhost', )
+                experimental_io_device="/job:localhost",
+            )
             net.load_weights(pretrained_ckpt, options=load_locally)
         else:
             net.load_weights(pretrained_ckpt)

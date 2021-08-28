@@ -5,19 +5,19 @@ from typing import Optional
 from volcengine_ml_platform.openapi.base_client import BaseClient
 from volcengine_ml_platform.openapi.base_client import define_api
 
-define_api('UpdateService')
-define_api('CreateService')
-define_api('UpdateServiceVersionDescription')
-define_api('ListServices')
-define_api('StopService')
-define_api('ListServiceVersions')
-define_api('StartService')
-define_api('DeleteService')
-define_api('GetService')
-define_api('RollbackServiceVersion')
-define_api('ListInferenceServiceInstances')
-define_api('GetInferenceServiceInstanceStatus')
-define_api('ModifyService')
+define_api("UpdateService")
+define_api("CreateService")
+define_api("UpdateServiceVersionDescription")
+define_api("ListServices")
+define_api("StopService")
+define_api("ListServiceVersions")
+define_api("StartService")
+define_api("DeleteService")
+define_api("GetService")
+define_api("RollbackServiceVersion")
+define_api("ListInferenceServiceInstances")
+define_api("GetInferenceServiceInstanceStatus")
+define_api("ModifyService")
 
 
 class InferenceServiceClient(BaseClient):
@@ -54,25 +54,25 @@ class InferenceServiceClient(BaseClient):
         """
         try:
             body = {
-                'ServiceName': service_name,
-                'ServiceDeployment': {
-                    'Replicas': replica,
-                    'FlavorID': flavor_id,
-                    'Model': {
-                        'ModelID': model_id,
-                        'ModelVersionID': model_version_id,
+                "ServiceName": service_name,
+                "ServiceDeployment": {
+                    "Replicas": replica,
+                    "FlavorID": flavor_id,
+                    "Model": {
+                        "ModelID": model_id,
+                        "ModelVersionID": model_version_id,
                     },
-                    'ImageID': image_id,
-                    'Envs': envs,
+                    "ImageID": image_id,
+                    "Envs": envs,
                 },
             }
             if description is not None:
-                body['ServiceDeployment'].update({'Description': description})
-            res_json = self.common_json_handler(api='CreateService', body=body)
+                body["ServiceDeployment"].update({"Description": description})
+            res_json = self.common_json_handler(api="CreateService", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to create service, error: %s', e)
-            raise Exception('create_service failed') from e
+            logging.error("Failed to create service, error: %s", e)
+            raise Exception("create_service failed") from e
 
     def modify_service(self, service_name: str, service_id: str, cluster_id: str):
         """Modify ServiceName with given ServiceID and ClusterID
@@ -89,21 +89,21 @@ class InferenceServiceClient(BaseClient):
             json response
         """
         body = {
-            'ServiceName': service_name,
-            'ServiceID': service_id,
-            'ClusterID': cluster_id,
+            "ServiceName": service_name,
+            "ServiceID": service_id,
+            "ClusterID": cluster_id,
         }
         try:
-            res_json = self.common_json_handler('ModifyService', body)
+            res_json = self.common_json_handler("ModifyService", body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to modify service, service_id: %s, cluster_id: %s, error: %s',
+                "Failed to modify service, service_id: %s, cluster_id: %s, error: %s",
                 service_id,
                 cluster_id,
                 e,
             )
-            raise Exception('modify_service failed') from e
+            raise Exception("modify_service failed") from e
 
     def delete_service(self, service_id: str) -> dict:
         """delete service with service id
@@ -117,15 +117,17 @@ class InferenceServiceClient(BaseClient):
         Returns:
             json response
         """
-        body = {'ServiceID': service_id}
+        body = {"ServiceID": service_id}
         try:
-            res_json = self.common_json_handler(api='DeleteService', body=body)
+            res_json = self.common_json_handler(api="DeleteService", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to delete service, service_id: %s, error: %s', service_id, e,
+                "Failed to delete service, service_id: %s, error: %s",
+                service_id,
+                e,
             )
-            raise Exception('delete_service failed') from e
+            raise Exception("delete_service failed") from e
 
     def start_service(self, service_id: str) -> dict:
         """start service with service id
@@ -139,15 +141,17 @@ class InferenceServiceClient(BaseClient):
         Returns:
             json response
         """
-        body = {'ServiceID': service_id}
+        body = {"ServiceID": service_id}
         try:
-            res_json = self.common_json_handler(api='StartService', body=body)
+            res_json = self.common_json_handler(api="StartService", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to start service, service_id: %s, error: %s', service_id, e,
+                "Failed to start service, service_id: %s, error: %s",
+                service_id,
+                e,
             )
-            raise Exception('start_service failed') from e
+            raise Exception("start_service failed") from e
 
     def stop_service(self, service_id: str) -> dict:
         """stop service with service id
@@ -161,15 +165,17 @@ class InferenceServiceClient(BaseClient):
         Returns:
             json response
         """
-        body = {'ServiceID': service_id}
+        body = {"ServiceID": service_id}
         try:
-            res_json = self.common_json_handler(api='StopService', body=body)
+            res_json = self.common_json_handler(api="StopService", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to stop service, service_id: %s, error: %s', service_id, e,
+                "Failed to stop service, service_id: %s, error: %s",
+                service_id,
+                e,
             )
-            raise Exception('stop_service failed') from e
+            raise Exception("stop_service failed") from e
 
     def scale_service(self, service_id: str, replicas: int) -> dict:
         """scale service by changing the number of replicas
@@ -184,22 +190,24 @@ class InferenceServiceClient(BaseClient):
         Returns:
             json response
         """
-        change_type = 'ScalingService'
+        change_type = "ScalingService"
 
         try:
             body = {
-                'ServiceID': service_id,
-                'Replicas': replicas,
-                'ChangeType': change_type,
+                "ServiceID": service_id,
+                "Replicas": replicas,
+                "ChangeType": change_type,
             }
 
-            res_json = self.common_json_handler(api='UpdateService', body=body)
+            res_json = self.common_json_handler(api="UpdateService", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to scale service, service_id: %s, error: %s', service_id, e,
+                "Failed to scale service, service_id: %s, error: %s",
+                service_id,
+                e,
             )
-            raise Exception('scale_service failed') from e
+            raise Exception("scale_service failed") from e
 
     def update_service(
         self,
@@ -214,27 +222,29 @@ class InferenceServiceClient(BaseClient):
         service_description: str = None,
     ):
         body = {
-            'ServiceID': service_id,
-            'Replicas': replicas,
-            'FlavorID': flavor_id,
-            'Model': {
-                'ModelID': model_id,
-                'ModelVersionID': model_version_id,
+            "ServiceID": service_id,
+            "Replicas": replicas,
+            "FlavorID": flavor_id,
+            "Model": {
+                "ModelID": model_id,
+                "ModelVersionID": model_version_id,
             },
-            'ImageID': image_id,
-            'Envs': envs,
-            'ChangeType': change_type,
+            "ImageID": image_id,
+            "Envs": envs,
+            "ChangeType": change_type,
         }
         if service_description:
-            body.update({'Description': service_description})
+            body.update({"Description": service_description})
         try:
-            res_json = self.common_json_handler(api='UpdateService', body=body)
+            res_json = self.common_json_handler(api="UpdateService", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to update service, service_id: %s, error: %s', service_id, e,
+                "Failed to update service, service_id: %s, error: %s",
+                service_id,
+                e,
             )
-            raise Exception('update_service failed') from e
+            raise Exception("update_service failed") from e
 
     def get_service(self, service_id: str):
         """get service with given service_id
@@ -248,15 +258,17 @@ class InferenceServiceClient(BaseClient):
         Returns:
             json response
         """
-        body = {'ServiceID': service_id}
+        body = {"ServiceID": service_id}
         try:
-            res_json = self.common_json_handler(api='GetService', body=body)
+            res_json = self.common_json_handler(api="GetService", body=body)
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get service, service_id: %s, error: %s', service_id, e,
+                "Failed to get service, service_id: %s, error: %s",
+                service_id,
+                e,
             )
-            raise Exception('get_service failed') from e
+            raise Exception("get_service failed") from e
 
     def list_services(
         self,
@@ -264,8 +276,8 @@ class InferenceServiceClient(BaseClient):
         service_name_contains: str = None,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list services
 
@@ -285,30 +297,30 @@ class InferenceServiceClient(BaseClient):
             json response
         """
         body = {
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
         if service_name:
-            body.update({'ServiceName': service_name})
+            body.update({"ServiceName": service_name})
         if service_name_contains:
-            body.update({'ServiceNameContains': service_name_contains})
+            body.update({"ServiceNameContains": service_name_contains})
 
         try:
-            res_json = self.common_json_handler(api='ListServices', body=body)
+            res_json = self.common_json_handler(api="ListServices", body=body)
             return res_json
         except Exception as e:
-            logging.error('Failed to list services, error: %s', e)
-            raise Exception('list_services failed') from e
+            logging.error("Failed to list services, error: %s", e)
+            raise Exception("list_services failed") from e
 
     def list_service_versions(
         self,
         service_id: str,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list service versions with given service_id
 
@@ -326,25 +338,26 @@ class InferenceServiceClient(BaseClient):
             json response
         """
         body = {
-            'ServiceID': service_id,
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "ServiceID": service_id,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
 
         try:
             res_json = self.common_json_handler(
-                api='ListServiceVersions', body=body,
+                api="ListServiceVersions",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to list service versions, service_id: %s, error: %s',
+                "Failed to list service versions, service_id: %s, error: %s",
                 service_id,
                 e,
             )
-            raise Exception('list_service_versions failed') from e
+            raise Exception("list_service_versions failed") from e
 
     def rollback_service_version(self, service_id: str, service_version_id: str):
         """Rollback a ServiceVersion with ServiceID and ServiceVersionID
@@ -360,30 +373,31 @@ class InferenceServiceClient(BaseClient):
             Dataset: json response
         """
         body = {
-            'ServiceID': service_id,
-            'ServiceVersionID': service_version_id,
+            "ServiceID": service_id,
+            "ServiceVersionID": service_version_id,
         }
         try:
             res_json = self.common_json_handler(
-                api='RollbackServiceVersion', body=body,
+                api="RollbackServiceVersion",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to rollback service version, service_id: %s, service_version_id: %s, error: %s',
+                "Failed to rollback service version, service_id: %s, service_version_id: %s, error: %s",
                 service_id,
                 service_version_id,
                 e,
             )
-            raise Exception('rollback_service_version failed') from e
+            raise Exception("rollback_service_version failed") from e
 
     def list_inference_service_instances(
         self,
         service_id: str,
         offset=0,
         page_size=10,
-        sort_by='CreateTime',
-        sort_order='Descend',
+        sort_by="CreateTime",
+        sort_order="Descend",
     ):
         """list service instances
 
@@ -401,28 +415,31 @@ class InferenceServiceClient(BaseClient):
             json response
         """
         body = {
-            'ServiceID': service_id,
-            'Offset': offset,
-            'Limit': page_size,
-            'SortBy': sort_by,
-            'SortOrder': sort_order,
+            "ServiceID": service_id,
+            "Offset": offset,
+            "Limit": page_size,
+            "SortBy": sort_by,
+            "SortOrder": sort_order,
         }
 
         try:
             res_json = self.common_json_handler(
-                api='ListInferenceServiceInstances', body=body,
+                api="ListInferenceServiceInstances",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to list inference service instances, service_id: %s, error: %s',
+                "Failed to list inference service instances, service_id: %s, error: %s",
                 service_id,
                 e,
             )
-            raise Exception('list_inference_service_instances failed') from e
+            raise Exception("list_inference_service_instances failed") from e
 
     def get_inference_service_instance_status(
-        self, service_id: str, instance_id_list: list,
+        self,
+        service_id: str,
+        instance_id_list: list,
     ):
         """get the status of inference service instance
 
@@ -436,19 +453,20 @@ class InferenceServiceClient(BaseClient):
         Returns:
             json response
         """
-        body = {'ServiceID': service_id, 'InstanceIDList': instance_id_list}
+        body = {"ServiceID": service_id, "InstanceIDList": instance_id_list}
 
         try:
             res_json = self.common_json_handler(
-                api='GetInferenceServiceInstanceStatus', body=body,
+                api="GetInferenceServiceInstanceStatus",
+                body=body,
             )
             return res_json
         except Exception as e:
             logging.error(
-                'Failed to get inference service instance status, service_id: %s, error: %s',
+                "Failed to get inference service instance status, service_id: %s, error: %s",
                 service_id,
                 e,
             )
             raise Exception(
-                'get_inference_service_instance_status failed',
+                "get_inference_service_instance_status failed",
             ) from e

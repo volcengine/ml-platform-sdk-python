@@ -14,7 +14,7 @@ QUEUE_TIMEOUT_SECONDS = 4
 
 
 def dataset_copy_file(metadata, source_dir, destination_dir):
-    file_path = metadata['Data']['FilePath']
+    file_path = metadata["Data"]["FilePath"]
     file_dir, file_name = os.path.split(file_path)
     target_dir = os.path.join(
         destination_dir,
@@ -24,11 +24,11 @@ def dataset_copy_file(metadata, source_dir, destination_dir):
     try:
         os.makedirs(target_dir, exist_ok=True)
     except OSError:
-        logging.warning('Cannot create directory: %s', target_dir)
+        logging.warning("Cannot create directory: %s", target_dir)
 
     target_file = os.path.join(target_dir, file_name)
     shutil.copy(file_path, target_file)
-    metadata['Data']['FilePath'] = target_file
+    metadata["Data"]["FilePath"] = target_file
 
 
 class _Dataset:
@@ -40,7 +40,7 @@ class _Dataset:
         self,
         dataset_id: Optional[str] = None,
         annotation_id: Optional[str] = None,
-        local_path: str = '.',
+        local_path: str = ".",
         tos_source: Optional[str] = None,
     ):
         self.dataset_id = dataset_id
@@ -67,10 +67,11 @@ class _Dataset:
             return
         try:
             self.detail = self.api_client.get_dataset(
-                self.dataset_id, )['Result']
+                self.dataset_id,
+            )["Result"]
         except Exception as e:
-            logging.error('get datasets detail failed, error: %s', e)
-            raise Exception('invalid datasets') from e
+            logging.error("get datasets detail failed, error: %s", e)
+            raise Exception("invalid datasets") from e
 
     def _get_annotation_detail(self):
         if self.annotation_id is None:
@@ -83,17 +84,17 @@ class _Dataset:
                 self.dataset_id,
                 self.annotation_id,
             )
-            self.annotation_detail = resp['Result']
+            self.annotation_detail = resp["Result"]
         except Exception as e:
-            logging.error('get annotation detail failed, error: %s', e)
-            raise Exception('invalid annotation') from e
+            logging.error("get annotation detail failed, error: %s", e)
+            raise Exception("invalid annotation") from e
 
     def _get_storage_path(self) -> str:
         if self.detail is None:
-            return ''
+            return ""
         if self.annotation_id is not None:
-            return self.annotation_detail['StoragePath']
-        return self.detail['StoragePath']
+            return self.annotation_detail["StoragePath"]
+        return self.detail["StoragePath"]
 
     def _manifest_path(self):
         return os.path.join(
@@ -111,22 +112,23 @@ class _Dataset:
         limit=-1,
     ):
 
-        print('Downloading the mainfest file ...')
+        print("Downloading the mainfest file ...")
         self._get_detail()
 
         manifest_file_path = self.tos_client.download_file(
-            tos_url=self._get_storage_path(), dir_path=self.local_path,
+            tos_url=self._get_storage_path(),
+            dir_path=self.local_path,
         )
         manifest_line = []
         urls = []
-        with open(manifest_file_path, encoding='utf-8') as f:
+        with open(manifest_file_path, encoding="utf-8") as f:
             for seqNum, line in enumerate(f.readlines()):
                 manifest_line.append(json.loads(line))
-                urls.append(manifest_line[seqNum]['Data'][manifest_keyword])
+                urls.append(manifest_line[seqNum]["Data"][manifest_keyword])
                 if limit != -1 and seqNum + 1 >= limit:
                     break
 
-        print('Downloading datasets ...')
+        print("Downloading datasets ...")
         paths = self.tos_client.download_files(
             tos_urls=urls,
             dir_path=self.local_path,
@@ -134,17 +136,18 @@ class _Dataset:
         )
 
         # create a new thread to consume new local maifest file
-        print('Generating the local mainfest file...')
-        manifest_str = ''
+        print("Generating the local mainfest file...")
+        manifest_str = ""
         for idx, path in enumerate(paths):
-            manifest_line[idx]['Data']['FilePath'] = path
-            manifest_str += json.dumps(manifest_line[idx]) + '\n'
+            manifest_line[idx]["Data"]["FilePath"] = path
+            manifest_str += json.dumps(manifest_line[idx]) + "\n"
         with open(
-            self._manifest_path(), 'w',
-            encoding='utf-8',
+            self._manifest_path(),
+            "w",
+            encoding="utf-8",
         ) as new_manifest_file:
             new_manifest_file.write(manifest_str)
-        print('Update the local mainfest file successful')
+        print("Update the local mainfest file successful")
         self.created = True
 
     def get_paths(self, offset=0, limit=-1) -> Optional[Tuple[List, Optional[List]]]:
@@ -163,16 +166,16 @@ class _Dataset:
         paths = []
         annotations = []
 
-        with open(self._manifest_path(), encoding='utf-8') as f:
+        with open(self._manifest_path(), encoding="utf-8") as f:
             for i, line in enumerate(f):
                 manifest_line = json.loads(line)
                 if i < offset:
                     continue
                 if limit != -1 and i >= offset + limit:
                     break
-                file_path = manifest_line['data']['FilePath']
+                file_path = manifest_line["data"]["FilePath"]
                 paths.append(file_path)
-                annotations.append(manifest_line['annotation'])
+                annotations.append(manifest_line["annotation"])
 
         return paths, annotations
 
