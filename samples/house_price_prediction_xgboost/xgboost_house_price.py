@@ -249,6 +249,7 @@ if __name__ == '__main__':
     y_pred = model_xgb.predict(test_)
     y_pred = np.floor(np.expm1(y_pred))
 
+    test_ids = np.Array([])  # TODO fix the unknown parameter
     submission = pd.concat(
         [test_ids, pd.Series(y_pred)], axis=1, keys=['Id', 'SalePrice'],
     )

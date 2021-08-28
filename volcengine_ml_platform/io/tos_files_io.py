@@ -12,7 +12,7 @@ from volcengine_ml_platform.tos import tos
 class TorchTOSDataset:
     def __init__(
         self,
-        manifest_info: Optional[Dict] = None,
+        manifest_info: Dict,
         decode: Optional[Callable] = None,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,

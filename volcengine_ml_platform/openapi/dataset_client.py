@@ -1,4 +1,6 @@
 import logging
+from typing import Dict
+from typing import Union
 
 from volcengine_ml_platform.openapi.base_client import BaseClient
 from volcengine_ml_platform.openapi.base_client import define_api
@@ -257,7 +259,7 @@ class DataSetClient(BaseClient):
         Returns:
             json response
         """
-        body = {
+        body: Dict[str, Union[str, int, list]] = {
             'DatasetID': dataset_id,
             'AnnotationType': annotation_type,
             'AnnotationName': annotation_name,

@@ -14,13 +14,15 @@ from volcengine_ml_platform.io.tos_files_io import TorchTOSDataset
 
 
 class ImageDataset(_Dataset):
-    def download(self, local_path: Optional[str] = None, limit=-1):
+    def download(self, local_path: str = 'ImageDataset', limit=-1):
         """download datasets from source
 
         Args:
             limit (int, optional): download size. Defaults to -1 (no limit).
         """
-        self._create_mainfest_dataset(local_path, 'ImageURL')
+        self._create_mainfest_dataset(
+            local_path=local_path, manifest_keyword='ImageURL',
+        )
 
     def split(self, training_dir: str, testing_dir: str, ratio=0.8, random_state=0):
         """split datasets and return two datasets objects

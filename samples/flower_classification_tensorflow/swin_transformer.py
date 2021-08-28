@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 
-from samples.models.swin_transformer_tensorflow import SwinTransformer
+from samples.models.swin_transformer_tensorflow.model import SwinTransformer
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.models.model import Model
 from volcengine_ml_platform.tos import tos

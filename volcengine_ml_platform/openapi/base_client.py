@@ -1,6 +1,7 @@
 import json
 import logging
 import threading
+from typing import Union
 
 from volcengine.ApiInfo import ApiInfo
 from volcengine.auth.SignerV4 import SignerV4
@@ -12,6 +13,8 @@ from volcengine_ml_platform import constant
 from volcengine_ml_platform.util import metric
 
 API_INFOS = {}
+
+BodyDict = dict[str, Union[str, int]]
 
 
 def define_api(name, method='POST'):
@@ -114,7 +117,7 @@ class BaseClient(Service):
         Returns:
 
         """
-        body = {'ServiceName': service_name}
+        body: BodyDict = {'ServiceName': service_name}
         if path:
             body.update({'Path': path})
 
@@ -128,7 +131,7 @@ class BaseClient(Service):
             raise Exception('GetTOSUploadPath failed') from e
 
     def get_sts_token(self, encrypt_code: str, duration: int = None):
-        body = {'EncryptCode': encrypt_code}
+        body: BodyDict = {'EncryptCode': encrypt_code}
 
         if duration:
             body.update({'Duration': duration})

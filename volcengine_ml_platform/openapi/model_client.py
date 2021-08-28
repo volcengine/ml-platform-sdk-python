@@ -1,3 +1,4 @@
+# type: ignore
 import logging
 
 from volcengine_ml_platform.openapi.base_client import BaseClient

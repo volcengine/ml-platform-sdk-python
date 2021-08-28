@@ -1,6 +1,5 @@
 import math
 import os
-from typing import Optional
 
 import numpy as np
 
@@ -8,16 +7,19 @@ from volcengine_ml_platform.datasets.dataset import _Dataset
 
 
 class TabularDataset(_Dataset):
-    def download(self, local_path: Optional[str] = None):
+    def download(self, local_path: str = 'TabularDataset'):
         if local_path is not None:
             self.local_path = local_path
+
         self.tabular_path = self._download_file(
-            self._get_storage_path(
+            tos_url=self._get_storage_path(
             ),  # TODO tabular file hasn't storage_path()
-            self.local_path,
+            file_path=self.local_path,
         )
         self.created = True
 
+        if not self.tabular_path:
+            raise ValueError('Empty value(self.tabular_path)')
         # count number of lines, not including header line
         with open(self.tabular_path, encoding='utf-8') as f:
             self.data_count = sum(1 for line in f) - 1
@@ -48,7 +50,8 @@ class TabularDataset(_Dataset):
             raise ValueError(
                 'training directory can not be the same as testing directory',
             )
-
+        if not self.tabular_path:
+            raise ValueError('Empty value(tabular_path)')
         csv_name = os.path.basename(self.tabular_path)
         train_csv_path = os.path.join(training_dir, csv_name)
         test_csv_path = os.path.join(testing_dir, csv_name)
@@ -77,6 +80,8 @@ class TabularDataset(_Dataset):
                     encoding='utf-8',
             ) as train_file:
                 index = -1
+                if not self.tabular_path:
+                    raise ValueError('Empty Value(tabular_path)')
                 with open(self.tabular_path, encoding='utf-8') as input_file:
                     for line in input_file:
                         # write header

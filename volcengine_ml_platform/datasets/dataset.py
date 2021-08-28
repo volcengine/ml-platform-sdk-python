@@ -40,7 +40,7 @@ class _Dataset:
         self,
         dataset_id: Optional[str] = None,
         annotation_id: Optional[str] = None,
-        local_path: Optional[str] = None,
+        local_path: str = '.',
         tos_source: Optional[str] = None,
     ):
         self.dataset_id = dataset_id
@@ -101,17 +101,19 @@ class _Dataset:
             constant.DATASET_LOCAL_METADATA_FILENAME,
         )
 
+    def _download_file(self, tos_url: str, file_path: str):
+        return self.tos_client.download_file(tos_url=tos_url, file_path=file_path)
+
     def _create_mainfest_dataset(
         self,
-        local_path: Optional[str] = None,
-        manifest_keyword: Optional[str] = None,
+        local_path: str,
+        manifest_keyword: str,
         limit=-1,
     ):
-        if local_path is not None:
-            self.local_path = local_path
 
         print('Downloading the mainfest file ...')
         self._get_detail()
+
         manifest_file_path = self.tos_client.download_file(
             tos_url=self._get_storage_path(), dir_path=self.local_path,
         )
@@ -127,7 +129,7 @@ class _Dataset:
         print('Downloading datasets ...')
         paths = self.tos_client.download_files(
             tos_urls=urls,
-            dir_path=local_path,
+            dir_path=self.local_path,
             parallelism=10,
         )
 
@@ -145,7 +147,7 @@ class _Dataset:
         print('Update the local mainfest file successful')
         self.created = True
 
-    def get_paths(self, offset=0, limit=-1) -> Tuple[List, List]:
+    def get_paths(self, offset=0, limit=-1) -> Optional[Tuple[List, Optional[List]]]:
         """get filepaths of dataset files
 
         Args:
