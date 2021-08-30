@@ -425,21 +425,23 @@ if __name__ == "__main__":
     model.save(SAVED_MODEL_PATH)
 
     # register new model_version to mlplatform.model_repo
-    model = Model(local_path=SAVED_MODEL_PATH)
-    model.register(
+    model = Model()
+    res = model.register(
+        local_path=SAVED_MODEL_PATH,
         model_name="test-swin-transformer-model",
         model_format="SavedModel",
         model_type="TensorFlow:2.4",
         description="Flower Classification Model",
     )
-
-    # get models detail
-    model.print()
+    print(res)
 
     # deploy the selected model_version
     inference_service = model.deploy(
+        model_id=res["Result"]["ModelID"],
+        service_name="flower-cls-serving-v2",
         flavor="ml.highcpu.large",
         replica=1,
-        model_version=1,
+        model_version=res["Result"]["VersionInfo"]["ModelVersion"],
         image_id="machinelearning/tfserving:tf-cuda11.0",
     )
+    inference_service.print()
