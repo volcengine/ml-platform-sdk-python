@@ -1,5 +1,4 @@
 import argparse
-import sys
 import warnings
 from io import StringIO
 
@@ -14,7 +13,6 @@ from volcengine_ml_platform import constant
 from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.util import cache_dir
 
-sys.path.append("../../")
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
 

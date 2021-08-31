@@ -28,11 +28,11 @@ from utils import load_checkpoint
 from utils import reduce_tensor
 from utils import save_checkpoint
 
+sys.path.append("../..")
 from samples.models.swin_transformer_pytorch.build import build_model
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.io import tos
 
-sys.path.append("../..")
 
 try:
     # noinspection PyUnresolvedReferences
