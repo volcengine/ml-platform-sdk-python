@@ -7,13 +7,12 @@ import horovod.tensorflow as hvd
 import numpy as np
 import tensorflow as tf
 
+sys.path.append("../..")
 from samples.models.swin_transformer_tensorflow.model import SwinTransformer
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
-
-sys.path.append("../..")
 
 BUCKET = constant.get_public_examples_readonly_bucket()
 CACHE_DIR = cache_dir.create(
