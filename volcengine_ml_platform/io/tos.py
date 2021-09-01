@@ -279,8 +279,9 @@ class TOSClient:
             bucket = parse_result.netloc.split(".")[0]
             key = parse_result.path[1:]
 
-            if file_path is None:
+            if not file_path:
                 file_path = os.path.join(dir_path, key)
+                dir_path = os.path.dirname(file_path)
             self._create_dir(dir_path)
 
         debug("download file: bucket %s, key %s", bucket, key)
@@ -332,7 +333,7 @@ class TOSClient:
         if (not bucket or not keys) and not tos_urls:
             raise ValueError("Please assign a set of value as non-None")
 
-        if not file_paths and not dir_path:
+        if not tos_urls and not dir_path:
             raise ValueError("Please set a correct dir_path or file_path")
 
         self.dir_record = set()
