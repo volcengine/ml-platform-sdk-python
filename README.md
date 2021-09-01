@@ -2,7 +2,6 @@
 
 
 ## To start using SDK
-https://bytedance.feishu.cn/docs/doccnxximX3BaSrGhB81SCav60f
 
 ### 1. Install package
 * From pypi
@@ -15,7 +14,7 @@ pip install --user --upgrade volcengine_ml_platform
 ```
 * To install the development version
 ```
-pip install --user git+https://code.byted.org/machinelearning/mlplatform-sdk-python.git
+pip install --user git+https://github.com/volcengine/mlplatform-sdk-python.git
 ```
 
 ### 2. Run Samples

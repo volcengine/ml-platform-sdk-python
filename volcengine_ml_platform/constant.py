@@ -1,3 +1,5 @@
+import os
+
 BOE_ENV = "BOE"
 PROD_ENV = "PROD"
 
@@ -6,13 +8,8 @@ SERVICE_NAME = "ml_platform"
 SERVICE_VERSION = "2021-10-01"
 
 SERVICE_HOSTS = {
-    BOE_ENV: "volcengineapi-boe-escape.byted.org",
+    BOE_ENV: os.getenv("VOLC_SERVICE_HOST_BOE", ""),
     PROD_ENV: "open.volcengineapi.com",
-}
-
-SERVICE_DIRECT_HOSTS = {
-    BOE_ENV: "10.228.109.27:30008",
-    PROD_ENV: "10.228.109.27:30018",
 }
 
 TOS_REGION_ENDPOINT_URLS = {
