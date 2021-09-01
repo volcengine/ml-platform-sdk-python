@@ -1,4 +1,3 @@
-# Get Started with Codebase CI https://bytedance.feishu.cn/wiki/wikcnclt1VL6j2z0I0fFE6cdzwc
 name: ML Platform Python SDK CI
 trigger:
   change:
@@ -17,5 +16,5 @@ jobs:
           - pre-commit run --all-files
           # Unit test starts here
           - echo "start unit test"
-          - pip3 install -i https://bytedpypi.byted.org/simple -r requirements.txt
+          - pip3 install -r requirements.txt
           - bash -ex scripts/py_unit_test.sh

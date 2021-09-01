@@ -30,10 +30,6 @@ def get_service_host():
     return constant.SERVICE_HOSTS[get_env_name()]
 
 
-def get_service_direct_host():
-    return constant.SERVICE_DIRECT_HOSTS[get_env_name()]
-
-
 def get_service_name():
     return constant.SERVICE_NAME
 

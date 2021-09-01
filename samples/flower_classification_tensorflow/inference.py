@@ -5,7 +5,7 @@ import numpy as np
 import requests
 from PIL import Image
 
-END_POINT = "inference-demo.byted.org/s-20210803143929-vfspk/rest"
+END_POINT = "inference-demo.volces.com/s-20210803143929-vfspk/rest"
 CLASSES = [
     "pink primrose",
     "hard-leaved pocket orchid",
