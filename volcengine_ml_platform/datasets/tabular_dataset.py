@@ -8,20 +8,9 @@ from volcengine_ml_platform.datasets.dataset import _Dataset
 
 class TabularDataset(_Dataset):
     def download(self, local_path: str = "TabularDataset"):
-        if local_path is not None:
+        if local_path:
             self.local_path = local_path
-
-        self.tabular_path = self._download_file(
-            tos_url=self._get_storage_path(),  # TODO tabular file hasn't storage_path()
-            file_path=self.local_path,
-        )
-        self.created = True
-
-        if not self.tabular_path:
-            raise ValueError("Empty value(self.tabular_path)")
-        # count number of lines, not including header line
-        with open(self.tabular_path, encoding="utf-8") as f:
-            self.data_count = sum(1 for line in f) - 1
+        self._create_non_manifest_dataset()
 
     def split(
         self,
@@ -88,6 +77,8 @@ class TabularDataset(_Dataset):
                         if index == -1:
                             test_file.write(line)
                             train_file.write(line)
+                            index = index + 1
+                            continue
 
                         if index in test_index_set:
                             test_file.write(line)

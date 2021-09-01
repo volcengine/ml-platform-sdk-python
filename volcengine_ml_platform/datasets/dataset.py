@@ -46,7 +46,7 @@ class _Dataset:
         self.dataset_id = dataset_id
         self.annotation_id = annotation_id
         self.local_path = local_path
-        self.tabular_path = None
+        self.tabular_path = ""
         self.tos_source = tos_source
         self.created = False
         self.data_count = 0
@@ -105,9 +105,24 @@ class _Dataset:
     def _download_file(self, tos_url: str, file_path: str):
         return self.tos_client.download_file(tos_url=tos_url, file_path=file_path)
 
-    def _create_mainfest_dataset(
+    def _create_non_manifest_dataset(self, limit=-1):
+        print("Downloading the csv file ...")
+        self._get_detail()
+        print(self._get_storage_path())  # TODO how to get csv file tos url
+        self.tabular_path = self.tos_client.download_file(
+            tos_url=self._get_storage_path(),
+            dir_path=self.local_path,
+        )
+
+        if not self.tabular_path:
+            raise ValueError("Empty value(self.tabular_path)")
+        # count number of lines, not including header line
+        with open(self.tabular_path, encoding="utf-8") as f:
+            self.data_count = sum(1 for line in f) - 1
+        self.created = True
+
+    def _create_manifest_dataset(
         self,
-        local_path: str,
         manifest_keyword: str,
         limit=-1,
     ):
@@ -161,7 +176,7 @@ class _Dataset:
             list of paths. Single tabular_path will be returned if it is a TabularDataset
             list of annotations. No annotations for TabularDataset
         """
-        if not self.tabular_path:
+        if self.tabular_path:
             return [self.tabular_path], None
         paths = []
         annotations = []

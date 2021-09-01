@@ -20,8 +20,10 @@ class ImageDataset(_Dataset):
         Args:
             limit (int, optional): download size. Defaults to -1 (no limit).
         """
-        self._create_mainfest_dataset(
-            local_path=local_path,
+
+        if local_path:
+            self.local_path = local_path
+        self._create_manifest_dataset(
             manifest_keyword="ImageURL",
         )
 
