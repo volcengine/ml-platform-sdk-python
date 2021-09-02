@@ -1,0 +1,2 @@
+horovod
+# tensorflow-gpu  >= 1.11.0  # GPU version of TensorFlow.
