@@ -1,5 +1,5 @@
+exclude: "docs/build/markdown/.*md"
 repos:
-
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:

@@ -64,7 +64,6 @@ pip-log.txt
 *~
 
 # Built documentation
-docs/_build
 bigquery/docs/generated
 docs.metadata
 
@@ -86,3 +85,9 @@ pylintrc.test
 samples/env.py
 tests/env.py
 /testdata
+
+#docs
+!/docs/build
+!/docs/source
+/docs/build/bdist*
+/docs/build/doctrees

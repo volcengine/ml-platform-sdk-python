@@ -16,5 +16,5 @@ jobs:
           - pre-commit run --all-files
           # Unit test starts here
           - echo "start unit test"
-          - pip3 install -r requirements.txt
+          - pip3 install -i https://bytedpypi.byted.org/simple -r dev-requirements.txt
           - bash -ex scripts/py_unit_test.sh

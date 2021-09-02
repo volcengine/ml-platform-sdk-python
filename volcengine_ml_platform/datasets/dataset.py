@@ -1,3 +1,4 @@
+"""数据集抽象实现"""
 import json
 import logging
 import os
@@ -14,6 +15,14 @@ QUEUE_TIMEOUT_SECONDS = 4
 
 
 def dataset_copy_file(metadata, source_dir, destination_dir):
+    """复制文件夹
+
+    Args:
+        metadata(dict): 一个 manifest 文件读取的 dict
+        source_dir(str): 源文件夹
+        destination_dir(str): 目标文件夹
+
+    """
     file_path = metadata["Data"]["FilePath"]
     file_dir, file_name = os.path.split(file_path)
     target_dir = os.path.join(
@@ -32,10 +41,6 @@ def dataset_copy_file(metadata, source_dir, destination_dir):
 
 
 class _Dataset:
-    """
-    datasets object
-    """
-
     def __init__(
         self,
         dataset_id: Optional[str] = None,
@@ -173,7 +178,7 @@ class _Dataset:
             limit (int, optional): num of images to load. Defaults to -1.
 
         Returns:
-            list of paths. Single tabular_path will be returned if it is a TabularDataset
+            list of paths. Single tabular_path will be returned if it is a Tabular Dataset
             list of annotations. No annotations for TabularDataset
         """
         if self.tabular_path:
