@@ -8,7 +8,7 @@ SERVICE_NAME = "ml_platform"
 SERVICE_VERSION = "2021-10-01"
 
 SERVICE_HOSTS = {
-    BOE_ENV: os.getenv("VOLC_SERVICE_HOST_BOE", ""),
+    BOE_ENV: os.getenv("VOLC_SERVICE_HOST_BOE", "open-boe.volcengineapi.com"),
     PROD_ENV: "open.volcengineapi.com",
 }
 
@@ -25,7 +25,7 @@ TOS_REGION_ENDPOINT_URLS = {
 }
 
 PUBLIC_EXAMPLES_TOS_REGION = "cn-beijing"
-PUBLIC_EXAMPLES_TOS_BUCKET = "mlplatform-public-examples-{}".format(
+PUBLIC_EXAMPLES_TOS_BUCKET = "ml-platform-public-examples-{}".format(
     PUBLIC_EXAMPLES_TOS_REGION,
 )
 

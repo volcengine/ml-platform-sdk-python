@@ -8,6 +8,7 @@ from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
 
+
 CACHE_DIR = cache_dir.create("mnist/tf_mnist")
 
 

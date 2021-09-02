@@ -4,30 +4,18 @@
 ## To start using SDK
 
 ### 1. Install package
-* From pypi
+* From TOS
 ```
-pip install --user volcengine_ml_platform
+pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing.volces.com/python_sdk_installer/volcengine_ml_platform-1.0.0-py3-none-any.whl -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-* Upgrade from pypi
+
+* From Pypi
 ```
-pip install --user --upgrade volcengine_ml_platform
-```
-* To install the development version
-```
-pip install --user git+https://github.com/volcengine/mlplatform-sdk-python.git
+敬请期待
 ```
 
 ### 2. Run Samples
 2.1 Setting up the environment(just choose one of following)
-
-* set environment variable
-```
-export VOLC_ACCESSKEY="replace_with_your_ak"
-export VOLC_SECRETKEY="replace_with_your_sk"
-export VOLC_REGION="replace_with_region_the_region_you_use_the_most"
-export VOLC_ML_PLATFORM_ENV="PROD/BOE"            # optional
-```
-
 
 * edit ~/.volc/config
 
@@ -42,6 +30,16 @@ export VOLC_ML_PLATFORM_ENV="PROD/BOE"            # optional
 }
 ```
 > the key of ml_platform is optional
+
+
+* set environment variable
+```
+export VOLC_ACCESSKEY="replace_with_your_ak"
+export VOLC_SECRETKEY="replace_with_your_sk"
+export VOLC_REGION="replace_with_region_the_region_you_use_the_most"
+export VOLC_ML_PLATFORM_ENV="PROD/BOE"            # optional
+```
+
 
 * edit samples/env.py
 ```
