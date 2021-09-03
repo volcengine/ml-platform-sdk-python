@@ -44,6 +44,9 @@ export VOLC_REGION="replace_with_region_the_region_you_use_the_most"
 ```
 
 * call method: volcengine_ml_platform.init()
+
+> You can refer to samples/env.py.template
+
 ```
 import volcengine_ml_platform
 
@@ -53,13 +56,6 @@ REGION_NAME = "replace_with_region_the_region_you_use_the_most"
 
 volcengine_ml_platform.init(ak=AK, sk=SK, region=REGION_NAME)
 ```
-```
-cp samples/env.py.template samples/env.py
-```
-
-> Please set the content of the env.py file correctly, and pay attention to the following 2 points:
->   - samples/env.py has been added to .gitignore
->   - don't modify env.py.template
 
 
 ### 3. Usage
