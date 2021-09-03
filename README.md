@@ -15,21 +15,15 @@ pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing
 ```
 
 ### 2. Run Samples
+
+Volcengine Region List
+ 
+|  name   | endpoint  |
+|  ----    | ----  |
+| cn-beijing  | xxxx |
+| cn-qingdao  | xxxx |
+
 2.1 Setting up the environment(just choose one of following)
-
-* edit ~/.volc/config
-
-```json
-{
-    "ak": "replace_with_your_ak",
-    "sk": "replace_with_your_sk",
-    "region": "replace_with_region_the_region_you_use_the_most",
-    "ml_platform" : {
-      "env": "PROD/BOE"
-   }
-}
-```
-> the key of ml_platform is optional
 
 
 * set environment variable
@@ -37,14 +31,27 @@ pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing
 export VOLC_ACCESSKEY="replace_with_your_ak"
 export VOLC_SECRETKEY="replace_with_your_sk"
 export VOLC_REGION="replace_with_region_the_region_you_use_the_most"
-export VOLC_ML_PLATFORM_ENV="PROD/BOE"            # optional
 ```
 
+* edit ~/.volc/config
 
-* edit samples/env.py
+```json
+{
+    "ak": "replace_with_your_ak",
+    "sk": "replace_with_your_sk",
+    "region": "replace_with_region_the_region_you_use_the_most"
+}
 ```
-cp samples/env.py.template samples/env.py
-# edit the content of samples/env.py
+
+* call method: volcengine_ml_platform.init()
+```
+import volcengine_ml_platform
+
+AK = "replace_with_your_ak"
+SK = "replace_with_your_sk=="
+REGION_NAME = "replace_with_region_the_region_you_use_the_most"
+
+volcengine_ml_platform.init(ak=AK, sk=SK, region=REGION_NAME)
 ```
 ```
 cp samples/env.py.template samples/env.py
