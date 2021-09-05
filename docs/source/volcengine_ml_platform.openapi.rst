@@ -44,6 +44,14 @@ volcengine\_ml\_platform.openapi.resource\_client module
    :undoc-members:
    :show-inheritance:
 
+volcengine\_ml\_platform.openapi.secure\_token\_client module
+-------------------------------------------------------------
+
+.. automodule:: volcengine_ml_platform.openapi.secure_token_client
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

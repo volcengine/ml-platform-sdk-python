@@ -7,6 +7,8 @@ from volcengine_ml_platform.openapi import inference_service_client
 
 # TODO 去掉model_version_id
 class InferenceService:
+    """提供推理服务"""
+
     def __init__(
         self,
         service_name: str,

@@ -10,7 +10,6 @@ Subpackages
    volcengine_ml_platform.annotation
    volcengine_ml_platform.datasets
    volcengine_ml_platform.inferences
-   volcengine_ml_platform.infrastructure
    volcengine_ml_platform.io
    volcengine_ml_platform.models
    volcengine_ml_platform.openapi

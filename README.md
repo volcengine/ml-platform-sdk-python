@@ -17,7 +17,7 @@ pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing
 ### 2. Run Samples
 
 Volcengine Region List
- 
+
 |  name   | endpoint  |
 |  ----    | ----  |
 | cn-beijing  | xxxx |
