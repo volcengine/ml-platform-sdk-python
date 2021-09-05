@@ -1316,4 +1316,42 @@ list resource with given service_id
     json response
 
 
+## volcengine_ml_platform.openapi.secure_token_client module
+
+
+### class volcengine_ml_platform.openapi.secure_token_client.SecureTokenClient(\*args, \*\*kwargs)
+Bases: `volcengine_ml_platform.openapi.base_client.BaseClient`
+
+
+#### get_secure_token(module_name, time_to_live=30, account_id=None, user_id=None)
+get secure token to perform some operation
+
+
+* **Parameters**
+
+    
+    * **module_name** (*str*) – module name, eg: inference, customtask
+
+
+    * **time_to_live** (*int*) – ttl of token, equals to 30 by default
+
+
+    * **account_id** (*int*) – user’s account id
+
+
+    * **user_id** (*int*) – user’s user id
+
+
+
+* **Raises**
+
+    **Exception** – get_secure_token failed
+
+
+
+* **Returns**
+
+    json response
+
+
 ## Module contents

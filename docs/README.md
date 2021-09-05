@@ -23,6 +23,7 @@ Request:
 ## workflow example
 ```
 write code and comment it
+make update
 make markdown
 repeat util it completes
 ```

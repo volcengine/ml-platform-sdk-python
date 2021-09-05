@@ -14,7 +14,25 @@ from volcengine_ml_platform.io.tos_dataset import TorchTOSDataset
 
 
 class ImageDataset(_Dataset):
+    """
+    ImageDataset创建函数 ``ImageDataset`` ，需要提供于 ml_engine 交互的基本信息，方便传输下载内容
+
+    Args:
+        dataset_id(str): ml_engine 创建时提供的 dataset_id
+        annotation_id(str, None):  ml_engine 创建时提供的 注释集 annotation_id
+        local_path(str): 数据下载到本地的目录
+        tos_source(str, None): 数据集的manifest文件的 tos url，一般可不设置
+
+    """
+
     def download(self, local_path: str = "ImageDataset", limit=-1):
+        """把数据集从 TOS 下载到本地
+
+        Args:
+            local_path(str): 设置下载目录
+            limit (int, optional): 设置最大下载数据条目
+        """
+
         """download datasets from source
 
         Args:
@@ -28,6 +46,18 @@ class ImageDataset(_Dataset):
         )
 
     def split(self, training_dir: str, testing_dir: str, ratio=0.8, random_state=0):
+        """把数据集分割成两个数据集对象（测试集合训练集）
+
+        Args:
+            training_dir (str): 训练集输出目录
+            testing_dir (str): 测试集输出目录
+            ratio (float, optional): 训练集数据所占比例，默认为 0.8
+            random_state (int, optional): 随机数种子
+
+        Returns:
+            返回两个数据集，第一个是训练集
+        """
+
         """split datasets and return two datasets objects
 
         Args:

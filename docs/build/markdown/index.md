@@ -7,6 +7,9 @@ contain the root `toctree` directive. -->
 # Contents:
 
 
+* volcengine_ml_platform
+
+
 * volcengine_ml_platform.annotation package
 
 
@@ -14,9 +17,6 @@ contain the root `toctree` directive. -->
 
 
 * volcengine_ml_platform.inferences package
-
-
-* volcengine_ml_platform.infrastructure package
 
 
 * volcengine_ml_platform.io package

@@ -1,4 +1,6 @@
-"""数据集抽象实现"""
+"""提供数据集下载，分裂操作
+
+"""
 import json
 import logging
 import os
@@ -43,7 +45,7 @@ def dataset_copy_file(metadata, source_dir, destination_dir):
 class _Dataset:
     def __init__(
         self,
-        dataset_id: Optional[str] = None,
+        dataset_id: str = "",
         annotation_id: Optional[str] = None,
         local_path: str = ".",
         tos_source: Optional[str] = None,
@@ -65,7 +67,7 @@ class _Dataset:
         self._get_annotation_detail()
 
     def _get_dataset_detail(self):
-        if self.dataset_id is None:
+        if not self.dataset_id:
             logging.warning(
                 "data which don't have dataset id can't get dataset detail",
             )

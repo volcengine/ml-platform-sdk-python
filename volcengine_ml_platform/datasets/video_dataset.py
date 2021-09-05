@@ -10,7 +10,19 @@ from volcengine_ml_platform.datasets.dataset import dataset_copy_file
 
 
 class VideoDataset(_Dataset):
+    """
+    VideoDataset创建函数同 ``ImageDataset``
+
+    """
+
     def download(self, local_path: str = "VideoDataset", limit=-1):
+        """把数据集从 TOS 下载到本地
+
+        Args:
+            local_path(str): 设置下载目录
+            limit (int, optional): 设置最大下载数据条目
+        """
+
         """download datasets from source
 
         Args:
@@ -24,6 +36,18 @@ class VideoDataset(_Dataset):
         )
 
     def split(self, training_dir: str, testing_dir: str, ratio=0.8, random_state=0):
+        """把数据集分割成两个数据集对象（测试集合训练集）
+
+        Args:
+            training_dir (str): 训练集输出目录
+            testing_dir (str): 测试集输出目录
+            ratio (float, optional): 训练集数据所占比例，默认为 0.8
+            random_state (int, optional): 随机数种子
+
+        Returns:
+            返回两个数据集，第一个是训练集
+        """
+
         """split datasets and return two datasets objects
 
         Args:

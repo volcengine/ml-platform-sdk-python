@@ -10,10 +10,10 @@ Welcome to mlplatform-sdk-python's documentation!
    :maxdepth: 1
    :caption: Contents:
 
+   modules.rst
    volcengine_ml_platform.annotation.rst
    volcengine_ml_platform.datasets.rst
    volcengine_ml_platform.inferences.rst
-   volcengine_ml_platform.infrastructure.rst
    volcengine_ml_platform.io.rst
    volcengine_ml_platform.models.rst
    volcengine_ml_platform.openapi.rst

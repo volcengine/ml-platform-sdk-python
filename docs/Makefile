@@ -8,6 +8,8 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
+LIBARY 	      = volcengine_ml_platform
+SOURCELIBARY  = ../$(LIBARY)
 # Put it first so that "make" without argument is like "make help".pip install myst-parser
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -17,5 +19,9 @@ help:
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 
-markdown:
+update:
+	rm source/$(LIBARY)*.rst  modules.rst -f
+	sphinx-apidoc -fo  ./source  $(SOURCELIBARY)  $(SOURCELIBARY)/constant.py  $(SOURCELIBARY)/config $(SOURCELIBARY)/modelrepo  $(SOURCELIBARY)/tos $(SOURCELIBARY)/util $(SOURCELIBARY)/infrastructure
+
+markdown: update
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

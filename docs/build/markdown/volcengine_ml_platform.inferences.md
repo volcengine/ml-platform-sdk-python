@@ -8,6 +8,8 @@
 ### class volcengine_ml_platform.inferences.inference.InferenceService(service_name: str, image_id: str, flavor_id: str, model_id: str, model_version_id: str, envs=None, replica: Optional[int] = 1, description: Optional[str] = None)
 Bases: `object`
 
+提供推理服务
+
 
 #### create()
 

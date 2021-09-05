@@ -7,7 +7,18 @@ from volcengine_ml_platform.datasets.dataset import _Dataset
 
 
 class TabularDataset(_Dataset):
+    """
+    TabularDataset创建函数同 ``ImageDataset``
+
+    """
+
     def download(self, local_path: str = "TabularDataset"):
+        """把数据集从 TOS 下载到本地
+
+        Args:
+            local_path(str): 设置下载目录
+        """
+
         if local_path:
             self.local_path = local_path
         self._create_non_manifest_dataset()
@@ -19,6 +30,18 @@ class TabularDataset(_Dataset):
         ratio=0.8,
         random_state=0,
     ):
+        """把数据集分割成两个数据集对象（测试集合训练集）
+
+        Args:
+            training_dir (str): 训练集输出目录
+            testing_dir (str): 测试集输出目录
+            ratio (float, optional): 训练集数据所占比例，默认为 0.8
+            random_state (int, optional): 随机数种子
+
+        Returns:
+            返回两个数据集，第一个是训练集
+        """
+
         """split dataset and return two dataset objects
 
         Args:

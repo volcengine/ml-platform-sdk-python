@@ -69,18 +69,6 @@
     * Module contents
 
 
-* volcengine_ml_platform.infrastructure package
-
-
-    * Submodules
-
-
-    * volcengine_ml_platform.infrastructure.ml_sts_token_service module
-
-
-    * Module contents
-
-
 * volcengine_ml_platform.io package
 
 
@@ -132,6 +120,9 @@
     * volcengine_ml_platform.openapi.resource_client module
 
 
+    * volcengine_ml_platform.openapi.secure_token_client module
+
+
     * Module contents
 
 
@@ -159,8 +150,6 @@ Bases: `object`
 ### volcengine_ml_platform.get_encrypted_key()
 
 ### volcengine_ml_platform.get_env_name()
-
-### volcengine_ml_platform.get_service_direct_host()
 
 ### volcengine_ml_platform.get_service_host()
 
