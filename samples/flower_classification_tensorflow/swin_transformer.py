@@ -1,12 +1,11 @@
 import argparse
 import os
 import re
-import sys
 
 import numpy as np
 import tensorflow as tf
 
-sys.path.append("../..")
+import volcengine_ml_platform
 from samples.models.swin_transformer_tensorflow.model import SwinTransformer
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.io import tos
@@ -14,13 +13,13 @@ from volcengine_ml_platform.models.model import Model
 from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
 
-
 BUCKET = constant.get_public_examples_readonly_bucket()
+USER_BUCKET = "mlplatform-public-examples-cn-beijing"
 CACHE_DIR = cache_dir.create("flower_classification/swin_transformer_tf")
 
 AUTO = tf.data.experimental.AUTOTUNE
+volcengine_ml_platform.init()
 
-client = tos.TOSClient()
 DATASET_PATH = "s3://{}/flower-classification/tfrecords/tfrecords-jpeg-224x224".format(
     BUCKET,
 )
@@ -29,7 +28,7 @@ VALIDATION_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/val/*.tfrec")
 TEST_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/test/*.tfrec")
 
 CHECKPOINT_PATH = "s3://{}/flower-classification/checkpoints/tf/cp.ckpt".format(
-    BUCKET,
+    USER_BUCKET,
 )
 
 CLASSES = [
@@ -321,7 +320,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
     # select a strategy
     if args.strategy == "default":
         strategy = (
@@ -439,9 +437,9 @@ if __name__ == "__main__":
     inference_service = model.deploy(
         model_id=res["Result"]["ModelID"],
         service_name="flower-cls-serving-v2",
-        flavor="ml.highcpu.large",
+        flavor="ml.c1e.large",
         replica=1,
         model_version=res["Result"]["VersionInfo"]["ModelVersion"],
-        image_id="machinelearning/tfserving:tf-cuda11.0",
+        image_id="ml_platform/tfserving:tf-cuda11.0",
     )
     inference_service.print()
