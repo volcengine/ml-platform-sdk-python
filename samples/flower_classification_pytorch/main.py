@@ -8,7 +8,6 @@ import argparse
 import datetime
 import json
 import os
-import sys
 import time
 from urllib.parse import urlparse
 
@@ -28,11 +27,10 @@ from utils import load_checkpoint
 from utils import reduce_tensor
 from utils import save_checkpoint
 
-sys.path.append("../..")
+import volcengine_ml_platform
 from samples.models.swin_transformer_pytorch.build import build_model
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.io import tos
-
 
 try:
     # noinspection PyUnresolvedReferences
@@ -40,7 +38,9 @@ try:
 except ImportError:
     amp = None
 
+volcengine_ml_platform.init()
 BUCKET = constant.get_public_examples_readonly_bucket()
+USER_BUCKET = "mlplatform-public-examples-cn-beijing"
 
 
 def parse_option():
@@ -227,7 +227,7 @@ def main(config):
     if config.MODEL.LOAD_CHECKPOINT:
         client.download_file(
             file_path="./ckpt.pth",
-            bucket=BUCKET,
+            bucket=USER_BUCKET,
             key="flower-classification/checkpoints/pytorch_ckpt.pth",
         )
     elif config.MODEL.LOAD_PRETRAINED:
@@ -276,7 +276,7 @@ def main(config):
                 optimizer,
                 lr_scheduler,
                 logger,
-                BUCKET,
+                USER_BUCKET,
             )
 
         acc1, acc5, loss = validate(config, data_loader_val, model)
@@ -409,9 +409,6 @@ def train_one_epoch(
 def accuracy(output, target, topk=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k"""
 
-    # import pdb
-    # pdb.set_trace()
-
     maxk = max(topk)
     batch_size = target.size(0)
     _, pred = output.topk(maxk, 1, True, True)
@@ -441,8 +438,6 @@ def validate(config, data_loader, model):
         output = model(images)
 
         # measure accuracy and record loss
-        # import pdb
-        # pdb.set_trace()
 
         loss = criterion(output, target)
         acc1, acc5 = accuracy(output, target, topk=(1, 5))

@@ -1,13 +1,12 @@
 import argparse
 import os
 import re
-import sys
 
 import horovod.tensorflow as hvd
 import numpy as np
 import tensorflow as tf
 
-sys.path.append("../..")
+import volcengine_ml_platform
 from samples.models.swin_transformer_tensorflow.model import SwinTransformer
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.io import tos
@@ -15,13 +14,14 @@ from volcengine_ml_platform.util import cache_dir
 from volcengine_ml_platform.util import metric
 
 BUCKET = constant.get_public_examples_readonly_bucket()
+USER_BUCKET = "mlplatform-public-examples-cn-beijing"
 CACHE_DIR = cache_dir.create(
     "flower_classification/swin_transformer_tf_horovod",
 )
 
 AUTO = tf.data.experimental.AUTOTUNE
+volcengine_ml_platform.init()
 
-client = tos.TOSClient()
 DATASET_PATH = "s3://{}/flower-classification/tfrecords/tfrecords-jpeg-224x224".format(
     BUCKET,
 )
@@ -30,7 +30,7 @@ VALIDATION_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/val/*.tfrec")
 TEST_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/test/*.tfrec")
 
 CHECKPOINT_PATH = "s3://{}/flower-classification/checkpoints/horovod_cp.ckpt".format(
-    BUCKET,
+    USER_BUCKET,
 )
 
 CLASSES = [

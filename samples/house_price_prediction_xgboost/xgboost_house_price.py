@@ -9,16 +9,18 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
 from xgboost import XGBRegressor
 
+import volcengine_ml_platform
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.util import cache_dir
 
-
 warnings.filterwarnings(action="ignore", category=UserWarning)
 
-BUCKET = constant.get_public_examples_readonly_bucket()
-CACHE_DIR = cache_dir.create("price_prediction/xgboost")
+volcengine_ml_platform.init()
 client = tos.TOSClient()
+BUCKET = constant.get_public_examples_readonly_bucket()
+USER_BUCKET = "mlplatform-public-examples-cn-beijing"
+CACHE_DIR = cache_dir.create("price_prediction/xgboost")
 
 zero_list = [
     "MasVnrArea",
@@ -61,8 +63,31 @@ na_values = [
     "BsmtFinSF1",
 ]
 
+csv_string_train = (
+    client.get_object(bucket=BUCKET, key="house-price-prediction/dataset/train.csv")
+    .read()
+    .decode("utf-8")
+)
+train = pd.read_csv(StringIO(csv_string_train))
+
+csv_string_test = (
+    client.get_object(bucket=BUCKET, key="house-price-prediction/dataset/test.csv")
+    .read()
+    .decode("utf-8")
+)
+test = pd.read_csv(StringIO(csv_string_test))
+
+test_ids = test.Id
+
+train.drop(["Id"], axis=1, inplace=True)
+train_tmp = train.drop(["SalePrice"], axis=1)
+test = test.drop(["Id"], axis=1)
+
+total = pd.concat([train_tmp, test]).reset_index(drop=True)
+
 
 def fill_zero_values(zero_list):
+    global train, test, test_ids, total
     for elem in zero_list:
         total[elem] = total[elem].fillna(0)
         train[elem] = train[elem].fillna(0)
@@ -70,6 +95,7 @@ def fill_zero_values(zero_list):
 
 
 def fill_na_values(na_list):
+    global train, test, test_ids, total
     for elem in na_list:
         total[elem] = total[elem].fillna("NA")
         train[elem] = train[elem].fillna("NA")
@@ -77,6 +103,7 @@ def fill_na_values(na_list):
 
 
 def replace_with_mode(na_values):
+    global train, test, test_ids, total
     for elem in na_values:
         total[elem] = total[elem].fillna(total[elem].mode()[0])
         train[elem] = train[elem].fillna(train[elem].mode()[0])
@@ -85,7 +112,7 @@ def replace_with_mode(na_values):
 
 def replace_with_linear_regression():
     # execute a linear regression to replace the null values
-
+    global train, test, test_ids, total
     total_lot = total[
         (pd.notna(total.LotFrontage))
         & (total.LotFrontage < 200)
@@ -107,32 +134,8 @@ def replace_with_linear_regression():
     test.loc[test.LotFrontage.isnull(), "LotFrontage"] = lot_pred_test
 
 
-def load_data_from_tos(key):
-    csv_obj_body = client.get_object(bucket=BUCKET, key=key)
-    csv_string = csv_obj_body.read().decode("utf-8")
-
-    return csv_string
-
-
 def data_cleaning():
-    global train
-    csv_string_train = load_data_from_tos(
-        "house-price-prediction/dataset/train.csv",
-    )
-    train = pd.read_csv(StringIO(csv_string_train))
-    global test
-    csv_string_test = load_data_from_tos(
-        "house-price-prediction/dataset/test.csv",
-    )
-    test = pd.read_csv(StringIO(csv_string_test))
-    global test_ids
-    test_ids = test.Id
-
-    train.drop(["Id"], axis=1, inplace=True)
-    train_tmp = train.drop(["SalePrice"], axis=1)
-    test = test.drop(["Id"], axis=1)
-    global total
-    total = pd.concat([train_tmp, test]).reset_index(drop=True)
+    global train, test, test_ids, total
 
     fill_zero_values(zero_list)
     fill_na_values(na_list)
@@ -228,7 +231,7 @@ if __name__ == "__main__":
             param_grid=parameters,
             scoring="neg_mean_squared_error",
             cv=5,
-            n_jobs=-1,
+            verbose=2,
         )
 
         print("Begin to fit...")
@@ -241,7 +244,7 @@ if __name__ == "__main__":
         joblib.dump(model_xgb, MODEL_PATH)
         client.upload_file(
             file_path=MODEL_PATH,
-            bucket=BUCKET,
+            bucket=USER_BUCKET,
             key="house-price-prediction/models/xgboost_model.pkl",
         )
         print("model has been uploaded successfully")
@@ -250,14 +253,5 @@ if __name__ == "__main__":
 
     y_pred = model_xgb.predict(test_)
     y_pred = np.floor(np.expm1(y_pred))
-
-    test_ids = np.Array([])  # TODO fix the unknown parameter
-    submission = pd.concat(
-        [test_ids, pd.Series(y_pred)],
-        axis=1,
-        keys=["Id", "SalePrice"],
-    )
-
-    submission.to_csv("sample_submission.csv", index=False)
 
     print("done!")
