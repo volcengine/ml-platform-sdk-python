@@ -422,7 +422,7 @@ if __name__ == "__main__":
     SAVED_MODEL_PATH = CACHE_DIR.subpath("tf_saved_model")
     model.save(SAVED_MODEL_PATH)
 
-    # register new model_version to mlplatform.model_repo
+    # register new model_version to ml-platform.model_repo
     model = Model()
     res = model.register(
         local_path=SAVED_MODEL_PATH,

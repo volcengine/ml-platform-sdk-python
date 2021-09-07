@@ -1,15 +1,21 @@
 #!/bin/bash
 
-TASK='MRPC'
-GLUE_DIR='./download_data/glue_data'
-BERT_BASE_DIR='./download_model/uncased_L-12_H-768_A-12'
+
+pathvar="$( cd "$( dirname $0 )" && pwd )"
+cd $pathvar
+python3 -m pip install -r ./requirements.txt --user
+
+TASK="MRPC"
+GLUE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/glue_data
+BERT_BASE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/uncased_L-12_H-768_A-12-model
 
 mpirun -np 8 \
     -H localhost:4 \
     -bind-to none -map-by slot \
     -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x PATH \
     -mca pml ob1 -mca btl ^openib \
-    python3.7 ./run_classifier.py \
+    --oversubscribe \
+    python3 ./main.py \
     --task_name=$TASK \
     --do_train=true \
     --do_eval=true \

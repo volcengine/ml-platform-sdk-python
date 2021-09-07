@@ -938,16 +938,6 @@ def main(_):
         session_config=config,
     )
 
-    """run_config = tf.compat.v1.estimator.tpu.RunConfig(
-      cluster=tpu_cluster_resolver,
-      master=FLAGS.master,
-      model_dir=FLAGS.output_dir,
-      save_checkpoints_steps=FLAGS.save_checkpoints_steps,
-      tpu_config=tf.compat.v1.estimator.tpu.TPUConfig(
-          iterations_per_loop=FLAGS.iterations_per_loop,
-          num_shards=FLAGS.num_tpu_cores,
-          per_host_input_for_training=is_per_host))"""
-
     train_examples = None
     num_train_steps = None
     num_warmup_steps = None
@@ -959,12 +949,6 @@ def main(_):
         num_warmup_steps = int(num_train_steps * FLAGS.warmup_proportion)
         num_train_steps = num_train_steps // hvd.size()
         num_warmup_steps = num_warmup_steps // hvd.size()
-
-    """if FLAGS.do_train:
-    train_examples = processor.get_train_examples(FLAGS.data_dir)
-    num_train_steps = int(
-        len(train_examples) / FLAGS.train_batch_size * FLAGS.num_train_epochs)
-    num_warmup_steps = int(num_train_steps * FLAGS.warmup_proportion)"""
 
     model_fn = model_fn_builder(
         bert_config=bert_config,
@@ -1006,21 +990,6 @@ def main(_):
         hooks = [hvd.BroadcastGlobalVariablesHook(0)]
 
         estimator.train(input_fn=train_input_fn, max_steps=num_train_steps, hooks=hooks)
-
-    """if FLAGS.do_train:
-    train_file = os.path.join(FLAGS.output_dir, "train.tf_record")
-    file_based_convert_examples_to_features(
-        train_examples, label_list, FLAGS.max_seq_length, tokenizer, train_file)
-    tf.compat.v1.logging.info("***** Running training *****")
-    tf.compat.v1.logging.info("  Num examples = %d", len(train_examples))
-    tf.compat.v1.logging.info("  Batch size = %d", FLAGS.train_batch_size)
-    tf.compat.v1.logging.info("  Num steps = %d", num_train_steps)
-    train_input_fn = file_based_input_fn_builder(
-        input_file=train_file,
-        seq_length=FLAGS.max_seq_length,
-        is_training=True,
-        drop_remainder=True)
-    estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)"""
 
     if FLAGS.do_eval:
         eval_examples = processor.get_dev_examples(FLAGS.data_dir)
