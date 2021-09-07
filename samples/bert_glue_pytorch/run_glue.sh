@@ -1,11 +1,17 @@
 #!/bin/bash
 
 
-TASK="MRPC"
-GLUE_DIR="./download_data/glue_data"
-BERT_BASE_DIR='./download_model/bert-base-uncased'
+pathvar="$( cd "$( dirname $0 )" && pwd )"
+cd $pathvar/transformers
+python3 setup.py install --user
+cd $pathvar
+python3 -m pip install -r ./requirements.txt --user
 
-python3.7 ./run_glue.py \
+TASK="MRPC"
+GLUE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/glue_data
+BERT_BASE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/bert-base-uncased-model
+
+python3 ./main.py \
     --model_type bert \
     --model_name_or_path $BERT_BASE_DIR \
     --task_name $TASK \

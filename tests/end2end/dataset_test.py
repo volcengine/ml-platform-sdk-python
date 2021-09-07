@@ -14,7 +14,7 @@ from volcengine_ml_platform.openapi.dataset_client import DataSetClient
 
 test_upload_number = 10
 benchmark_upload_number = 50000
-bucket_prefix = "mlplatform-test-dataset-"
+bucket_prefix = "ml-platform-test-dataset-"
 
 
 # pass test data path and dataset type to generate general test procedure
@@ -27,7 +27,7 @@ def inner_test_dataset_download(
 ):
     clean_buckets()
 
-    bucket = "mlplatform-test-dataset-" + genRandonString(20)
+    bucket = "ml-platform-test-dataset-" + genRandonString(20)
     file = Path(data_path)
 
     # upload resource
