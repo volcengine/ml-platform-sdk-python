@@ -1,5 +1,7 @@
 import os
 
+from volcengine_ml_platform.util import volce_util
+
 BOE_ENV = "BOE"
 PROD_ENV = "PROD"
 
@@ -18,9 +20,9 @@ TOS_REGION_ENDPOINT_URLS = {
         "cn-north-4": "http://boe-s3-official-test.volces.com",
     },
     PROD_ENV: {
-        "cn-qingdao": "http://tos-s3-cn-qingdao.volces.com",
-        "cn-north-1": "http://tos-s3-cn-qingdao.volces.com",
-        "cn-beijing": "http://tos-s3-cn-beijing.volces.com",
+        "cn-qingdao": volce_util.get_tos_endpoint("cn-qingdao"),
+        "cn-north-1": volce_util.get_tos_endpoint("cn-qingdao"),
+        "cn-beijing": volce_util.get_tos_endpoint("cn-beijing"),
     },
 }
 

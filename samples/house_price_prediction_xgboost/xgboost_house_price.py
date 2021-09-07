@@ -19,7 +19,6 @@ warnings.filterwarnings(action="ignore", category=UserWarning)
 volcengine_ml_platform.init()
 client = tos.TOSClient()
 BUCKET = constant.get_public_examples_readonly_bucket()
-USER_BUCKET = "mlplatform-public-examples-cn-beijing"
 CACHE_DIR = cache_dir.create("price_prediction/xgboost")
 
 zero_list = [
@@ -242,11 +241,6 @@ if __name__ == "__main__":
         # save model
         MODEL_PATH = CACHE_DIR.get_root_path() + "xgboost_model.pkl"
         joblib.dump(model_xgb, MODEL_PATH)
-        client.upload_file(
-            file_path=MODEL_PATH,
-            bucket=USER_BUCKET,
-            key="house-price-prediction/models/xgboost_model.pkl",
-        )
         print("model has been uploaded successfully")
         print("best score:" + str(best_score))
         print("best parameters" + str(best_parameters))

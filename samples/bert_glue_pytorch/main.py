@@ -72,7 +72,9 @@ def set_seed(args):
 def train(args, train_dataset, model, tokenizer):
     """Train the model"""
     if args.local_rank in [-1, 0]:
-        tb_writer = SummaryWriter()
+        tb_writer = SummaryWriter(
+            log_dir=os.getenv("TENSORBOARD_LOG_PATH", "/tensorboard_logs/")
+        )
     if args.local_rank == -1:
         rank, world_size = 0, 1
     else:
