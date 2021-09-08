@@ -271,7 +271,7 @@ def download_pretrained_ckpt_from_tos():
     file_name = "swin_tiny_224.tar.gz"
     dst_path = CACHE_DIR.subpath(file_name)
     tos_client.download_file(
-        file_path=dst_path,
+        target_file_path=dst_path,
         bucket=BUCKET,
         key="flower-classification/swin_tiny_224.tar.gz",
     )

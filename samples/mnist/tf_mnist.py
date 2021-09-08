@@ -18,7 +18,7 @@ def download_dataset_from_tos():
     file_name = "datasets/mnist.npz"
     dst_path = CACHE_DIR.subpath(file_name)
     tos_client.download_file(
-        file_path=dst_path,
+        target_file_path=dst_path,
         bucket=constant.PUBLIC_EXAMPLES_TOS_BUCKET,
         key=file_name,
     )
