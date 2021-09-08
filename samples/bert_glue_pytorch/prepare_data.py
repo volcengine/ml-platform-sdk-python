@@ -17,7 +17,7 @@ tmp_file_path = CACHE_DIR.subpath("glue_data.tar.gz")
 tos_client.download_file(
     bucket=constant.get_public_examples_readonly_bucket(),
     key="bert/glue/glue_data.tar.gz",
-    file_path=tmp_file_path,
+    target_file_path=tmp_file_path,
 )
 
 os.system(f"tar -zxvf {tmp_file_path} -C {CACHE_DIR.get_root_path()}")
@@ -31,7 +31,7 @@ tmp_file_path = CACHE_DIR.subpath(f"{BERT_BASE_MODEL}.tar.gz")
 tos_client.download_file(
     bucket=constant.get_public_examples_readonly_bucket(),
     key=f"bert/model/{BERT_BASE_MODEL}.tar.gz",
-    file_path=tmp_file_path,
+    target_file_path=tmp_file_path,
 )
 os.system(f"tar -zxvf {tmp_file_path} -C {CACHE_DIR.get_root_path()}")
 os.system(
