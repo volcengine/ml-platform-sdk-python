@@ -153,7 +153,7 @@ class _Dataset:
         print("Downloading datasets ...")
         paths = self.tos_client.download_files(
             tos_urls=urls,
-            dir_path=self.local_path,
+            target_dir_path=self.local_path,
             parallelism=10,
         )
 

@@ -389,34 +389,36 @@ class TOSClient:
         self,
         bucket: str = "",
         key: str = "",
+        tos_url: str = "",
         file_path: str = "",
         dir_path: str = "",
-        tos_url: str = "",
         max_concurrence: int = 10,
         que: Queue = None,
     ) -> str:
-        """从 bucket 下载对象
+        """下载TOS对象到本地
 
-        推荐两种使用方式：
+        要下载对象的目标地址，两种方式选择其一：
         - 通过 ``bucket + key`` 下载：::
 
-            download_file(bucket="xxx", key="xxx",
-                            file_path="./dataset/a.csv")
+            download_file(bucket="xxx", key="xxx", ...)
 
         - 通过 ``tos_url`` 下载：::
 
-            download_file(tos_url="tos://bucket.[xxxxx]/key",
-                            dir_path="./input/your/target/dir")
+            download_file(tos_url="tos://bucket.[xxxxx]/key", ...)
 
 
-            其中，``dir_path`` 和 ``file_path`` 可以互换。
+        下载的文件保存到本地目标路径有两种方式： target_file_path 或
+
+        - 通过 `target_file_path`` 指定
+
+        - 通过 ``target_dir_path`` 指定，实际保存的文件名为key 或者 tos_url.substringAfterLast("/")
 
         Args:
             bucket(str): bucket 名
             key(str): object 的 key，比如 key=``put/you/path/xxxx/yyy``
-            file_path(str): 下载文件的路径
-            dir_path(str): 下载文件的目
             tos_url(str): 对象的 tos 链接
+            file_path(str): 本地保存的目标文件路径
+            dir_path(str): 本地保存的目标目录路径
             max_concurrence(int): 最大并发数量，控制下载速度
 
         Returns:
@@ -425,22 +427,6 @@ class TOSClient:
         Raises:
             ValueError: 参数填写错误
 
-        """
-        """download dataset by bucket
-        You call the function as follow:
-            download_file(bucket="xxx", key="xxx", file_path="./dataset/a.csv"), or
-            download_file(tos_url="tos://bucket.[xxxxx]/key", dir_path="./input/your/target/dir").
-
-        1. you must pass file_path or dir_path as target file or target folder.
-        2. you can only download object by a tos-url, or a key in the bucket
-
-        param bucket: bucket name
-        param keys: list keys of objects which will be deleted in the same bucket
-        param file_path: the mapped file path of downloaded objects
-        param dir_path: if file_paths is None, the object will download into dir_path
-        param tos_url: if bucket or keys is none, urls will be used for downloaded
-        param parallelism: the number threads which download files.
-        return: the download filepath
         """
 
         # To consume less downstream bandwidth, decrease the maximum concurrency
@@ -465,7 +451,6 @@ class TOSClient:
             self._create_dir(dir_path)
 
         debug("download file: bucket %s, key %s", bucket, key)
-        # Download an S3 object
         self.s3_client.download_file(
             bucket,
             key,
@@ -496,36 +481,36 @@ class TOSClient:
         self,
         bucket: str = "",
         keys: list = [],
-        file_paths: list = [],
-        dir_path: str = "",
-        tos_urls: List[str] = [],
+        tos_urls: list = [],
+        target_file_paths: list = [],
+        target_dir_path: str = "",
         parallelism=1,
     ) -> List[str]:
-        """并行下载 objects
+        """下载多个TOS对象到本地
 
-        推荐两种使用方式：
-        - 通过 ``bucket + key`` 下载：::
+        要下载的源文件有两种指定方式：
+        - 通过 ``bucket + keys`` 指定：::
 
-            download_files(bucket="xxx",
-                            keys=["xxx","yyy"],
-                            file_paths=["./dataset/a.csv",
-                                        "./dataset/b.csv"])
+            download_files(bucket="your_bucket_name", keys=["xxx","yyy", ...], ...)
 
 
-        - 通过 ``tos_url`` 下载：::
+        - 通过 ``tos_urls`` 指定：::
 
-            download_files(tos_url=["tos://bucket.[xxxxx]/key", ....],
-                            dir_path="./input/your/target/dir")
+            download_files(tos_urls=["tos://you_bucket_name]/xxx", "tos://you_bucket_name]/yyy", ....], ...)
 
 
-            其中， ``dir_path`` 和 ``file_path`` **不** 可以互换。
+        下载的文件保存到本地目标路径有两种方式：
+
+        - 通过 `target_file_paths`` 指定，需要和要下载的源对象列表长度一致
+
+        - 通过 ``target_dir_path`` 指定，所有文件保存到该目录下，，实际保存的文件名为对应的key 或者 对应的tos_url.substringAfterLast("/")
 
         Args:
             bucket(str): bucket 名
-            key(str): object 的 key，比如 key="put/you/path/xxxx/yyy"
-            file_paths(str): 下载多个文件对应的路径
-            dir_path(str): 下载文件的目
-            tos_urls(str): 对象的 tos 链接集合
+            keys(list): object 的 key，比如 key="put/you/path/xxxx/yyy"
+            tos_urls(list): 对象的 tos 链接集合
+            target_file_paths(list): 下载多个文件对应的路径
+            target_dir_path(str): 下载文件的目
             parallelism(int): 并发数量，控制下载速度
 
         Returns:
@@ -535,25 +520,11 @@ class TOSClient:
             ValueError: 参数填写错误
 
         """
-        """download files by parallelism
-        You only can call the function as follow:
-           1. download_files(bucket="xxx", keys=["xxx","yyy"], file_paths=["./dataset/a.csv", "./dataset/b.csv"]),
-           2. download_files(tos_url="tos://bucket.[xxxxx]/key", dir_path="./input/your/target/dir").
-        In the first way, you must generation a file list, which is mapped by keys.
-
-        param bucket: bucket name
-        param keys: list keys of objects which will be deleted in the same bucket
-        param file_paths: the mapped file paths of downloaded objects
-        param dir_paths: if file_paths is None, objects will download into dir_path
-        param urls: if bucket or keys is none, urls will be used for downloaded
-        param parallelism: the number threads which download files.
-        return: the list of download filepaths
-        """
 
         if (not bucket or not keys) and not tos_urls:
             raise ValueError("Please assign a set of value as non-None")
 
-        if not tos_urls and not dir_path:
+        if not tos_urls and not target_dir_path:
             raise ValueError("Please set a correct dir_path or file_path")
 
         self.dir_record = set()
@@ -570,14 +541,14 @@ class TOSClient:
                         self.download_file,
                         kwds={
                             "tos_url": url,
-                            "dir_path": dir_path,
+                            "dir_path": target_dir_path,
                             "que": que,
                         },
                     ),
                 )
         elif bucket and keys:
             data_count = len(keys)
-            for file_path, key in zip(file_paths, keys):
+            for file_path, key in zip(target_file_paths, keys):
                 async_res.append(
                     pool.apply_async(
                         self.download_file,
