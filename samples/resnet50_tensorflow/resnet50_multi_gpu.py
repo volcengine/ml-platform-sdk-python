@@ -1,19 +1,14 @@
-# Modified from pengyanghua's code
-# Bytedance Inc,
 import argparse
 import os
 import time
 
 import tensorflow as tf
 
+import volcengine_ml_platform
 from volcengine_ml_platform import constant
 
-try:
-    import env
 
-    env.init()
-except Exception:
-    pass
+volcengine_ml_platform.init()
 
 
 BUCKET = constant.get_public_examples_readonly_bucket()
@@ -356,7 +351,6 @@ def enable_mixed_precision():
 # For highest speed, please enable mixed precision and xla by running the following command:
 # python3 resnet50_multi_gpu.py --enable_mixed_precision --enable_xla
 # This script is tested in TF 2.3 and TF 2.4 and can run in local CPU environment, e.g., your Macbook Pro, devbox, container, notebook, linux shell, etc.
-# Contact pengyanghua.yanghua by Lark if you have an issue.
 
 # 使用默认数据类型 float32 训练
 # 训练速度：单卡 372 images/sec，8卡 2550 images/sec

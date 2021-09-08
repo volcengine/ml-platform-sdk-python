@@ -1,3 +1,5 @@
+https://ml-platform-public-examples-cn-beijing.tos-cn-beijing.volces.com/bert/util/transformers.tar.gz
+https://ml-platform-public-examples-cn-beijing.tos-cn-beijing.volces.com/python_sdk_installer/volcengine_ml_platform-1.0.0-py3-none-any.whl
 psutil==5.8.0
 rouge-score==0.0.4
 sacrebleu==2.0.0
