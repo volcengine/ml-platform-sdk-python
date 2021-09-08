@@ -8,22 +8,24 @@ from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import MaxPool2D
+from tensorflow.keras.losses import SparseCategoricalCrossentropy
+from tensorflow.keras.metrics import Mean
+from tensorflow.keras.metrics import SparseCategoricalAccuracy
+from tensorflow.keras.optimizers import Adam
+
+import volcengine_ml_platform
+from volcengine_ml_platform import constant
 
 
-try:
-    import env
+volcengine_ml_platform.init()
 
-    env.init()
-except Exception:
-    pass
-
-
-DATA_PATH = "s3://chinese-mnist/data"
+DATA_PATH = f"s3://{constant.get_public_examples_readonly_bucket()}/chinese-mnist/data"
 BATCH_SIZE = 32
+train_length = 14000
+test_length = 1000
 
 
 def load_and_preprocess_from_path_label(path, label):
-
     image = tf.io.read_file(path)
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.resize(image, size=[64, 64])
@@ -59,10 +61,9 @@ def create_dataset(data_root):
 dataset = create_dataset(DATA_PATH)
 # Be careful do NOT batch before '.take()' or '.skip()', it should be the samples number but
 # not the batches number to be considered
-test_ds = dataset.take(1000)
-train_ds = dataset.skip(1000)
-train_length = 14000
-test_length = 1000
+test_ds = dataset.take(test_length)
+train_ds = dataset.skip(test_length)
+
 # Be careful for the '.repeat()' applied on tf dataset, if a repeated dataset is iterated
 # in the loop like 'for x, y in dataset: ...', it will cause a ever-loop that never
 # break, thus manually breaking is needed
@@ -89,10 +90,6 @@ class Net(Model):
 
 
 model = Net()
-
-from tensorflow.keras.losses import SparseCategoricalCrossentropy
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.metrics import Mean, SparseCategoricalAccuracy
 
 loss_object = SparseCategoricalCrossentropy(from_logits=True)
 optimizer = Adam()
