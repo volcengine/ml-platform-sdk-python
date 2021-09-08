@@ -5,8 +5,6 @@ from logging import debug
 from logging import error
 from logging import warning
 from multiprocessing.dummy import Pool
-from multiprocessing.dummy import Process
-from multiprocessing.dummy import Queue
 from typing import List
 from urllib.parse import urlparse
 
@@ -390,10 +388,9 @@ class TOSClient:
         bucket: str = "",
         key: str = "",
         tos_url: str = "",
-        file_path: str = "",
-        dir_path: str = "",
+        target_file_path: str = "",
+        target_dir_path: str = "",
         max_concurrence: int = 10,
-        que: Queue = None,
     ) -> str:
         """下载TOS对象到本地
 
@@ -409,7 +406,7 @@ class TOSClient:
 
         下载的文件保存到本地目标路径有两种方式： target_file_path 或
 
-        - 通过 `target_file_path`` 指定
+        - 通过 ``target_file_path`` 指定
 
         - 通过 ``target_dir_path`` 指定，实际保存的文件名为key 或者 tos_url.substringAfterLast("/")
 
@@ -420,7 +417,6 @@ class TOSClient:
             file_path(str): 本地保存的目标文件路径
             dir_path(str): 本地保存的目标目录路径
             max_concurrence(int): 最大并发数量，控制下载速度
-
         Returns:
             返回下载文件路径
 
@@ -435,7 +431,7 @@ class TOSClient:
         if (not bucket or not key) and not tos_url:
             raise ValueError("Please assign a set of value as non-None")
 
-        if not file_path and not dir_path:
+        if not target_file_path and not target_dir_path:
             raise ValueError("Please set a correct dir_path or file_path")
 
         if tos_url:
@@ -445,22 +441,20 @@ class TOSClient:
             bucket = parse_result.netloc.split(".")[0]
             key = parse_result.path[1:]
 
-            if not file_path:
-                file_path = os.path.join(dir_path, key)
-                dir_path = os.path.dirname(file_path)
-            self._create_dir(dir_path)
+        if not target_file_path:
+            target_file_path = os.path.join(target_dir_path, key)
+        else:
+            target_dir_path = os.path.dirname(target_file_path)
+        self._create_dir(target_dir_path)
 
         debug("download file: bucket %s, key %s", bucket, key)
         self.s3_client.download_file(
             bucket,
             key,
-            file_path,
+            target_file_path,
             Config=transfer_config,
         )
-
-        if que:
-            que.put(file_path)
-        return file_path
+        return target_file_path
 
     def _create_dir(self, dir_path):
         """创建路径缓冲
@@ -509,8 +503,8 @@ class TOSClient:
             bucket(str): bucket 名
             keys(list): object 的 key，比如 key="put/you/path/xxxx/yyy"
             tos_urls(list): 对象的 tos 链接集合
-            target_file_paths(list): 下载多个文件对应的路径
-            target_dir_path(str): 下载文件的目
+            target_file_paths(list): 本地保存的目标路径的列表，与 keys 或者 tos_urls 一一对应
+            target_dir_path(str): 本地保存的目标目录
             parallelism(int): 并发数量，控制下载速度
 
         Returns:
@@ -524,63 +518,40 @@ class TOSClient:
         if (not bucket or not keys) and not tos_urls:
             raise ValueError("Please assign a set of value as non-None")
 
-        if not tos_urls and not target_dir_path:
+        if not target_file_paths and not target_dir_path:
             raise ValueError("Please set a correct dir_path or file_path")
 
         self.dir_record = set()
-        que: Queue = Queue()
         async_res = []
 
         pool = Pool(processes=parallelism)
-        data_count = 0
-        if tos_urls:
-            data_count = len(tos_urls)
-            for url in tos_urls:
-                async_res.append(
-                    pool.apply_async(
-                        self.download_file,
-                        kwds={
-                            "tos_url": url,
-                            "dir_path": target_dir_path,
-                            "que": que,
-                        },
-                    ),
-                )
-        elif bucket and keys:
-            data_count = len(keys)
-            for file_path, key in zip(target_file_paths, keys):
-                async_res.append(
-                    pool.apply_async(
-                        self.download_file,
-                        kwds={
-                            "bucket": bucket,
-                            "key": key,
-                            "file_path": file_path,
-                            "que": que,
-                        },
-                    ),
-                )
-        else:
-            raise ValueError("Please set correct urls or (buckets + keys)")
 
-        counter = Process(target=self._download_counter, args=(data_count, que))
-        counter.start()
+        data_count = len(keys) if keys else len(tos_urls)
+        download_dicts: list = [{} for _ in range(data_count)]
+
+        if tos_urls:
+            for idx, url in enumerate(tos_urls):
+                download_dicts[idx]["tos_url"] = url
+        else:
+            for idx, key in enumerate(keys):
+                download_dicts[idx]["bucket"] = bucket
+                download_dicts[idx]["key"] = key
+
+        if target_dir_path:
+            for dict in download_dicts:
+                dict["target_dir_path"] = target_dir_path
+        else:
+            for idx, target_file_path in enumerate(target_file_paths):
+                download_dicts[idx]["target_file_path"] = target_file_path
+
+        for idx in range(data_count):
+            async_res.append(
+                pool.apply_async(
+                    self.download_file,
+                    kwds=download_dicts[idx],
+                ),
+            )
 
         pool.close()
         pool.join()
-        counter.join()
-        return [res.get() for res in async_res]
-
-    def _download_counter(self, times, q):
-        """下载进度提示
-
-            请勿调用
-        Args:
-            times(int): 下载总量
-            q(queue): 下载成功消息队列
-
-        """
-        with tqdm(total=times) as pbar:
-            for _ in range(times):
-                q.get()
-                pbar.update(1)
+        return [res.get() for res in tqdm(async_res)]
