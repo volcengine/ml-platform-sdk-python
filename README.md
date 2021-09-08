@@ -35,7 +35,7 @@ export VOLC_SECRETKEY="replace_with_your_sk"
 export VOLC_REGION="replace_with_region_the_region_you_use_the_most"
 ```
 
-​	ps: for more details about this in Customtask, invite [Customtask](https://www.volcengine.com/docs/6459/72350).
+​	ps: for more details about this in CustomTask, invite [CustomTask](https://www.volcengine.com/docs/6459/72350).
 
 * edit ~/.volc/config
 
@@ -75,7 +75,7 @@ volcengine_ml_platform.init(ak=AK, sk=SK, region=REGION_NAME)
 | sample                                   | what can you learn                                           |
 | ---------------------------------------- | ------------------------------------------------------------ |
 | flower_classification_tensorflow         | How to load datasets from TOS and build dataset by tf.io.gfile.glob() and load_dataset()<br />How to load pretrained model from TOS<br />How to save checkpoints and upload to TOS by callbacks<br />How to load checkpoints from TOS |
-| flower_classification_tensorflow_horovod | How to use horovod in Webide and Customtask                  |
+| flower_classification_tensorflow_horovod | How to use horovod in  WebIDE and CustomTask                  |
 | flower_classification_pytorch            | How to load datasets from TOS and build dataset by our SDK<br />How to load checkpoint from TOS and upload checkpoint to TOS<br />How to use pytorch DDP in WebIDE and Customtask |
 
 ### 3. Usage
@@ -104,7 +104,7 @@ pre-commit run --all-files
 
 ### Unittest
 ```
-make unit_test
+make test
 ```
 
 ### end2end test
