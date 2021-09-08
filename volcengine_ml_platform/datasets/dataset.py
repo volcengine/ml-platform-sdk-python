@@ -97,11 +97,16 @@ class _Dataset:
             raise Exception("invalid annotation") from e
 
     def _get_storage_path(self) -> str:
-        if self.detail is None:
+        if not self.detail:
             return ""
-        if self.annotation_id is not None:
+        if self.annotation_id:
             return self.annotation_detail["StoragePath"]
         return self.detail["StoragePath"]
+
+    def _get_source_path(self) -> str:
+        if not self.detail:
+            return ""
+        return self.detail["SourcePath"]
 
     def _manifest_path(self):
         return os.path.join(
@@ -110,15 +115,18 @@ class _Dataset:
         )
 
     def _download_file(self, tos_url: str, file_path: str):
-        return self.tos_client.download_file(tos_url=tos_url, file_path=file_path)
+        return self.tos_client.download_file(
+            tos_url=tos_url, target_file_path=file_path
+        )
 
-    def _create_non_manifest_dataset(self, limit=-1):
+    def _create_non_manifest_dataset(self):
         print("Downloading the csv file ...")
         self._get_detail()
-        print(self._get_storage_path())  # TODO how to get csv file tos url
+        print(self.detail)
+        assert self._get_storage_path() != ""
         self.tabular_path = self.tos_client.download_file(
             tos_url=self._get_storage_path(),
-            dir_path=self.local_path,
+            target_dir_path=self.local_path,
         )
 
         if not self.tabular_path:
@@ -139,7 +147,7 @@ class _Dataset:
 
         manifest_file_path = self.tos_client.download_file(
             tos_url=self._get_storage_path(),
-            dir_path=self.local_path,
+            target_dir_path=self.local_path,
         )
         manifest_line = []
         urls = []
@@ -153,7 +161,7 @@ class _Dataset:
         print("Downloading datasets ...")
         paths = self.tos_client.download_files(
             tos_urls=urls,
-            dir_path=self.local_path,
+            target_dir_path=self.local_path,
             parallelism=10,
         )
 

@@ -205,7 +205,7 @@ if __name__ == "__main__":
     if args.load_model:
         LOADED_MODEL_PATH = CACHE_DIR.get_root_path() + "loaded_xgboost_model.pkl"
         client.download_file(
-            file_path=LOADED_MODEL_PATH,
+            target_file_path=LOADED_MODEL_PATH,
             bucket=BUCKET,
             key="house-price-prediction/models/xgboost_model.pkl",
         )

@@ -16,6 +16,8 @@ test_upload_number = 10
 benchmark_upload_number = 50000
 bucket_prefix = "ml-platform-test-dataset-"
 
+csv_file = "train.csv"
+
 
 # pass test data path and dataset type to generate general test procedure
 def inner_test_dataset_download(
@@ -27,7 +29,7 @@ def inner_test_dataset_download(
 ):
     clean_buckets()
 
-    bucket = "ml-platform-test-dataset-" + genRandonString(20)
+    bucket = bucket_prefix + genRandonString(20)
     file = Path(data_path)
 
     # upload resource
@@ -65,12 +67,12 @@ def inner_test_dataset_download(
             "Description": "created by python sdk {}".format(
                 datetime.now().strftime("%Y %H:%M:%S"),
             ),
-            "SourcePath": url,
+            "SourcePath": os.path.join(url, csv_file),
             "StorageType": "TOS",
         }
     else:
         raise BaseException("Invalid dataset type")
-
+    print(os.path.join(url, csv_file))
     resp = api_cli.create_dataset(body=request)
     dataset_id = resp["Result"]["DatasetID"]
     time.sleep(3)  # wait 3 seconds as ml-engine need time to create the dataset
