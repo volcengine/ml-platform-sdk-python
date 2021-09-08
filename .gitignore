@@ -1,0 +1,93 @@
+.idea/
+.vscode/
+.DS_store
+.ipynb_checkpoints
+
+# Outputs of build stage
+output/
+dist/
+build/
+
+# python
+*__pycache__*
+*.pyi
+.eggs
+
+# Virtual env
+.venv/
+venv/
+
+*.py[cod]
+*.sw[op]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+.eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.nox
+.cache
+.pytest_cache
+
+
+# Mac
+.DS_Store
+
+# JetBrains
+.idea
+
+# VS Code
+.vscode
+.vscode-upload.json
+
+# emacs
+*~
+
+# Built documentation
+bigquery/docs/generated
+docs.metadata
+
+# Virtual environment
+env/
+
+# Test logs
+coverage.xml
+*sponge_log.xml
+demo_dataset_*
+
+# System test environment variables.
+system_tests/local_test_setup
+
+# Make sure a generated file isn't accidentally committed.
+pylintrc
+pylintrc.test
+
+samples/env.py
+tests/env.py
+/testdata
+
+#docs
+!/docs/build
+!/docs/source
+/docs/build/bdist*
+/docs/build/doctrees

@@ -1,0 +1,23 @@
+boto3>=1.18.29
+jsonschema>=3.0.0
+numpy>=1.14.0
+Pillow>=4.0.0
+prettytable>=2.0.0
+protobuf==3.17.3
+pytest==6.2.4
+requests>=2.18.0
+six>=1.11.0
+
+#docs
+sphinx>=4.1.2
+sphinx_markdown_builder>=0.5.4
+sphinx_rtd_theme>=0.5.2
+sphinxcontrib-napoleon>=0.7
+
+# only put libs for end2end test
+tensorflow==2.4.0
+# only put libs extras_require in setup.py
+torch==1.8.0
+tqdm>=4.19.2
+
+volcengine>=1.0.19
