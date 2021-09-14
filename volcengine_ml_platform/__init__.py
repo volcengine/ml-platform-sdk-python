@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Optional
 
 from volcengine import Credentials
 
@@ -62,7 +63,7 @@ class EnvHolder:
     ENV_NAME = constant.PROD_ENV
     STRESS_FLAG = os.environ.get("VOLC_ML_PLATFORM_STRESS", "")
     GLOBAL_CREDENTIALS = None
-    SESSION_TOKEN: str = None
+    SESSION_TOKEN: Optional[str] = None
 
     @classmethod
     def init(cls, ak, sk, region, env_name, init_aws_env):
