@@ -26,13 +26,16 @@ class TOSClient:
         # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
         credentials = volcengine_ml_platform.get_credentials()
         self.region_name = credentials.region
-        self.s3_client = boto3.client(
-            "s3",
-            region_name=credentials.region,
-            aws_access_key_id=credentials.ak,
-            aws_secret_access_key=credentials.sk,
-            endpoint_url=volcengine_ml_platform.get_tos_endpoint_url(),
-        )
+        config = {
+            "region_name": credentials.region,
+            "aws_access_key_id": credentials.ak,
+            "aws_secret_access_key": credentials.sk,
+            "endpoint_url": volcengine_ml_platform.get_tos_endpoint_url(),
+        }
+        session_token = volcengine_ml_platform.get_session_token()
+        if session_token is not None and len(session_token.strip()) > 0:
+            config["aws_session_token"] = session_token
+        self.s3_client = boto3.client("s3", **config)
         self.dir_record = set()
 
     def bucket_exists(self, bucket_name):
@@ -445,7 +448,7 @@ class TOSClient:
             target_file_path = os.path.join(target_dir_path, key)
         else:
             target_dir_path = os.path.dirname(target_file_path)
-        self._create_dir(target_dir_path)
+        self._create_dir(os.path.dirname(target_file_path))
 
         debug("download file: bucket %s, key %s", bucket, key)
         self.s3_client.download_file(
@@ -553,5 +556,6 @@ class TOSClient:
             )
 
         pool.close()
+        ret = [res.get() for res in tqdm(async_res)]
         pool.join()
-        return [res.get() for res in tqdm(async_res)]
+        return ret
