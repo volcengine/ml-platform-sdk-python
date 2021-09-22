@@ -8,6 +8,8 @@ python3 -m pip install -r ./requirements.txt --user
 TASK="MRPC"
 GLUE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/glue_data
 BERT_BASE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/uncased_L-12_H-768_A-12-model
+python prepare.py
+
 
 mpirun -np 8 \
     -H localhost:4 \
@@ -15,6 +17,7 @@ mpirun -np 8 \
     -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x PATH \
     -mca pml ob1 -mca btl ^openib \
     --oversubscribe \
+    --allow-run-as-root \
     python3 ./main.py \
     --task_name=$TASK \
     --do_train=true \
