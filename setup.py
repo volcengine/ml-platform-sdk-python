@@ -68,3 +68,6 @@ setuptools.setup(
     ],
     zip_safe=False,
 )
+
+
+import git_pull_request
