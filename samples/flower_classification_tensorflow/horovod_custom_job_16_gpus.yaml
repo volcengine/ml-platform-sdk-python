@@ -1,0 +1,37 @@
+# self define e.g text_classfication
+TaskName: "custom_job_from_cli"
+# description for this task
+Description: "3个节点，每个节点2块GPU"
+# entry point command
+Entrypoint: "bash /xxx_dir/samples/flower_classification_tensorflow/run_horovod.sh"
+Args: ""
+Tags: []
+# user code path
+UserCodePath: "./samples"
+# remote path mount in container
+RemoteMountCodePath: "/xxx_dir/"
+# user define env var
+Envs:
+    - Name: "VOLC_ACCESSKEY"
+      Value: "AKLTZDZjNzEyNGRiMjg2NDllZWI5OTAyYTcxMjg0ZWVjZTE"
+    - Name: "VOLC_SECRETKEY"
+      Value: "T0RZMVl6YzRNalF3WmpFME5HSTFOV0psWlRWbE16QTVNV0poTUdFMk5EZw=="
+    - Name: "VOLC_REGION"
+      Value: "cn-beijing"
+Image: "ml_platform/tensorflow:2.4"
+# gorup define in /ml-platform/resourceGroup, empty as default group
+ResourceGroupID: "r-20210903151412-pgh7h"
+# AI framework, support: TensorFlow PS,PyTorch DDP,Horovod,BytePS
+Framework: "HOROVOD"
+TaskRoleSpecs:
+    - RoleName: "worker"
+      RoleReplicas: 2
+      Flavor: "ml.g1v.22xlarge"
+ActiveDeadlineSeconds: 432000
+# enable tensor board or not
+EnableTensorBoard: true
+# 将tos bucket挂载到容器内文件系统
+Storages:
+  - Type: "TOS"
+    MountPath: "/data"
+    Bucket: "tyt-test"
