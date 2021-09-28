@@ -1,0 +1,26 @@
+# self define e.g text_classfication
+TaskName: "flower_classification_tensorflow"
+# description for this task
+Description: "2台 16core32G的机器，机型Flavor是ml.c1e.8xlarge"
+# entry point command
+Entrypoint: "bash /root/code/samples/flower_classification_tensorflow/run_horovod.sh"
+Args: ""
+Tags: []
+# user code path
+UserCodePath: ./samples/
+# remote path mount in container
+RemoteMountCodePath: "/root/code/"
+# user define env var
+Envs: []
+Image: "ml_platform/tensorflow:2.4"
+# gorup define in /ml-platform/resourceGroup, empty as default group
+ResourceGroupID: "default"
+# AI framework, support: TensorFlow PS,PyTorch DDP,Horovod,BytePS
+Framework: "HOROVOD"
+TaskRoleSpecs:
+    - RoleName: "worker"
+      RoleReplicas: 2
+      Flavor: "ml.c1e.8xlarge"
+ActiveDeadlineSeconds: 432000
+# enable tensor board or not
+EnableTensorBoard: true
