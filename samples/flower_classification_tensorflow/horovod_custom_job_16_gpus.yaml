@@ -32,6 +32,6 @@ ActiveDeadlineSeconds: 432000
 EnableTensorBoard: true
 # 将tos bucket挂载到容器内文件系统
 Storages:
-  - Type: "TOS"
-    MountPath: "/data"
-    Bucket: "tyt-test"
+    - Type: "Tos"
+      MountPath: "/data"
+      Bucket: "tyt-test"
