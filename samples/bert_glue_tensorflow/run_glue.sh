@@ -8,6 +8,7 @@ python3 -m pip install -r ./requirements.txt --user
 TASK="MRPC"
 GLUE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/glue_data
 BERT_BASE_DIR=$HOME/.volcengine_ml_platform/samples/bert_glue/uncased_L-12_H-768_A-12-model
+python prepare.py
 
 python3 ./main.py \
   --task_name=$TASK \

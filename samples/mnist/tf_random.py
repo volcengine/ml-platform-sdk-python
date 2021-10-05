@@ -3,8 +3,6 @@ import os
 import numpy as np
 import tensorflow as tf
 
-mnist = tf.keras.datasets.mnist
-
 TRAIN_N = 60000
 x_train = np.random.randint(0, 255, [TRAIN_N, 28, 28], dtype=np.uint8)
 y_train = np.random.randint(
