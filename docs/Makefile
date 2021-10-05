@@ -20,7 +20,7 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 
 update:
-	rm -f source/$(LIBARY)*.rst  modules.rst
+	rm source/$(LIBARY)*.rst  modules.rst -f
 	sphinx-apidoc -fo  ./source  $(SOURCELIBARY)  $(SOURCELIBARY)/constant.py  $(SOURCELIBARY)/config $(SOURCELIBARY)/modelrepo  $(SOURCELIBARY)/tos $(SOURCELIBARY)/util $(SOURCELIBARY)/infrastructure
 
 markdown: update

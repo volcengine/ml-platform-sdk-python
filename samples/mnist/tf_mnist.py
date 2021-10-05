@@ -69,7 +69,7 @@ def main():
         histogram_freq=1,
     )
 
-    model.fit(x_train, y_train, epochs=100, callbacks=[tensorboard_callback])
+    model.fit(x_train, y_train, epochs=5, callbacks=[tensorboard_callback])
 
     model.evaluate(x_test, y_test, verbose=2)
 

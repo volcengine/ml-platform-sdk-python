@@ -99,9 +99,6 @@ class BaseClient(Service):
         api_info = self.api_info[api]
         r = self.prepare_request(api_info, params)
         r.headers["Content-Type"] = "application/json"
-        session_token = volcengine_ml_platform.get_session_token()
-        if session_token is not None and len(session_token.strip()) > 0:
-            r.headers["X-Security-Token"] = session_token.strip()
         r.body = body
 
         SignerV4.sign(r, self.service_info.credentials)
