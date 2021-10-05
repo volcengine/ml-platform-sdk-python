@@ -107,30 +107,27 @@ Bases: `object`
 
 
 
-#### download_file(bucket: str = '', key: str = '', tos_url: str = '', target_file_path: str = '', target_dir_path: str = '', max_concurrence: int = 10)
-下载TOS对象到本地
+#### download_file(bucket: str = '', key: str = '', file_path: str = '', dir_path: str = '', tos_url: str = '', max_concurrence: int = 10, que: Optional[queue.Queue] = None)
+从 bucket 下载对象
 
-要下载对象的目标地址，两种方式选择其一：
+推荐两种使用方式：
 - 通过 `bucket + key` 下载：:
 
 ```
-download_file(bucket="xxx", key="xxx", ...)
+download_file(bucket="xxx", key="xxx",
+                file_path="./dataset/a.csv")
 ```
 
 
 * 通过 `tos_url` 下载：:
 
 ```
-download_file(tos_url="tos://bucket.[xxxxx]/key", ...)
+download_file(tos_url="tos://bucket.[xxxxx]/key",
+                dir_path="./input/your/target/dir")
+
+
+其中，``dir_path`` 和 ``file_path`` 可以互换。
 ```
-
-下载的文件保存到本地目标路径有两种方式： target_file_path 或
-
-
-* 通过 `target_file_path` 指定
-
-
-* 通过 `target_dir_path` 指定，实际保存的文件名为key 或者 tos_url.substringAfterLast(“/”)
 
 
 * **Parameters**
@@ -142,13 +139,13 @@ download_file(tos_url="tos://bucket.[xxxxx]/key", ...)
     * **key** (*str*) – object 的 key，比如 key=\`\`put/you/path/xxxx/yyy\`\`
 
 
+    * **file_path** (*str*) – 下载文件的路径
+
+
+    * **dir_path** (*str*) – 下载文件的目
+
+
     * **tos_url** (*str*) – 对象的 tos 链接
-
-
-    * **file_path** (*str*) – 本地保存的目标文件路径
-
-
-    * **dir_path** (*str*) – 本地保存的目标目录路径
 
 
     * **max_concurrence** (*int*) – 最大并发数量，控制下载速度
@@ -167,30 +164,29 @@ download_file(tos_url="tos://bucket.[xxxxx]/key", ...)
 
 
 
-#### download_files(bucket: str = '', keys: list = [], tos_urls: list = [], target_file_paths: list = [], target_dir_path: str = '', parallelism=1)
-下载多个TOS对象到本地
+#### download_files(bucket: str = '', keys: list = [], file_paths: list = [], dir_path: str = '', tos_urls: List[str] = [], parallelism=1)
+并行下载 objects
 
-要下载的源文件有两种指定方式：
-- 通过 `bucket + keys` 指定：:
-
-```
-download_files(bucket="your_bucket_name", keys=["xxx","yyy", ...], ...)
-```
-
-
-* 通过 `tos_urls` 指定：:
+推荐两种使用方式：
+- 通过 `bucket + key` 下载：:
 
 ```
-download_files(tos_urls=["tos://you_bucket_name]/xxx", "tos://you_bucket_name]/yyy", ....], ...)
+download_files(bucket="xxx",
+                keys=["xxx","yyy"],
+                file_paths=["./dataset/a.csv",
+                            "./dataset/b.csv"])
 ```
 
-下载的文件保存到本地目标路径有两种方式：
+
+* 通过 `tos_url` 下载：:
+
+```
+download_files(tos_url=["tos://bucket.[xxxxx]/key", ....],
+                dir_path="./input/your/target/dir")
 
 
-* 通过 target_file_paths\` 指定，需要和要下载的源对象列表长度一致
-
-
-* 通过 `target_dir_path` 指定，所有文件保存到该目录下，，实际保存的文件名为对应的key 或者 对应的tos_url.substringAfterLast(“/”)
+其中， ``dir_path`` 和 ``file_path`` **不** 可以互换。
+```
 
 
 * **Parameters**
@@ -199,16 +195,16 @@ download_files(tos_urls=["tos://you_bucket_name]/xxx", "tos://you_bucket_name]/y
     * **bucket** (*str*) – bucket 名
 
 
-    * **keys** (*list*) – object 的 key，比如 key=”put/you/path/xxxx/yyy”
+    * **key** (*str*) – object 的 key，比如 key=”put/you/path/xxxx/yyy”
 
 
-    * **tos_urls** (*list*) – 对象的 tos 链接集合
+    * **file_paths** (*str*) – 下载多个文件对应的路径
 
 
-    * **target_file_paths** (*list*) – 本地保存的目标路径的列表，与 keys 或者 tos_urls 一一对应
+    * **dir_path** (*str*) – 下载文件的目
 
 
-    * **target_dir_path** (*str*) – 本地保存的目标目录
+    * **tos_urls** (*str*) – 对象的 tos 链接集合
 
 
     * **parallelism** (*int*) – 并发数量，控制下载速度
@@ -388,4 +384,10 @@ download_files(tos_urls=["tos://you_bucket_name]/xxx", "tos://you_bucket_name]/y
 
 ## volcengine_ml_platform.io.tos_dataset module
 
+
+### class volcengine_ml_platform.io.tos_dataset.TorchTOSDataset(manifest_info: Dict, decode: Optional[collections.abc.Callable] = None, transform: Optional[collections.abc.Callable] = None, target_transform: Optional[collections.abc.Callable] = None)
+Bases: `object`
+
+
+#### set_dataset_indices(buckets, keys, annotations)
 ## Module contents

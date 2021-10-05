@@ -12,7 +12,7 @@ def get_annotation_section(annotation_line):
 
 def get_content(annotation_line):
     data = annotation_line["Data"]
-    with open(data["FilePath"], mode="rb") as fd:
+    with open(data["FilePath"], mode="rb", encoding="utf-8") as fd:
         content = fd.read()
         return content
 
