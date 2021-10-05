@@ -33,6 +33,7 @@ setuptools.setup(
     version=VERSION,
     description=description,
     long_description=readme,
+    long_description_content_type="text/markdown"
     packages=[
         package
         for package in setuptools.PEP420PackageFinder.find()

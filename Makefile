@@ -16,4 +16,4 @@ end2end_test:
 	bash -ex scripts/py_end2end_test.sh
 
 sync_to_github:
-	cp -r .gitignore .pre-commit-config.yaml LICENSE Makefile README.md dev-requirements.txt docs pytest.ini samples scripts setup.cfg setup.py volcengine_ml_platform tests  ../ml-platform-sdk-python/
+	cp -r .gitignore .pre-commit-config.yaml LICENSE Makefile README.md dev-requirements.txt docs pytest.ini samples scripts setup.cfg setup.py volcengine_ml_platform tests  ../mlplatform-sdk-python/
