@@ -325,7 +325,10 @@ def prepare_for_training(args, model_args, model_arch):
     args.distributed = False
     if "WORLD_SIZE" in os.environ:
         args.distributed = int(os.environ["WORLD_SIZE"]) > 1
-        args.local_rank = int(os.environ["LOCAL_RANK"])
+        if "LOCAL_RANK" in os.environ:
+            args.local_rank = int(os.environ["LOCAL_RANK"])
+        else:
+            args.local_rank = int(os.environ["RANK"])
     else:
         args.local_rank = 0
 
