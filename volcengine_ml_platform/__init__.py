@@ -59,6 +59,10 @@ def get_session_token():
     return EnvHolder.SESSION_TOKEN
 
 
+def get_inner_api_service_host():
+    return os.getenv(constant.INNER_API_SERVICE_HOST_ENV_NAME)
+
+
 class EnvHolder:
     ENV_NAME = constant.PROD_ENV
     STRESS_FLAG = os.environ.get("VOLC_ML_PLATFORM_STRESS", "")

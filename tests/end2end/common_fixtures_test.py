@@ -20,12 +20,32 @@ def tf_mnist_model():
     tf_mnist.CACHE_DIR.clear()
 
 
-def get_tensor_config():
+def get_model_tensor_config():
     config = {
         "Inputs": [
             {
                 "TensorName": "serving_default_flatten_input:0",
-                "DType": "FP32",
+                "DType": "FLOAT",
+                "Shape": [-1, 28, 28],
+            },
+        ],
+        "Outputs": [
+            {
+                "TensorName": "StatefulPartitionedCall:0",
+                "DType": "FLOAT",
+                "Shape": [-1, 10],
+            },
+        ],
+    }
+    return config
+
+
+def get_perf_job_tensor_config():
+    config = {
+        "Inputs": [
+            {
+                "TensorName": "serving_default_flatten_input:0",
+                "DType": "FLOAT",
                 "Shape": {
                     "MaxShape": [32, 28, 28],
                     "MinShape": [1, 28, 28],
@@ -35,7 +55,7 @@ def get_tensor_config():
         "Outputs": [
             {
                 "TensorName": "StatefulPartitionedCall:0",
-                "DType": "FP32",
+                "DType": "FLOAT",
                 "Shape": {
                     "MaxShape": [32, 10],
                     "MinShape": [1, 10],

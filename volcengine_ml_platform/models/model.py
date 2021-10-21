@@ -1,11 +1,9 @@
 import logging
-import os
 from typing import Optional
 from typing import Tuple
 from urllib.parse import urlparse
 
 from prettytable import PrettyTable
-from tqdm import tqdm
 
 from volcengine_ml_platform.inferences.inference import InferenceService
 from volcengine_ml_platform.io import tos
@@ -22,6 +20,10 @@ class Model:
         self.model_client = model_client.ModelClient()
         self.resource_client = resource_client.ResourceClient()
 
+    @staticmethod
+    def _model_version_id(model_id, model_version):
+        return f"{model_id}-{model_version.lower()}"
+
     def _register_validate_and_preprocess(
         self,
         local_path: str,
@@ -31,13 +33,15 @@ class Model:
         model_type: Optional[str] = None,
         tensor_config: Optional[dict] = None,
         model_metrics: Optional[list] = None,
+        model_category: Optional[str] = None,
+        source_type: Optional[str] = None,
     ):
-        if local_path is None:
-            logging.warning("Model local_path is empty")
-            raise ValueError
-        if not os.path.exists(local_path):
-            logging.warning("Model local_path not exists %s", local_path)
-            raise ValueError
+        validation.validate_local_path(local_path)
+        validation.validate_model_tensor_config(tensor_config)
+        validation.validate_metrics(model_metrics)
+        validation.validate_model_category(model_category)
+        validation.validate_source_type(source_type)
+
         if model_id is None:
             if model_name is None or model_format is None or model_type is None:
                 logging.warning(
@@ -50,15 +54,6 @@ class Model:
             ]
             if raw_model_name != model_name:
                 logging.warning("model name is diff from origin, use old model_name")
-        try:
-            validation.validate_tensor_config(tensor_config)
-        except Exception as e:
-            raise Exception("Invalid tensor config.") from e
-
-        try:
-            validation.validate_metrics(model_metrics)
-        except Exception as e:
-            raise Exception("Invalid models metrics.") from e
 
     def _require_model_tos_storage(self) -> Tuple[str, str]:
         response = self.model_client.get_tos_upload_path(
@@ -67,79 +62,13 @@ class Model:
         )
         return response["Result"]["Bucket"], response["Result"]["KeyPrefix"]
 
-    def _upload_tos(self, local_path) -> str:
-        bucket, prefix = self._require_model_tos_storage()
-
-        if os.path.isfile(local_path):
-            key = f"{prefix}{os.path.basename(local_path)}"
-            self.tos_client.upload_file(local_path, bucket, key=key)
-
-        if os.path.isdir(local_path):
-            self_prefix = os.path.basename(local_path.rstrip("/"))
-            if self_prefix != ".":
-                prefix = f"{prefix}{self_prefix}/"
-
-            for root, _, files in os.walk(local_path):
-                for file in tqdm(files):
-                    file_path = os.path.join(root, file)
-                    rel_path = os.path.relpath(root, local_path)
-                    if rel_path == ".":
-                        key = f"{prefix}{file}"
-                    else:
-                        key = f"{prefix}{rel_path}/{file}"
-                    self.tos_client.upload_file(file_path, bucket, key=key)
-        return f"tos://{bucket}/{prefix}"
-
-    def _download_tos(self, bucket, key, prefix, local_path):
-        marker = ""
-        while True:
-            result = self.tos_client.list_objects(
-                bucket=bucket,
-                delimiter="/",
-                encoding_type="",
-                marker=marker,
-                max_keys=1000,
-                prefix=key,
-            )
-            keys = [content["Key"] for content in result.get("Contents", [])]
-            dirs = [content["Prefix"] for content in result.get("CommonPrefixes", [])]
-
-            for d in tqdm(dirs):
-                dest_pathname = os.path.join(
-                    local_path,
-                    os.path.relpath(d, prefix) + "/",
-                )
-                if not os.path.exists(os.path.dirname(dest_pathname)):
-                    os.makedirs(os.path.dirname(dest_pathname))
-                self._download_tos(bucket, d, prefix, local_path)
-
-            for file in tqdm(keys):
-                dest_pathname = os.path.join(
-                    local_path,
-                    os.path.relpath(file, prefix),
-                )
-                if not os.path.exists(os.path.dirname(dest_pathname)):
-                    os.makedirs(os.path.dirname(dest_pathname))
-
-                if not os.path.isdir(dest_pathname):
-                    self.tos_client.s3_client.download_file(
-                        bucket,
-                        file,
-                        dest_pathname,
-                    )
-
-            if result["IsTruncated"]:
-                marker = result["Contents"][-1]["Key"]
-                continue
-            break
-
     def _download_model(self, remote_path, local_path):
         parse_url = urlparse(remote_path)
         scheme = parse_url.scheme
         if scheme == "tos":
             bucket = parse_url.hostname
             key = parse_url.path.lstrip("/")
-            self._download_tos(bucket, key, key, local_path)
+            self.tos_client.download_dir(bucket, key, key, local_path)
         else:
             logging.warning("unsupported remote_path, %s", remote_path)
 
@@ -153,6 +82,9 @@ class Model:
         description: Optional[str] = None,
         tensor_config: Optional[dict] = None,
         model_metrics: Optional[list] = None,
+        model_category: Optional[str] = None,
+        dataset_id: Optional[str] = None,
+        source_type: Optional[str] = "TOS",
     ):
         """注册模型到模型仓库
 
@@ -175,6 +107,11 @@ class Model:
             description (str, optional): 模型描述信息。 默认为None
             tensor_config (dict, optional): 模型的Tensor配置。 默认为None
             model_metrics (list, optional): 模型的指标数据。默认为None
+            model_category (str, optional): 模型类别
+                可选值: 'TextClassification', 'TabularClassification', 'TabularRegression', 'ImageClassification'
+            dataset_id (str, optional): 训练模型所使用的数据集唯一标示
+            source_type (str, optional): 模型来源, 默认为TOS
+                可选值: 'TOS', 'Local', 'AutoML', 'Perf'
 
         Returns:
             返回json格式的response，包含模型相关信息。
@@ -207,8 +144,12 @@ class Model:
             model_type,
             tensor_config,
             model_metrics,
+            model_category,
+            source_type,
         )
-        tos_path = self._upload_tos(local_path)
+        bucket, prefix = self._require_model_tos_storage()
+        tos_path = self.tos_client.upload(local_path, bucket, prefix)
+
         return self.model_client.create_model(
             model_name=model_name,
             model_format=model_format,
@@ -218,19 +159,22 @@ class Model:
             description=description,
             tensor_config=tensor_config,
             model_metrics=model_metrics,
+            model_category=model_category,
+            dataset_id=dataset_id,
+            source_type=source_type,
         )
 
     def download(
         self,
         model_id: str,
-        model_version: int,
+        model_version: str,
         local_path: str,
     ):
         """下载模型到本地
 
         Args:
             model_id (str): 模型在仓库中的唯一标识
-            model_version (int): 模型版本号
+            model_version (str): 模型版本号
             local_path (str): 标示模型下载到本地时的存储路径
 
         Raises:
@@ -240,7 +184,9 @@ class Model:
             logging.warning("Model can not be download, model_id is empty")
             raise ValueError
 
-        response = self.model_client.get_model_version(f"{model_id}-{model_version}")
+        response = self.model_client.get_model_version(
+            self._model_version_id(model_id, model_version)
+        )
         remote_path = response["Result"]["Path"]
 
         self._download_model(remote_path, local_path)
@@ -251,12 +197,12 @@ class Model:
             local_path,
         )
 
-    def unregister(self, model_id: str, model_version: int):
+    def unregister(self, model_id: str, model_version: str):
         """删除模型版本
 
         Args:
             model_id (str): 模型在仓库中的唯一标识
-            model_version (int): 模型版本号
+            model_version (str): 模型版本号
 
         Returns:
             返回json格式的response，包含模型版本信息
@@ -276,7 +222,9 @@ class Model:
         Raises:
             Exception: 删除模型版本异常
         """
-        return self.model_client.delete_model_version(f"{model_id}-{model_version}")
+        return self.model_client.delete_model_version(
+            self._model_version_id(model_id, model_version)
+        )
 
     def unregister_all_versions(self, model_id: str):
         """删除模型及其所有模型版本
@@ -311,6 +259,7 @@ class Model:
     def list_models(
         self,
         model_name_contains=None,
+        id_contains=None,
         offset=0,
         page_size=10,
         sort_by="CreateTime",
@@ -321,6 +270,8 @@ class Model:
         Args:
             model_name_contains (str, optional): 模型名字包含的字符串。默认为None
                 获取模型列表时，可以按照模型名是否包含该字段指定的字符串，对模型进行检索查询
+            id_contains (str, optional): 模型ID包含的字符串。默认为None
+                获取模型列表时，可以按照模型ID是否包含该字段指定的字符串，对模型进行检索查询
             offset (int, optional): 标识检索模型时，起始偏移量位置。默认为0
             page_size (int, optional): 标识每个分页的大小。默认为10
             sort_by (str, optional): 标识按照哪个字段进行排序。默认为"CreateTime"
@@ -363,6 +314,7 @@ class Model:
         """
         return self.model_client.list_models(
             model_name_contains=model_name_contains,
+            id_contains=id_contains,
             offset=offset,
             page_size=page_size,
             sort_by=sort_by,
@@ -372,7 +324,7 @@ class Model:
     def get_model_versions(
         self,
         model_id: str,
-        model_version: int = None,
+        model_version: str = None,
         offset=0,
         page_size=10,
         sort_by="CreateTime",
@@ -382,7 +334,7 @@ class Model:
 
         Args:
             model_id (str): 模型在仓库中的唯一标识
-            model_version (int, optional): 模型版本号。默认为None
+            model_version (str, optional): 模型版本号。默认为None
             offset (int, optional): 标识检索模型版本时，起始偏移量位置。默认为0
             page_size (int, optional): 标识每个分页的大小。默认为10
             sort_by (str, optional): 标识按照哪个字段进行排序。默认为"CreateTime"
@@ -498,7 +450,7 @@ class Model:
     def update_model_version(
         self,
         model_id: str,
-        model_version: int,
+        model_version: str,
         description: Optional[str] = None,
         tensor_config: Optional[dict] = None,
         model_metrics: Optional[list] = None,
@@ -507,7 +459,7 @@ class Model:
 
         Args:
             model_id (str): 模型在仓库中的唯一标识
-            model_version (int): 模型版本号
+            model_version (str): 模型版本号
             description (str, optional): 模型描述信息。 默认为None
             tensor_config (dict, optional): 模型的Tensor配置。 默认为None
             model_metrics (list, optional): 模型的指标数据。默认为None
@@ -532,7 +484,7 @@ class Model:
             Exception: 更新模型版本异常
         """
         try:
-            validation.validate_tensor_config(tensor_config)
+            validation.validate_model_tensor_config(tensor_config)
         except Exception as e:
             raise Exception("Invalid tensor config.") from e
 
@@ -542,7 +494,7 @@ class Model:
             raise Exception("Invalid models metrics.") from e
 
         return self.model_client.update_model_version(
-            model_version_id=f"{model_id}-{model_version}",
+            model_version_id=self._model_version_id(model_id, model_version),
             description=description,
             tensor_config=tensor_config,
             model_metrics=model_metrics,
@@ -551,7 +503,7 @@ class Model:
     def deploy(
         self,
         model_id: str,
-        model_version: int,
+        model_version: str,
         service_name: str,
         flavor: str = "ml.g1e.large",
         image_id: str = "machinelearning/tfserving:tf-cuda10.1",
@@ -563,7 +515,7 @@ class Model:
 
         Args:
             model_id (str): 模型在仓库中的唯一标识
-            model_version (int): 模型版本号
+            model_version (str): 模型版本号
             service_name (str): 推理服务名称
             flavor (str, optional): 推理服务使用的套餐。默认为`ml.g1e.large`
             image_id (str, optional): 推理服务使用的镜像。默认为`machinelearning/tfserving:tf-cuda10.1`
@@ -587,7 +539,7 @@ class Model:
                 ),
             ),
             model_id=model_id,
-            model_version_id=f"{model_id}-{model_version}",
+            model_version_id=self._model_version_id(model_id, model_version),
             envs=envs,
             replica=replica,
             description=description,
@@ -598,7 +550,7 @@ class Model:
     def create_perf_job(
         self,
         model_id: str,
-        model_version: int,
+        model_version: str,
         tensor_config: dict,
         job_type: str,
         job_params: list,
@@ -607,7 +559,7 @@ class Model:
 
         Args:
             model_id (str): 模型在仓库中的唯一标识
-            model_version (int): 模型版本号
+            model_version (str): 模型版本号
             tensor_config (dict): 评测/转换任务所使用的模型Tensor配置
             job_type (str): Job类型。可选值：'PERF_ONLY', 'CONVERT_PERF'
             job_params (list): Job参数。
@@ -669,8 +621,13 @@ class Model:
             Exception: 创建评测/转换Job异常
 
         """
+        try:
+            validation.validate_perf_job_tensor_config(tensor_config)
+        except Exception as e:
+            raise Exception("Invalid tensor config.") from e
+
         return self.model_client.create_perf_job(
-            model_version_id=f"{model_id}-{model_version}",
+            model_version_id=self._model_version_id(model_id, model_version),
             tensor_config=tensor_config,
             job_type=job_type,
             job_params=job_params,
@@ -690,7 +647,7 @@ class Model:
 
         Args:
             model_id (str, optional): 模型在仓库中的唯一标识。默认为None
-            model_version (int, optional): 模型版本号。默认为None
+            model_version (str, optional): 模型版本号。默认为None
             job_id (str, optional): 评测/转换Job唯一标识。默认为None
             offset (int, optional): 标识检索时，起始偏移量位置。默认为0
             page_size (int, optional): 标识每个分页的大小。默认为10
@@ -735,7 +692,7 @@ class Model:
         Raises:
             Exception: 获取评测/转换Job异常
         """
-        model_version_id = f"{model_id}-{model_version}"
+        model_version_id = self._model_version_id(model_id, model_version)
         return self.model_client.list_perf_jobs(
             model_version_id=model_version_id,
             job_id=job_id,
