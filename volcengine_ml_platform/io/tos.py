@@ -563,7 +563,7 @@ class TOSClient:
         return ret
 
     def download_dir(self, bucket, key, prefix, local_dir):
-        marker = ''
+        marker = ""
         while True:
             res = self.s3_client.list_objects(
                 Bucket=bucket,
@@ -571,33 +571,35 @@ class TOSClient:
                 EncodingType="",
                 Marker=marker,
                 MaxKeys=1000,
-                Prefix=key
+                Prefix=key,
             )
             keys = [content["Key"] for content in res.get("Contents", list())]
             dirs = [content["Prefix"] for content in res.get("CommonPrefixes", list())]
 
             for d in dirs:
-                debug("processing dir: {}".format(d))
-                dest_pathname = os.path.join(local_dir, os.path.relpath(d, prefix) + '/')
-                debug("dest_pathname: {}".format(dest_pathname))
+                debug(f"processing dir: {d}")
+                dest_pathname = os.path.join(
+                    local_dir, os.path.relpath(d, prefix) + "/"
+                )
+                debug(f"dest_pathname: {dest_pathname}")
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
-                    debug("make dir: {}".format(dest_pathname))
+                    debug(f"make dir: {dest_pathname}")
                 self.download_dir(bucket, d, prefix, local_dir)
 
             for k in keys:
-                debug("processing file: {}".format(k))
+                debug(f"processing file: {k}")
                 dest_pathname = os.path.join(local_dir, os.path.relpath(k, prefix))
-                debug("dest_pathname: {}".format(dest_pathname))
+                debug(f"dest_pathname: {dest_pathname}")
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
-                    debug("make dir: {}".format(dest_pathname))
+                    debug(f"make dir: {dest_pathname}")
 
                 if not os.path.isdir(dest_pathname):
                     self.s3_client.download_file(bucket, k, dest_pathname)
 
-            if res['IsTruncated']:
-                marker = res['Contents'][-1]['Key']
+            if res["IsTruncated"]:
+                marker = res["Contents"][-1]["Key"]
                 continue
             break
 

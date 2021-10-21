@@ -1,8 +1,8 @@
 # type: ignore
 import logging
 
-from volcengine_ml_platform.innerapi.base_client import InnerApiBaseClient
 from volcengine_ml_platform.innerapi.base_client import define_inner_api
+from volcengine_ml_platform.innerapi.base_client import InnerApiBaseClient
 
 
 define_inner_api("InnerCreateModel")
@@ -84,9 +84,13 @@ class ModelInnerApiClient(InnerApiBaseClient):
                 body.update({"DatasetID": dataset_id})
 
             if base_model_version_id is not None:
-                body["VersionInfo"].update({"BaseModelVersionID": base_model_version_id})
+                body["VersionInfo"].update(
+                    {"BaseModelVersionID": base_model_version_id}
+                )
 
-            res_json = self.common_json_handler(api="InnerCreateModel", body=body, token=token)
+            res_json = self.common_json_handler(
+                api="InnerCreateModel", body=body, token=token
+            )
             return res_json
         except Exception as e:
             logging.error("Failed to create models, error: %s", e)
@@ -109,9 +113,7 @@ class ModelInnerApiClient(InnerApiBaseClient):
 
         try:
             res_json = self.common_json_handler(
-                api="InnerGetModelVersion",
-                body=body,
-                token=token
+                api="InnerGetModelVersion", body=body, token=token
             )
             return res_json
         except Exception as e:
@@ -121,7 +123,7 @@ class ModelInnerApiClient(InnerApiBaseClient):
                 e,
             )
             raise Exception("Get model version failed") from e
-    
+
     def update_model_version(
         self,
         model_version_id: str,

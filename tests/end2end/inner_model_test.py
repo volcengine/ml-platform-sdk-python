@@ -77,7 +77,7 @@ def test_inner_model_end2end():
         description="automl model",
         local_path=tf_mnist.get_saved_path(),
         model_metrics=model_metrics,
-        source_type="AutoML"
+        source_type="AutoML",
     )
     model_version_3 = resp["Result"]
     assert model_version_3["ModelID"] is not None

@@ -1,6 +1,7 @@
 from samples.mnist import tf_mnist
 from tests.end2end.common_fixtures_test import get_model_metrics
-from tests.end2end.common_fixtures_test import get_model_tensor_config, get_perf_job_tensor_config
+from tests.end2end.common_fixtures_test import get_model_tensor_config
+from tests.end2end.common_fixtures_test import get_perf_job_tensor_config
 from volcengine_ml_platform.models import model
 
 
@@ -23,7 +24,6 @@ def test_model_end2end():
         model_metrics=model_metrics,
     )
     model_version_1 = resp["Result"]
-    print(">>>>model_version_1:{}".format(model_version_1), flush=True)
 
     assert model_version_1["ModelID"] is not None
     assert model_version_1["VersionInfo"]["ModelVersion"] == "V1.0"
@@ -48,9 +48,8 @@ def test_model_end2end():
         model_id=model_version_1["ModelID"],
         model_version=model_version_1["VersionInfo"]["ModelVersion"],
     )
-    print(">>>resp:{}".format(resp))
-    # assert resp["Result"]["Total"] == 1
-    # assert resp["Result"]["List"][0]["ModelVersion"] == "V1.0"
+    assert resp["Result"]["Total"] == 1
+    assert resp["Result"]["List"][0]["ModelVersion"] == "V1.0"
 
     # 删除模型版本1
     resp = client.unregister(
@@ -61,7 +60,7 @@ def test_model_end2end():
         model_id=model_version_1["ModelID"],
         model_version=model_version_1["VersionInfo"]["ModelVersion"],
     )
-    # assert resp["Result"]["Total"] == 0
+    assert resp["Result"]["Total"] == 0
 
     # 为模型版本2创建一个评测任务
     job_params = [

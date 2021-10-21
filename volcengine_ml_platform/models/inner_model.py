@@ -8,9 +8,9 @@ from volcengine import Credentials
 
 import volcengine_ml_platform
 from volcengine_ml_platform import constant
-from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.innerapi import model_client as inner_model_client
 from volcengine_ml_platform.innerapi import sts_token
+from volcengine_ml_platform.io import tos
 from volcengine_ml_platform.models import validation
 from volcengine_ml_platform.openapi import secure_token_client
 
@@ -28,7 +28,7 @@ class Model:
 
     def set_target_account_id(self, target_account_id):
         self.target_account_id = target_account_id
-    
+
     def set_target_user_id(self, target_user_id):
         self.target_user_id = target_user_id
 
@@ -58,7 +58,7 @@ class Model:
     def _get_sts_token(self):
         resp = self.inner_sts_client.get_sts_token(self._get_secure_token())
         result = resp["Result"]
-        return result['AccessKeyId'], result['SecretAccessKey'], result['SessionToken']
+        return result["AccessKeyId"], result["SecretAccessKey"], result["SessionToken"]
 
     def get_model_version(
         self,
@@ -223,7 +223,9 @@ class Model:
         model_category: Optional[str] = None,
         source_type: Optional[str] = None,
     ):
-        if model_id is None and (model_name is None or model_format is None or model_type is None):
+        if model_id is None and (
+            model_name is None or model_format is None or model_type is None
+        ):
             logging.warning(
                 "Register new model need parameter model_name,model_format,model_type",
             )

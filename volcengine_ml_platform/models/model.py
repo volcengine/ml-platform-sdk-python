@@ -184,7 +184,9 @@ class Model:
             logging.warning("Model can not be download, model_id is empty")
             raise ValueError
 
-        response = self.model_client.get_model_version(self._model_version_id(model_id, model_version))
+        response = self.model_client.get_model_version(
+            self._model_version_id(model_id, model_version)
+        )
         remote_path = response["Result"]["Path"]
 
         self._download_model(remote_path, local_path)
@@ -220,7 +222,9 @@ class Model:
         Raises:
             Exception: 删除模型版本异常
         """
-        return self.model_client.delete_model_version(self._model_version_id(model_id, model_version))
+        return self.model_client.delete_model_version(
+            self._model_version_id(model_id, model_version)
+        )
 
     def unregister_all_versions(self, model_id: str):
         """删除模型及其所有模型版本

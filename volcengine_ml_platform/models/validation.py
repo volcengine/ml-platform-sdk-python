@@ -1,15 +1,33 @@
 import copy
 import json
-import jsonschema
 import os
 
-SUPPORTED_MODEL_CATEGORY = ["TextClassification", "TabularClassification", "TabularRegression", "ImageClassification"]
+import jsonschema
+
+SUPPORTED_MODEL_CATEGORY = [
+    "TextClassification",
+    "TabularClassification",
+    "TabularRegression",
+    "ImageClassification",
+]
 
 SUPPORTED_SOURCE_TYPE = ["TOS", "Local", "AutoML", "Perf"]
 
 _shape_schema = {"type": "array", "items": {"type": "integer"}, "minItems": 1}
 
-_perf_job_supported_tensor_dtype = ["FLOAT16","FLOAT", "DOUBLE", "INT8", "INT16", "INT32", "INT64", "UINT8", "UINT16", "UINT32", "UINT64"]
+_perf_job_supported_tensor_dtype = [
+    "FLOAT16",
+    "FLOAT",
+    "DOUBLE",
+    "INT8",
+    "INT16",
+    "INT32",
+    "INT64",
+    "UINT8",
+    "UINT16",
+    "UINT32",
+    "UINT64",
+]
 
 _model_supported_tensor_dtype = copy.deepcopy(_perf_job_supported_tensor_dtype)
 _model_supported_tensor_dtype.extend(["STRING", "BOOL"])
@@ -130,19 +148,30 @@ def validate_metrics(model_metrics):
     except Exception as e:
         raise Exception("Invalid models metrics.") from e
 
+
 def validate_local_path(local_path):
     if local_path is None:
         raise Exception("Model local_path is empty")
     if not os.path.exists(local_path):
         raise Exception("Model local_path not exists %s", local_path)
 
+
 def validate_model_category(model_category):
     if model_category is not None and model_category not in SUPPORTED_MODEL_CATEGORY:
-        raise Exception("Invalid model_category %s, values should be one of %s", model_category, SUPPORTED_MODEL_CATEGORY)
+        raise Exception(
+            "Invalid model_category %s, values should be one of %s",
+            model_category,
+            SUPPORTED_MODEL_CATEGORY,
+        )
+
 
 def validate_source_type(source_type):
     if source_type is not None and source_type not in SUPPORTED_SOURCE_TYPE:
-        raise Exception("Invalid source_type %s, values should be one of %s", source_type, SUPPORTED_SOURCE_TYPE)
+        raise Exception(
+            "Invalid source_type %s, values should be one of %s",
+            source_type,
+            SUPPORTED_SOURCE_TYPE,
+        )
 
 
 if __name__ == "__main__":

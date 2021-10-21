@@ -1,11 +1,10 @@
 import json
 import logging
-import requests
 import threading
-
 from typing import Dict
 from typing import Union
 
+import requests
 from volcengine.ApiInfo import ApiInfo
 
 import volcengine_ml_platform
@@ -35,7 +34,7 @@ def define_inner_api(name, method="POST"):
         {},
         header,
     )
-    
+
     INNER_API_INFOS[name] = api_info
 
 
@@ -66,7 +65,7 @@ class InnerApiBaseClient:
 
     def common_json_handler(self, api, body, token):
         start_time = metric.current_ts()
-        
+
         if api not in self.inner_api_info:
             raise Exception("no such inner api")
 
@@ -88,8 +87,8 @@ class InnerApiBaseClient:
 
             if resp.status_code != 200:
                 raise Exception(resp.text)
-        
-            res_json = resp.json()   
+
+            res_json = resp.json()
         except Exception as e:
             msg = "time-cost(ms)={}, The server returns an error: api={}, error={}".format(
                 metric.cost_time(start_time),
