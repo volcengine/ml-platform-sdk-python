@@ -1,8 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import json
-import os
-import sys
 import argparse
 import byteps.tensorflow as bps
 from  byteps.tensorflow.distribute import MirroredStrategy
