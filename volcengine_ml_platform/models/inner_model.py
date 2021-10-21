@@ -340,3 +340,23 @@ class Model:
             source_type=source_type,
             base_model_version_id=base_model_version_id,
         )
+
+    def upload_tos(
+        self,
+        local_path: str,
+    ):
+        """上传数据到TOS
+
+        Args:
+            local_path (str): 数据在本地的存放路径
+
+        Returns:
+            返回tos路径。
+            比如: "tos://ml-platform-auto-created-required-2100000050-cn-north-4/modelrepo/from-sdk-repo/1631236594036/1/"
+
+        Raises:
+            Exception: 数据上传异常
+        """
+        bucket, prefix = self._require_model_tos_storage()
+        tos_client = self._get_tos_client()
+        return tos_client.upload(local_path, bucket, prefix)
