@@ -1,10 +1,20 @@
+import copy
 import json
-
 import jsonschema
+import os
+
+SUPPORTED_MODEL_CATEGORY = ["TextClassification", "TabularClassification", "TabularRegression", "ImageClassification"]
+
+SUPPORTED_SOURCE_TYPE = ["TOS", "Local", "AutoML", "Perf"]
 
 _shape_schema = {"type": "array", "items": {"type": "integer"}, "minItems": 1}
 
-_tensor_schema = {
+_perf_job_supported_tensor_dtype = ["FLOAT16","FLOAT", "DOUBLE", "INT8", "INT16", "INT32", "INT64", "UINT8", "UINT16", "UINT32", "UINT64"]
+
+_model_supported_tensor_dtype = copy.deepcopy(_perf_job_supported_tensor_dtype)
+_model_supported_tensor_dtype.extend(["STRING", "BOOL"])
+
+_perf_job_tensor_schema = {
     "type": "object",
     "properties": {
         "TensorName": {"type": "string"},
@@ -18,35 +28,50 @@ _tensor_schema = {
         },
         "DType": {
             "type": "string",
-            "enum": [
-                "FP32",
-                "FP16",
-                "INT8",
-                "INT16",
-                "INT32",
-                "INT64",
-                "UINT8",
-                "UINT16",
-                "UINT32",
-                "UINT64",
-                "FP64",
-                "STRING",
-            ],
+            "enum": _perf_job_supported_tensor_dtype,
         },
     },
     "required": ["TensorName", "Shape", "DType"],
 }
 
-_model_schema = {
+_model_tensor_schema = {
+    "type": "object",
+    "properties": {
+        "TensorName": {"type": "string"},
+        "Shape": _shape_schema,
+        "DType": {
+            "type": "string",
+            "enum": _model_supported_tensor_dtype,
+        },
+    },
+    "required": ["TensorName", "Shape", "DType"],
+}
+
+_perf_job_tensor_config_schema = {
     "type": "object",
     "properties": {
         "Inputs": {
             "type": "array",
-            "items": _tensor_schema,
+            "items": _perf_job_tensor_schema,
         },
         "Outputs": {
             "type": "array",
-            "items": _tensor_schema,
+            "items": _perf_job_tensor_schema,
+        },
+    },
+    "required": ["Inputs"],
+}
+
+_model_tensor_config_schema = {
+    "type": "object",
+    "properties": {
+        "Inputs": {
+            "type": "array",
+            "items": _model_tensor_schema,
+        },
+        "Outputs": {
+            "type": "array",
+            "items": _model_tensor_schema,
         },
     },
     "required": ["Inputs"],
@@ -81,19 +106,43 @@ def valid_json(serialized_data):
     json.loads(serialized_data)
 
 
-def validate_tensor_config(tensor_config):
+def validate_model_tensor_config(tensor_config):
     if tensor_config is None:
         return
-    jsonschema.validate(tensor_config, schema=_model_schema)
+    try:
+        jsonschema.validate(tensor_config, schema=_model_tensor_config_schema)
+    except Exception as e:
+        raise Exception("Invalid tensor config.") from e
+
+
+def validate_perf_job_tensor_config(tensor_config):
+    jsonschema.validate(tensor_config, schema=_perf_job_tensor_config_schema)
 
 
 def validate_metrics(model_metrics):
     if model_metrics is None:
         return
-    jsonschema.validate(model_metrics, _model_metrics_schema)
-    for metrics in model_metrics:
-        valid_json(metrics["Params"])
-        valid_json(metrics["MetricsData"])
+    try:
+        jsonschema.validate(model_metrics, _model_metrics_schema)
+        for metrics in model_metrics:
+            valid_json(metrics["Params"])
+            valid_json(metrics["MetricsData"])
+    except Exception as e:
+        raise Exception("Invalid models metrics.") from e
+
+def validate_local_path(local_path):
+    if local_path is None:
+        raise Exception("Model local_path is empty")
+    if not os.path.exists(local_path):
+        raise Exception("Model local_path not exists %s", local_path)
+
+def validate_model_category(model_category):
+    if model_category is not None and model_category not in SUPPORTED_MODEL_CATEGORY:
+        raise Exception("Invalid model_category %s, values should be one of %s", model_category, SUPPORTED_MODEL_CATEGORY)
+
+def validate_source_type(source_type):
+    if source_type is not None and source_type not in SUPPORTED_SOURCE_TYPE:
+        raise Exception("Invalid source_type %s, values should be one of %s", source_type, SUPPORTED_SOURCE_TYPE)
 
 
 if __name__ == "__main__":
@@ -117,7 +166,7 @@ if __name__ == "__main__":
         ],
     }
 
-    validate_tensor_config(conf)
+    validate_perf_job_tensor_config(conf)
 
     data = [
         {

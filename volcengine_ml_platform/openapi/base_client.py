@@ -22,7 +22,7 @@ def define_api(name, method="POST"):
     header = {}
     stress_flag = volcengine_ml_platform.get_stress_flag()
     if stress_flag is not None and len(stress_flag.strip()) > 0:
-        header.update("X-Tt-Stress", stress_flag.strip())
+        header.update({"X-Tt-Stress": stress_flag.strip()})
 
     API_INFOS[name] = ApiInfo(
         method,
@@ -51,10 +51,11 @@ class BaseClient(Service):
         return cls._instance
 
     def __init__(self):
+        credentials = volcengine_ml_platform.get_credentials()
         self.service_info = ServiceInfo(
             volcengine_ml_platform.get_service_host(),
             {"Accept": "application/json"},
-            volcengine_ml_platform.get_credentials(),
+            credentials,
             10,
             10,
             "http",
