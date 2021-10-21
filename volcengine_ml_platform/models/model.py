@@ -1,11 +1,9 @@
 import logging
-import os
 from typing import Optional
 from typing import Tuple
 from urllib.parse import urlparse
 
 from prettytable import PrettyTable
-from tqdm import tqdm
 
 from volcengine_ml_platform.inferences.inference import InferenceService
 from volcengine_ml_platform.io import tos

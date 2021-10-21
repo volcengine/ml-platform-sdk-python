@@ -12,11 +12,6 @@ import volcengine_ml_platform
 from volcengine_ml_platform import constant
 from volcengine_ml_platform.util import metric
 
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-
 
 INNER_API_INFOS = {}
 

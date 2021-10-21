@@ -3,7 +3,7 @@ import shutil
 
 from samples.mnist import tf_mnist
 from tests.end2end.common_fixtures_test import get_model_metrics
-from tests.end2end.common_fixtures_test import get_model_tensor_config, get_perf_job_tensor_config
+from tests.end2end.common_fixtures_test import get_model_tensor_config
 from volcengine_ml_platform.models import inner_model
 
 
