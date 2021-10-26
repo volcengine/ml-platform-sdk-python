@@ -1,8 +1,8 @@
 import json
 import logging
 import threading
+from typing import Any
 from typing import Dict
-from typing import Union
 
 from volcengine.ApiInfo import ApiInfo
 from volcengine.auth.SignerV4 import SignerV4
@@ -15,14 +15,12 @@ from volcengine_ml_platform.util import metric
 
 API_INFOS = {}
 
-BodyDict = Dict[str, Union[str, int]]
-
 
 def define_api(name, method="POST"):
     header = {}
     stress_flag = volcengine_ml_platform.get_stress_flag()
     if stress_flag is not None and len(stress_flag.strip()) > 0:
-        header.update({"X-Tt-Stress": stress_flag.strip()})
+        header.update("X-Tt-Stress", stress_flag.strip())
 
     API_INFOS[name] = ApiInfo(
         method,
@@ -51,11 +49,10 @@ class BaseClient(Service):
         return cls._instance
 
     def __init__(self):
-        credentials = volcengine_ml_platform.get_credentials()
         self.service_info = ServiceInfo(
             volcengine_ml_platform.get_service_host(),
             {"Accept": "application/json"},
-            credentials,
+            volcengine_ml_platform.get_credentials(),
             10,
             10,
             "http",
@@ -100,9 +97,6 @@ class BaseClient(Service):
         api_info = self.api_info[api]
         r = self.prepare_request(api_info, params)
         r.headers["Content-Type"] = "application/json"
-        session_token = volcengine_ml_platform.get_session_token()
-        if session_token is not None and len(session_token.strip()) > 0:
-            r.headers["X-Security-Token"] = session_token.strip()
         r.body = body
 
         SignerV4.sign(r, self.service_info.credentials)
@@ -130,7 +124,7 @@ class BaseClient(Service):
         Returns:
 
         """
-        body: BodyDict = {"ServiceName": service_name}
+        body = {"ServiceName": service_name}
         if path:
             body.update({"Path": path})
 
@@ -145,10 +139,10 @@ class BaseClient(Service):
             raise Exception("GetTOSUploadPath failed") from e
 
     def get_sts_token(self, encrypt_code: str, duration: int = None):
-        body: BodyDict = {"EncryptCode": encrypt_code}
+        body = {"EncryptCode": encrypt_code}  # type: Dict[str, Any]
 
         if duration:
-            body.update({"Duration": duration})
+            body["Duration"] = duration
 
         try:
             res_json = self.common_json_handler(api="GetSTSToken", body=body)
@@ -165,5 +159,5 @@ class BaseClient(Service):
         flavor_map = list_flavor_result["Result"]["List"]
         for _, v in flavor_map.items():
             if v and len(v):
-                return v[0]["FlavorID"]
+                return v[0]["Id"]
         return ""
