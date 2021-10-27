@@ -49,10 +49,11 @@ class BaseClient(Service):
         return cls._instance
 
     def __init__(self):
+        credentials = volcengine_ml_platform.get_credentials()
         self.service_info = ServiceInfo(
             volcengine_ml_platform.get_service_host(),
             {"Accept": "application/json"},
-            volcengine_ml_platform.get_credentials(),
+            credentials,
             10,
             10,
             "http",
