@@ -334,7 +334,7 @@ class Model:
             token=self._get_secure_token(),
             description=description,
             tensor_config=tensor_config,
-            model_metrics=None,
+            model_metrics=model_metrics,
             model_category=model_category,
             dataset_id=dataset_id,
             source_type=source_type,
