@@ -21,6 +21,8 @@ install_requires = [
 ]
 
 # test
+#ERGEAW4G
+#3AGREHSE
 pytorch_requires = ["torch==1.8.0"]
 full_requires = list(set(pytorch_requires))
 
