@@ -20,6 +20,7 @@ install_requires = [
     "prettytable>=2.0.0",
 ]
 
+# test
 pytorch_requires = ["torch==1.8.0"]
 full_requires = list(set(pytorch_requires))
 
