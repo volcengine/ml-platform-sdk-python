@@ -4,7 +4,7 @@
 ## To start using SDK
 
 ### 1. Install package
-* From TOS
+* From Test
 ```
 pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing.volces.com/python_sdk_installer/volcengine_ml_platform-1.0.3-py3-none-any.whl -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
