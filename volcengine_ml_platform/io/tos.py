@@ -20,19 +20,24 @@ import volcengine_ml_platform
 class TOSClient:
     """自动配置环境变量中的用户信息，与TOS 进行交互"""
 
-    def __init__(self):
+    def __init__(self, credentials=None, session_token=None):
         """设置认证信息，初始化类变量"""
 
         # ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
-        credentials = volcengine_ml_platform.get_credentials()
+        if credentials is None:
+            credentials = volcengine_ml_platform.get_credentials()
         self.region_name = credentials.region
-        self.s3_client = boto3.client(
-            "s3",
-            region_name=credentials.region,
-            aws_access_key_id=credentials.ak,
-            aws_secret_access_key=credentials.sk,
-            endpoint_url=volcengine_ml_platform.get_tos_endpoint_url(),
-        )
+        config = {
+            "region_name": credentials.region,
+            "aws_access_key_id": credentials.ak,
+            "aws_secret_access_key": credentials.sk,
+            "endpoint_url": volcengine_ml_platform.get_tos_endpoint_url(),
+        }
+        if session_token is None:
+            session_token = volcengine_ml_platform.get_session_token()
+        if session_token is not None and len(session_token.strip()) > 0:
+            config["aws_session_token"] = session_token
+        self.s3_client = boto3.client("s3", **config)
         self.dir_record = set()
 
     def bucket_exists(self, bucket_name):
@@ -445,7 +450,7 @@ class TOSClient:
             target_file_path = os.path.join(target_dir_path, key)
         else:
             target_dir_path = os.path.dirname(target_file_path)
-        self._create_dir(target_dir_path)
+        self._create_dir(os.path.dirname(target_file_path))
 
         debug("download file: bucket %s, key %s", bucket, key)
         self.s3_client.download_file(
@@ -553,5 +558,68 @@ class TOSClient:
             )
 
         pool.close()
+        ret = [res.get() for res in tqdm(async_res)]
         pool.join()
-        return [res.get() for res in tqdm(async_res)]
+        return ret
+
+    def download_dir(self, bucket, key, prefix, local_dir):
+        marker = ""
+        while True:
+            res = self.s3_client.list_objects(
+                Bucket=bucket,
+                Delimiter="/",
+                EncodingType="",
+                Marker=marker,
+                MaxKeys=1000,
+                Prefix=key,
+            )
+            keys = [content["Key"] for content in res.get("Contents", list())]
+            dirs = [content["Prefix"] for content in res.get("CommonPrefixes", list())]
+
+            for d in dirs:
+                debug(f"processing dir: {d}")
+                dest_pathname = os.path.join(
+                    local_dir, os.path.relpath(d, prefix) + "/"
+                )
+                debug(f"dest_pathname: {dest_pathname}")
+                if not os.path.exists(os.path.dirname(dest_pathname)):
+                    os.makedirs(os.path.dirname(dest_pathname))
+                    debug(f"make dir: {dest_pathname}")
+                self.download_dir(bucket, d, prefix, local_dir)
+
+            for k in keys:
+                debug(f"processing file: {k}")
+                dest_pathname = os.path.join(local_dir, os.path.relpath(k, prefix))
+                debug(f"dest_pathname: {dest_pathname}")
+                if not os.path.exists(os.path.dirname(dest_pathname)):
+                    os.makedirs(os.path.dirname(dest_pathname))
+                    debug(f"make dir: {dest_pathname}")
+
+                if not os.path.isdir(dest_pathname):
+                    self.s3_client.download_file(bucket, k, dest_pathname)
+
+            if res["IsTruncated"]:
+                marker = res["Contents"][-1]["Key"]
+                continue
+            break
+
+    def upload(self, local_path, bucket, prefix):
+        if os.path.isfile(local_path):
+            key = f"{prefix}{os.path.basename(local_path)}"
+            self.upload_file(local_path, bucket, key=key)
+
+        if os.path.isdir(local_path):
+            self_prefix = os.path.basename(local_path.rstrip("/"))
+            if self_prefix != ".":
+                prefix = f"{prefix}{self_prefix}/"
+
+            for root, _, files in os.walk(local_path):
+                for file in tqdm(files):
+                    file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(root, local_path)
+                    if rel_path == ".":
+                        key = f"{prefix}{file}"
+                    else:
+                        key = f"{prefix}{rel_path}/{file}"
+                    self.upload_file(file_path, bucket, key=key)
+        return f"tos://{bucket}/{prefix}"
