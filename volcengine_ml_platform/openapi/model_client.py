@@ -36,6 +36,8 @@ class ModelClient(BaseClient):
         description=None,
         tensor_config=None,
         model_metrics=None,
+        model_category=None,
+        dataset_id=None,
         source_type="TOS",
     ):
         """create models
@@ -50,6 +52,9 @@ class ModelClient(BaseClient):
             description (str, optional): description to the models. Defaults to None.
             tensor_config (dict, optional): tensor config of the models.
             model_metrics (list, optional): list of models metrics.
+            model_category (str, optional): category of the model.
+                values can be 'TextClassification', 'TabularClassification', 'TabularRegression', 'ImageClassification'
+            dataset_id (str, optional): id of the dataset based on which the model is trained
             source_type (str, optional): storage type. Defaults to 'TOS'.
 
         Raises:
@@ -79,6 +84,12 @@ class ModelClient(BaseClient):
 
             if model_metrics is not None:
                 body["VersionInfo"].update({"MetricsList": model_metrics})
+
+            if model_category is not None:
+                body.update({"ModelCategory": model_category})
+
+            if dataset_id is not None:
+                body.update({"DatasetID": dataset_id})
 
             res_json = self.common_json_handler(api="CreateModel", body=body)
             return res_json
@@ -118,6 +129,7 @@ class ModelClient(BaseClient):
         self,
         model_name=None,
         model_name_contains=None,
+        id_contains=None,
         offset=0,
         page_size=10,
         sort_by="CreateTime",
@@ -151,6 +163,9 @@ class ModelClient(BaseClient):
 
         if model_name_contains:
             body.update({"ModelNameContains": model_name_contains})
+
+        if id_contains:
+            body.update({"IdContains": id_contains})
 
         try:
             res_json = self.common_json_handler(api="ListModels", body=body)
@@ -214,7 +229,7 @@ class ModelClient(BaseClient):
     def list_model_versions(
         self,
         model_id: str,
-        model_version: int = None,
+        model_version: str = None,
         offset=0,
         page_size=10,
         sort_by="CreateTime",
