@@ -34,6 +34,12 @@ PUBLIC_EXAMPLES_TOS_BUCKET = "ml-platform-public-examples-{}".format(
 DATASET_LOCAL_METADATA_FILENAME = "local_metadata.manifest"
 ENCRYPTED_KEY_ENV_NAME = "ENCRYPTED_KEY"
 
+INNER_API_SERVICE_HOST_ENV_NAME = "ML_PLATFORM_HOST"
+ACCOUNT_ID_ENV_NAME = "VOLC_ACCOUNT_ID"
+USER_ID_ENV_NAME = "VOLC_USER_ID"
+
+MODULE_MODEL_REPO = "modelrepo"
+
 
 def get_public_examples_readonly_bucket():
     return PUBLIC_EXAMPLES_TOS_BUCKET

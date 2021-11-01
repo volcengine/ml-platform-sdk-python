@@ -3,7 +3,7 @@ import os
 import setuptools
 
 NAME = "volcengine_ml_platform"
-VERSION = "1.0.0"
+VERSION = "1.0.3"
 description = "Volcengine ML Platform API client library"
 
 setup_requires = ["setuptools>=41.0.0"]
@@ -33,6 +33,7 @@ setuptools.setup(
     version=VERSION,
     description=description,
     long_description=readme,
+    long_description_content_type="text/markdown",
     packages=[
         package
         for package in setuptools.PEP420PackageFinder.find()
