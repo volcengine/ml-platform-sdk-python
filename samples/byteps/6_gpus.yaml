@@ -1,0 +1,46 @@
+#运行命令: volc ml_task submit --job_config=./samples/byteps/6_gpus.yaml
+
+# self define e.g text_classfication
+TaskName: "byteps_from_cli_jingyan"
+# description for this task
+Description: "3个节点，每个节点2块GPU"
+# entry point command
+Entrypoint: "bpslaunch python3 /root/code/samples/byteps/synthetic_benchmark.py"
+Args: ""
+Tags: []
+# user code path
+UserCodePath: "./samples"
+# remote path mount in container
+RemoteMountCodePath: "/root/code"
+# user define env var
+Envs:
+    - Name: "VOLC_ACCESSKEY"
+      Value: "AKLTOTk1NmEwOTYyZDQ2NGJmNTk5M2E1MWY4N2NmMzA4M2Q"
+    - Name: "VOLC_SECRETKEY"
+      Value: "TnpjNFlUTmtZalZoTkRSaU5HRXdNV0l4TjJOaU9UWXlZekUxTnpBeE1tUQ=="
+    - Name: "VOLC_REGION"
+      Value: "cn-beijing"
+Image: "ml-platform-q6r4bhp2mj9zlw2kf7/byteps:tensorflow1.15_new"
+# gorup define in /ml-platform/resourceGroup, empty as default group
+ResourceGroupID: "default"
+# AI framework, support: TensorFlow PS,PyTorch DDP,Horovod,BytePS
+Framework: "BytePS"
+# Flavor代表机型，去 https://www.volcengine.com/docs/6459/72363 查询
+TaskRoleSpecs:
+    - RoleName: "worker"
+      RoleReplicas: 1
+      Flavor: "ml.g1v.2xlarge"
+    - RoleName: "scheduler"
+      RoleReplicas: 1
+      Flavor: "ml.g1e.2xlarge"
+    - RoleName: "server"
+      RoleReplicas: 1
+      Flavor: "ml.g1e.4xlarge"
+ActiveDeadlineSeconds: 432000
+# enable tensor board or not
+EnableTensorBoard: true
+# 将tos bucket挂载到每个容器文件系统内
+Storages:
+  - Type: "Tos"
+    MountPath: "/data1"
+    Bucket: "tyt-test"
