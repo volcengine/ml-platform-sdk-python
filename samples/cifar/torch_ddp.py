@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import os
 
 import torch
@@ -193,9 +194,14 @@ def main():
 
     if args.save_model and (dist.get_rank() == -1 or dist.get_rank() == 0):
         # 直接将模型训练好的参数，保存到TOS上。下文的/data00/models/cifar/ 对应 tos://${your_bucket_name}/models/cifar
-        saved_model_dir = "/data01/models/cifar/"
+        saved_model_dir = "/data00/models/cifar"
         os.makedirs(saved_model_dir, exist_ok=True)
-        torch.save(model.state_dict(), saved_model_dir + "cifar_demo.pt")
+        # TOS挂载带来的限制: 模型保存到TOS上的时候，每次只能保存为一个新文件，不能覆盖已有文件
+        model_path = "{}/cifar_demo_{}.pt".format(
+            saved_model_dir, datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        )
+        torch.save(model.state_dict(), model_path)
+        print(f"finish save model to {model_path}")
 
 
 if __name__ == "__main__":
