@@ -79,28 +79,28 @@ class EnvHolder:
                     conf = json.load(f)
 
         final_ak = cls.pickup_non_blank_value(
-            ak,
             os.environ.get("VOLC_ACCESSKEY", None),
             conf.get("ak", None),
+            ak,
         )
         final_sk = cls.pickup_non_blank_value(
-            sk,
             os.environ.get("VOLC_SECRETKEY", None),
             conf.get("sk", None),
+            sk,
         )
         final_region = cls.pickup_non_blank_value(
-            region,
             os.environ.get("VOLC_REGION", None),
             conf.get(
                 "region",
                 None,
             ),
+            region,
         )
         ml_platform_conf = conf.get("ml_platform", {})
         final_env_name = cls.pickup_non_blank_value(
-            env_name,
             os.environ.get("VOLC_ML_PLATFORM_ENV", None),
             ml_platform_conf.get("env", None),
+            env_name,
         )
 
         if final_env_name is not None and len(final_env_name) > 0:

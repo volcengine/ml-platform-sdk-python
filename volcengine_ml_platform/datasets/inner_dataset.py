@@ -30,12 +30,8 @@ class InnerDataset(TabularDataset):
         _Dataset.__init__(self, dataset_id, annotation_id, local_path, tos_source)
         # new info
         self.dataset_type = dataset_type
-        self.target_user_id = (
-            int(target_user_id) if target_user_id is not None else None
-        )
-        self.target_account_id = (
-            int(target_account_id) if target_account_id is not None else None
-        )
+        self.target_user_id = target_user_id
+        self.target_account_id = target_account_id
         self.module_name = constant.MODULE_DATASET
         self.inner_dataset_client = inner_dataset_client.InnerDatasetClient()
         self.inner_sts_client = sts_token.STSApiClient()
@@ -58,7 +54,8 @@ class InnerDataset(TabularDataset):
         return self.target_user_id
 
     def _get_secure_token(self):
-        resp = self.secure_token_client.admin_get_secure_token(
+        resp = self.secure_token_client.get_secure_token(
+            module_name=self.module_name,
             time_to_live=600,
             account_id=self.get_target_account_id(),
             user_id=self.get_target_user_id(),
