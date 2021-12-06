@@ -4,20 +4,8 @@ import time
 
 import tensorflow as tf
 
-import volcengine_ml_platform
-from volcengine_ml_platform import constant
 
-
-volcengine_ml_platform.init()
-
-
-BUCKET = constant.get_public_examples_readonly_bucket()
-
-DATASET_PATH = "s3://{}/imagenet/tfrecord".format(
-    BUCKET,
-)
-
-TRAINING_FILENAMES = tf.io.gfile.glob(DATASET_PATH + "/train*")
+TRAINING_FILENAMES = tf.io.gfile.glob("/data00/imagenet/tfrecord/train*")
 os.environ["TF_GPU_THREAD_MODE"] = "gpu_private"
 os.environ["TF_GPU_THREAD_COUNT"] = "2"
 os.environ["TF_USE_CUDNN_BATCHNORM_SPATIAL_PERSISTENT"] = "1"

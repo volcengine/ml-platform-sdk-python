@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Optional
 
 from volcengine import Credentials
 
@@ -18,6 +19,10 @@ def init(
 
 def mark_stress(flag=None):
     EnvHolder.STRESS_FLAG = flag
+
+
+def set_session_token(token):
+    EnvHolder.SESSION_TOKEN = token
 
 
 def get_tos_endpoint_url():
@@ -50,10 +55,19 @@ def get_stress_flag():
     return EnvHolder.STRESS_FLAG.upper()
 
 
+def get_session_token():
+    return EnvHolder.SESSION_TOKEN
+
+
+def get_inner_api_service_host():
+    return os.getenv(constant.INNER_API_SERVICE_HOST_ENV_NAME)
+
+
 class EnvHolder:
     ENV_NAME = constant.PROD_ENV
     STRESS_FLAG = os.environ.get("VOLC_ML_PLATFORM_STRESS", "")
     GLOBAL_CREDENTIALS = None
+    SESSION_TOKEN: Optional[str] = None
 
     @classmethod
     def init(cls, ak, sk, region, env_name, init_aws_env):
@@ -65,28 +79,28 @@ class EnvHolder:
                     conf = json.load(f)
 
         final_ak = cls.pickup_non_blank_value(
+            ak,
             os.environ.get("VOLC_ACCESSKEY", None),
             conf.get("ak", None),
-            ak,
         )
         final_sk = cls.pickup_non_blank_value(
+            sk,
             os.environ.get("VOLC_SECRETKEY", None),
             conf.get("sk", None),
-            sk,
         )
         final_region = cls.pickup_non_blank_value(
+            region,
             os.environ.get("VOLC_REGION", None),
             conf.get(
                 "region",
                 None,
             ),
-            region,
         )
         ml_platform_conf = conf.get("ml_platform", {})
         final_env_name = cls.pickup_non_blank_value(
+            env_name,
             os.environ.get("VOLC_ML_PLATFORM_ENV", None),
             ml_platform_conf.get("env", None),
-            env_name,
         )
 
         if final_env_name is not None and len(final_env_name) > 0:

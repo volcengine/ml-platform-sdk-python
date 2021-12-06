@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 import torch.distributed as dist
@@ -79,9 +80,9 @@ def main():
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=256,
+        default=64,
         metavar="N",
-        help="input batch size for training (default: 256)",
+        help="input batch size for training (default: 64)",
     )
     parser.add_argument(
         "--test-batch-size",
@@ -127,7 +128,7 @@ def main():
     parser.add_argument(
         "--save-model",
         action="store_true",
-        default=False,
+        default=True,
         help="For Saving the current Model",
     )
     parser.add_argument("--local_rank", default=-1, type=int)
@@ -156,12 +157,14 @@ def main():
             torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ]
     )
-    # Download=False，将tos数据挂载到/data00/datasets/cifar/目录下，直接读取即可，无需下载
+    # /data00 为 tos bucket挂载的根目录，以下本地POSIX本地目录/data00/datasets/cifar/ 对应 tos://${your_bucket_name}/datasets/cifar
+    dataset_path = "/data00/datasets/cifar/"
+    # Download=False，TOS数据已直接挂载到${dataset_path}目录下，直接读取即可，无需下载
     train_dataset = torchvision.datasets.CIFAR10(
-        root="/data00/datasets/cifar/", train=True, download=False, transform=transform
+        root=dataset_path, train=True, download=False, transform=transform
     )
     test_dataset = torchvision.datasets.CIFAR10(
-        root="/data00/datasets/cifar/", train=True, download=False, transform=transform
+        root=dataset_path, train=False, download=False, transform=transform
     )
     if args.local_rank >= 0:
         sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -188,8 +191,11 @@ def main():
         test(model, device, test_loader, epoch)
         scheduler.step()
 
-    if args.save_model:
-        torch.save(model.state_dict(), "cifiar_cnn.pt")
+    if args.save_model and (dist.get_rank() == -1 or dist.get_rank() == 0):
+        # 直接将模型训练好的参数，保存到TOS上。下文的/data00/models/cifar/ 对应 tos://${your_bucket_name}/models/cifar
+        saved_model_dir = "/data01/models/cifar/"
+        os.makedirs(saved_model_dir, exist_ok=True)
+        torch.save(model.state_dict(), saved_model_dir + "cifar_demo.pt")
 
 
 if __name__ == "__main__":

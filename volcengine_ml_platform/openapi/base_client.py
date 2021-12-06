@@ -1,8 +1,8 @@
 import json
 import logging
 import threading
+from typing import Any
 from typing import Dict
-from typing import Union
 
 from volcengine.ApiInfo import ApiInfo
 from volcengine.auth.SignerV4 import SignerV4
@@ -14,8 +14,6 @@ from volcengine_ml_platform import constant
 from volcengine_ml_platform.util import metric
 
 API_INFOS = {}
-
-BodyDict = Dict[str, Union[str, int]]
 
 
 def define_api(name, method="POST"):
@@ -51,10 +49,11 @@ class BaseClient(Service):
         return cls._instance
 
     def __init__(self):
+        credentials = volcengine_ml_platform.get_credentials()
         self.service_info = ServiceInfo(
             volcengine_ml_platform.get_service_host(),
             {"Accept": "application/json"},
-            volcengine_ml_platform.get_credentials(),
+            credentials,
             10,
             10,
             "http",
@@ -83,6 +82,7 @@ class BaseClient(Service):
             raise e
 
         err = res_json["ResponseMetadata"].get("Error", None)
+
         if err is not None:
             msg = "time-cost(ms)={}, The server returns an error: api={}, error={}".format(
                 metric.cost_time(start_time),
@@ -126,7 +126,7 @@ class BaseClient(Service):
         Returns:
 
         """
-        body: BodyDict = {"ServiceName": service_name}
+        body = {"ServiceName": service_name}
         if path:
             body.update({"Path": path})
 
@@ -141,10 +141,10 @@ class BaseClient(Service):
             raise Exception("GetTOSUploadPath failed") from e
 
     def get_sts_token(self, encrypt_code: str, duration: int = None):
-        body: BodyDict = {"EncryptCode": encrypt_code}
+        body = {"EncryptCode": encrypt_code}  # type: Dict[str, Any]
 
         if duration:
-            body.update({"Duration": duration})
+            body["Duration"] = duration
 
         try:
             res_json = self.common_json_handler(api="GetSTSToken", body=body)
@@ -161,5 +161,5 @@ class BaseClient(Service):
         flavor_map = list_flavor_result["Result"]["List"]
         for _, v in flavor_map.items():
             if v and len(v):
-                return v[0]["FlavorID"]
+                return v[0]["Id"]
         return ""
