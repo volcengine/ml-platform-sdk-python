@@ -91,3 +91,5 @@ tests/env.py
 !/docs/source
 /docs/build/bdist*
 /docs/build/doctrees
+
+**/*_task_conf.yaml
