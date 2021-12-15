@@ -39,6 +39,7 @@ class ModelClient(BaseClient):
         model_category=None,
         dataset_id=None,
         source_type="TOS",
+        model_tags=None,
     ):
         """create models
 
@@ -56,6 +57,7 @@ class ModelClient(BaseClient):
                 values can be 'TextClassification', 'TabularClassification', 'TabularRegression', 'ImageClassification'
             dataset_id (str, optional): id of the dataset based on which the model is trained
             source_type (str, optional): storage type. Defaults to 'TOS'.
+            model_tags (list, optional): model tags. e.g. [{"Key": "tag_key", "Value": "tag_key_value"}]
 
         Raises:
             Exception: failed to create models
@@ -90,6 +92,9 @@ class ModelClient(BaseClient):
 
             if dataset_id is not None:
                 body.update({"DatasetID": dataset_id})
+
+            if model_tags is not None:
+                body["VersionInfo"].update({"ModelTags": model_tags})
 
             res_json = self.common_json_handler(api="CreateModel", body=body)
             return res_json

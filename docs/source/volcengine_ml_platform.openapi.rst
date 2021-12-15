@@ -12,6 +12,14 @@ volcengine\_ml\_platform.openapi.base\_client module
    :undoc-members:
    :show-inheritance:
 
+volcengine\_ml\_platform.openapi.custom\_task\_client module
+------------------------------------------------------------
+
+.. automodule:: volcengine_ml_platform.openapi.custom_task_client
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 volcengine\_ml\_platform.openapi.dataset\_client module
 -------------------------------------------------------
 
