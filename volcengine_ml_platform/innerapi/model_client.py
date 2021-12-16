@@ -30,6 +30,7 @@ class ModelInnerApiClient(InnerApiBaseClient):
         source_type="TOS",
         base_model_version_id=None,
         source_id=None,
+        model_tags=None,
     ):
         """create models
 
@@ -50,6 +51,7 @@ class ModelInnerApiClient(InnerApiBaseClient):
             token (str): The secure token
             base_model_version_id (str, optional): perf转换任务生成的模型，所基于的模型版本ID
             source_id (str, optional): 对于perf转换任务生成的模型，产生这个模型的perf task id
+            model_tags (list, optional): model tags. e.g. [{"Key": "tag_key", "Value": "tag_key_value"}]
 
         Raises:
             Exception: failed to create models
@@ -91,6 +93,8 @@ class ModelInnerApiClient(InnerApiBaseClient):
                 )
             if source_id is not None:
                 body["VersionInfo"].update({"SourceId": source_id})
+            if model_tags is not None:
+                body["VersionInfo"].update({"ModelTags": model_tags})
 
             res_json = self.common_json_handler(
                 api="InnerCreateModel", body=body, token=token

@@ -85,6 +85,7 @@ class Model:
         model_category: Optional[str] = None,
         dataset_id: Optional[str] = None,
         source_type: Optional[str] = "TOS",
+        model_tags: Optional[list] = None,
     ):
         """注册模型到模型仓库
 
@@ -112,6 +113,7 @@ class Model:
             dataset_id (str, optional): 训练模型所使用的数据集唯一标示
             source_type (str, optional): 模型来源, 默认为TOS
                 可选值: 'TOS', 'Local', 'AutoML', 'Perf'
+            model_tags: (list, optional): 模型标签。默认为None。 e.g. [{"Key": "tag_key", "Value": "tag_key_value"}]
 
         Returns:
             返回json格式的response，包含模型相关信息。
@@ -162,6 +164,7 @@ class Model:
             model_category=model_category,
             dataset_id=dataset_id,
             source_type=source_type,
+            model_tags=model_tags,
         )
 
     def download(

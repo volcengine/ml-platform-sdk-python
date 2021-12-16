@@ -32,6 +32,30 @@ Returns:
 #### json2(api, params, body)
 
 ### volcengine_ml_platform.openapi.base_client.define_api(name, method='POST')
+## volcengine_ml_platform.openapi.custom_task_client module
+
+
+### class volcengine_ml_platform.openapi.custom_task_client.CustomTaskClient(\*args, \*\*kwargs)
+Bases: `volcengine_ml_platform.openapi.base_client.BaseClient`
+
+
+#### create_custom_task(name: str, image_id: str, entrypoint_path: str, framework: str, resource_group_id: str, task_role_specs: list, active_deadline_seconds: int = 432000, tags: Optional[list] = None, enable_tensorboard: bool = False, code_source: Optional[str] = None, code_ori_path: Optional[str] = None, tos_code_path: Optional[str] = None, local_code_path: Optional[str] = None, envs: Optional[list] = None, args: Optional[str] = None, storages: Optional[list] = None, tensor_board_path: Optional[str] = None, description: Optional[str] = None, ak: Optional[str] = None, sk: Optional[str] = None, sidecar_memory_ratio: Optional[float] = None, cache_type: Optional[str] = None, sidecar_image: Optional[str] = None, sidecar_resource_cpu: Optional[float] = None, sidecar_resource_memory: Optional[float] = None)
+
+#### delete_custom_task(task_id: str)
+
+#### get_custom_task(task_id: str)
+
+#### get_custom_task_instances(custom_task_id: str, offset=0, limit=10, sort_by='Id', sort_order='Descend')
+
+#### list_custom_task_timelines(custom_task_id: str)
+
+#### list_custom_tasks(task_name: Optional[str] = None, task_filter: Optional[str] = None, task_id: Optional[str] = None, resource_group_id: Optional[str] = None, creator_user_ids: Optional[list] = None, states: Optional[list] = None, tags: Optional[list] = None, offset=0, limit=10, sort_by='Id', sort_order='Descend')
+
+#### static set_if_not_none(body, name, value)
+
+#### stop_custom_task(task_id: str)
+
+#### update_custom_task(task_id: str, task_name: Optional[str] = None, description: Optional[str] = None, tags: Optional[list] = None)
 ## volcengine_ml_platform.openapi.dataset_client module
 
 
@@ -749,7 +773,7 @@ cancel a perf task
 
 
 
-#### create_model(model_name: str, model_format: str, model_type: str, path: str, model_id=None, description=None, tensor_config=None, model_metrics=None, source_type='TOS')
+#### create_model(model_name: str, model_format: str, model_type: str, path: str, model_id=None, description=None, tensor_config=None, model_metrics=None, model_category=None, dataset_id=None, source_type='TOS', model_tags=None)
 create models
 
 
@@ -781,7 +805,17 @@ create models
     * **model_metrics** (*list**, **optional*) – list of models metrics.
 
 
+    * **model_category** (*str**, **optional*) – category of the model.
+    values can be ‘TextClassification’, ‘TabularClassification’, ‘TabularRegression’, ‘ImageClassification’
+
+
+    * **dataset_id** (*str**, **optional*) – id of the dataset based on which the model is trained
+
+
     * **source_type** (*str**, **optional*) – storage type. Defaults to ‘TOS’.
+
+
+    * **model_tags** (*list**, **optional*) – model tags. e.g. [{“Key”: “tag_key”, “Value”: “tag_key_value”}]
 
 
 
@@ -939,7 +973,7 @@ get certain version of a models
 
 
 
-#### list_model_versions(model_id: str, model_version: Optional[int] = None, offset=0, page_size=10, sort_by='CreateTime', sort_order='Descend')
+#### list_model_versions(model_id: str, model_version: Optional[str] = None, offset=0, page_size=10, sort_by='CreateTime', sort_order='Descend')
 list models versions with given model_id
 
 
@@ -977,7 +1011,7 @@ list models versions with given model_id
 
 
 
-#### list_models(model_name=None, model_name_contains=None, offset=0, page_size=10, sort_by='CreateTime', sort_order='Descend')
+#### list_models(model_name=None, model_name_contains=None, id_contains=None, offset=0, page_size=10, sort_by='CreateTime', sort_order='Descend')
 list models
 
 
@@ -1321,6 +1355,35 @@ list resource with given service_id
 
 ### class volcengine_ml_platform.openapi.secure_token_client.SecureTokenClient(\*args, \*\*kwargs)
 Bases: `volcengine_ml_platform.openapi.base_client.BaseClient`
+
+
+#### admin_get_secure_token(time_to_live=30, account_id=None, user_id=None)
+get secure token to perform some operation as admin
+
+
+* **Parameters**
+
+    
+    * **time_to_live** (*int*) – ttl of token, equals to 30 by default
+
+
+    * **account_id** (*int*) – user’s account id
+
+
+    * **user_id** (*int*) – user’s user id
+
+
+
+* **Raises**
+
+    **Exception** – get_secure_token failed
+
+
+
+* **Returns**
+
+    json response
+
 
 
 #### get_secure_token(module_name, time_to_live=30, account_id=None, user_id=None)

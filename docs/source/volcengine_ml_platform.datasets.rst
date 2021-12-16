@@ -12,10 +12,26 @@ volcengine\_ml\_platform.datasets.dataset module
    :undoc-members:
    :show-inheritance:
 
+volcengine\_ml\_platform.datasets.dataset\_util module
+------------------------------------------------------
+
+.. automodule:: volcengine_ml_platform.datasets.dataset_util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 volcengine\_ml\_platform.datasets.image\_dataset module
 -------------------------------------------------------
 
 .. automodule:: volcengine_ml_platform.datasets.image_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+volcengine\_ml\_platform.datasets.inner\_dataset module
+-------------------------------------------------------
+
+.. automodule:: volcengine_ml_platform.datasets.inner_dataset
    :members:
    :undoc-members:
    :show-inheritance:

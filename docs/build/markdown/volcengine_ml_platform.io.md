@@ -7,7 +7,7 @@
 提供对 TOS 储存的上传、下载、删除、查询功能
 
 
-### class volcengine_ml_platform.io.tos.TOSClient()
+### class volcengine_ml_platform.io.tos.TOSClient(credentials=None, session_token=None)
 Bases: `object`
 
 自动配置环境变量中的用户信息，与TOS 进行交互
@@ -106,6 +106,8 @@ Bases: `object`
     * **key** (*str*) – 上传对象的 key
 
 
+
+#### download_dir(bucket, key, prefix, local_dir)
 
 #### download_file(bucket: str = '', key: str = '', tos_url: str = '', target_file_path: str = '', target_dir_path: str = '', max_concurrence: int = 10)
 下载TOS对象到本地
@@ -347,6 +349,8 @@ download_files(tos_urls=["tos://you_bucket_name]/xxx", "tos://you_bucket_name]/y
 
 
 
+#### upload(local_path, bucket, prefix)
+
 #### upload_file(file_path, bucket, key=None, part_size=20971520)
 上传文件到 bucket
 
@@ -388,4 +392,10 @@ download_files(tos_urls=["tos://you_bucket_name]/xxx", "tos://you_bucket_name]/y
 
 ## volcengine_ml_platform.io.tos_dataset module
 
+
+### class volcengine_ml_platform.io.tos_dataset.TorchTOSDataset(manifest_info: Dict, decode: Optional[collections.abc.Callable] = None, transform: Optional[collections.abc.Callable] = None, target_transform: Optional[collections.abc.Callable] = None)
+Bases: `object`
+
+
+#### set_dataset_indices(buckets, keys, annotations)
 ## Module contents

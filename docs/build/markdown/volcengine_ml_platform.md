@@ -33,6 +33,18 @@
     * Module contents
 
 
+* volcengine_ml_platform.custom_task package
+
+
+    * Submodules
+
+
+    * volcengine_ml_platform.custom_task.custom_task module
+
+
+    * Module contents
+
+
 * volcengine_ml_platform.datasets package
 
 
@@ -42,7 +54,13 @@
     * volcengine_ml_platform.datasets.dataset module
 
 
+    * volcengine_ml_platform.datasets.dataset_util module
+
+
     * volcengine_ml_platform.datasets.image_dataset module
+
+
+    * volcengine_ml_platform.datasets.inner_dataset module
 
 
     * volcengine_ml_platform.datasets.tabular_dataset module
@@ -69,6 +87,27 @@
     * Module contents
 
 
+* volcengine_ml_platform.innerapi package
+
+
+    * Submodules
+
+
+    * volcengine_ml_platform.innerapi.base_client module
+
+
+    * volcengine_ml_platform.innerapi.dataset_client module
+
+
+    * volcengine_ml_platform.innerapi.model_client module
+
+
+    * volcengine_ml_platform.innerapi.sts_token module
+
+
+    * Module contents
+
+
 * volcengine_ml_platform.io package
 
 
@@ -90,6 +129,9 @@
     * Submodules
 
 
+    * volcengine_ml_platform.models.inner_model module
+
+
     * volcengine_ml_platform.models.model module
 
 
@@ -106,6 +148,9 @@
 
 
     * volcengine_ml_platform.openapi.base_client module
+
+
+    * volcengine_ml_platform.openapi.custom_task_client module
 
 
     * volcengine_ml_platform.openapi.dataset_client module
@@ -133,9 +178,13 @@
 Bases: `object`
 
 
+#### CANARY_FLAG( = '')
+
 #### ENV_NAME( = 'PROD')
 
 #### GLOBAL_CREDENTIALS( = None)
+
+#### SESSION_TOKEN(: Optional[str] = None)
 
 #### STRESS_FLAG( = '')
 
@@ -145,20 +194,28 @@ Bases: `object`
 
 #### classmethod pickup_non_blank_value(\*args)
 
+### volcengine_ml_platform.get_canary_flag()
+
 ### volcengine_ml_platform.get_credentials()
 
 ### volcengine_ml_platform.get_encrypted_key()
 
 ### volcengine_ml_platform.get_env_name()
 
+### volcengine_ml_platform.get_inner_api_service_host()
+
 ### volcengine_ml_platform.get_service_host()
 
 ### volcengine_ml_platform.get_service_name()
+
+### volcengine_ml_platform.get_session_token()
 
 ### volcengine_ml_platform.get_stress_flag()
 
 ### volcengine_ml_platform.get_tos_endpoint_url()
 
-### volcengine_ml_platform.init(ak=None, sk=None, region='cn-beijing', env_name=None, init_aws_env=True)
+### volcengine_ml_platform.init(ak=None, sk=None, region=None, env_name=None, init_aws_env=True)
 
 ### volcengine_ml_platform.mark_stress(flag=None)
+
+### volcengine_ml_platform.set_session_token(token)

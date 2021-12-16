@@ -22,6 +22,10 @@ def define_api(name, method="POST"):
     if stress_flag is not None and len(stress_flag.strip()) > 0:
         header.update("X-Tt-Stress", stress_flag.strip())
 
+    canary_flag = volcengine_ml_platform.get_canary_flag()
+    if len(canary_flag.strip()) > 0:
+        header.update({"x-mlplatform-env": "staging"})
+
     API_INFOS[name] = ApiInfo(
         method,
         "/",

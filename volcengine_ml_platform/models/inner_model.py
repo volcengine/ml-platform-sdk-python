@@ -23,8 +23,12 @@ class Model:
         self.inner_sts_client = sts_token.STSApiClient()
         self.secure_token_client = secure_token_client.SecureTokenClient()
         self.module_name = constant.MODULE_MODEL_REPO
-        self.target_account_id = target_account_id
-        self.target_user_id = target_user_id
+        self.target_account_id = (
+            int(target_account_id) if target_account_id is not None else None
+        )
+        self.target_user_id = (
+            int(target_user_id) if target_user_id is not None else None
+        )
 
     def set_target_account_id(self, target_account_id):
         self.target_account_id = target_account_id
@@ -47,8 +51,7 @@ class Model:
         return f"{model_id}-{model_version.lower()}"
 
     def _get_secure_token(self):
-        resp = self.secure_token_client.get_secure_token(
-            module_name=self.module_name,
+        resp = self.secure_token_client.admin_get_secure_token(
             time_to_live=600,
             account_id=self.get_target_account_id(),
             user_id=self.get_target_user_id(),
@@ -259,6 +262,7 @@ class Model:
         source_type: Optional[str] = "TOS",
         base_model_version_id: Optional[str] = None,
         source_id: Optional[str] = None,
+        model_tags: Optional[list] = None,
     ):
         """注册模型到模型仓库
 
@@ -288,6 +292,7 @@ class Model:
                 可选值: 'TOS', 'Local', 'AutoML', 'Perf'
             base_model_version_id (str, optional): perf转换任务生成的模型，所基于的模型版本ID
             source_id (str, optional): 对于perf转换任务生成的模型，产生这个模型的perf task id
+            model_tags: (list, optional): 模型标签。默认为None。 e.g. [{"Key": "tag_key", "Value": "tag_key_value"}]
 
         Returns:
             返回json格式的response，包含模型相关信息。
@@ -342,6 +347,7 @@ class Model:
             source_type=source_type,
             base_model_version_id=base_model_version_id,
             source_id=source_id,
+            model_tags=model_tags,
         )
 
     def upload_tos(
