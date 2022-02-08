@@ -5,6 +5,6 @@ cd $FILE_PATH
 
 export PYTHONPATH="../../"
 
-horovodrun -np ML_PLATFORM_MPI_NP -H "${ML_PLATFORM_MPI_HOSTS}" python swin_transformer_horovod.py || true
+horovodrun -np ML_PLATFORM_MPI_NP -H "${MLP_MPI_HOSTS}" python swin_transformer_horovod.py || true
 
 sleep 1d

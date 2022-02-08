@@ -1,0 +1,24 @@
+{
+  "Inputs": [
+    {
+      "TensorName": "INPUT__0",
+      "DType": "FLOAT",
+      "Shape": [
+        -1,
+        3,
+        32,
+        32
+      ]
+    }
+  ],
+  "Outputs": [
+    {
+      "TensorName": "OUTPUT__0",
+      "DType": "FLOAT",
+      "Shape": [
+        -1,
+        10
+      ]
+    }
+  ]
+}

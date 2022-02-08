@@ -34,6 +34,7 @@ class InferenceServiceClient(BaseClient):
         envs: list,
         replica: Optional[int] = 1,
         description: Optional[str] = None,
+        resource_group_id: Optional[str] = None,
     ) -> dict:
         """create inference service for models
 
@@ -45,6 +46,7 @@ class InferenceServiceClient(BaseClient):
             envs (list): environment variables
             replica (int, optional): replica number. Defaults to 1.
             description (str, optional): description of service. Defaults to None.
+            resource_group_id (str, optional): id of the resource group
 
         Raises:
             Exception: create_service failed
@@ -68,6 +70,9 @@ class InferenceServiceClient(BaseClient):
             }
             if description is not None:
                 body["ServiceDeployment"].update({"Description": description})
+            if resource_group_id is not None:
+                body["ServiceDeployment"].update({"ResourceGroupID": resource_group_id})
+
             res_json = self.common_json_handler(api="CreateService", body=body)
             return res_json
         except Exception as e:

@@ -19,6 +19,7 @@ class InferenceService:
         envs=None,
         replica: Optional[int] = 1,
         description: Optional[str] = None,
+        resource_group_id: Optional[str] = None,
     ):
         self.service_name = service_name
         self.service_id = None
@@ -37,6 +38,7 @@ class InferenceService:
         self.envs = envs or {}
         self.replica = replica
         self.description = description
+        self.resource_group_id = resource_group_id
         self.inference_service_client = (
             inference_service_client.InferenceServiceClient()
         )
@@ -57,6 +59,7 @@ class InferenceService:
                 model_id=self.model_id,
                 description=self.description,
                 replica=self.replica,
+                resource_group_id=self.resource_group_id,
             )["Result"]["ServiceID"]
         except Exception as e:
             logging.warning("Inference failed to create")
