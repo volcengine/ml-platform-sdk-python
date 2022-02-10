@@ -5,7 +5,10 @@ TaskName: "pytorch_ddp_example_from_cli"
 Description: ""
 # 运行命令
 #Entrypoint: "sleep 1d"
-Entrypoint: "python -m torch.distributed.launch --nproc_per_node $ML_PLATFORM_WORKER_GPU --master_addr $ML_PLATFORM_WORKER_0_HOST --node_rank $ML_PLATFORM_ROLE_INDEX --master_port $ML_PLATFORM_WORKER_0_PORT --nnodes=$ML_PLATFORM_WORKER_NUM /root/code/samples/cifiar/torch_ddp.py"
+Entrypoint: "python -m torch.distributed.launch
+  --master_addr $MLP_WORKER_0_HOST --master_port $MLP_WORKER_0_PORT
+  --nnodes=$MLP_WORKER_NUM --nproc_per_node $MLP_WORKER_GPU --node_rank $MLP_ROLE_INDEX
+  /root/code/samples/cifiar/torch_ddp.py"
 # Args参数，补充空格后，拼接到Entrypoint后面，作为提交给容器运行的entryPoint
 Args: "--epoch 1000 --batch-size 256"
 Tags: []

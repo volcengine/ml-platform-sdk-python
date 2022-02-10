@@ -51,12 +51,12 @@ def get_env_name():
     return EnvHolder.ENV_NAME.upper()
 
 
-def get_stress_flag():
-    return EnvHolder.STRESS_FLAG.upper()
+def get_stress_env():
+    return EnvHolder.STRESS_ENV
 
 
-def get_canary_flag():
-    return EnvHolder.CANARY_FLAG.upper()
+def get_mlplatform_env():
+    return EnvHolder.MLPLATFORM_ENV
 
 
 def get_session_token():
@@ -69,8 +69,8 @@ def get_inner_api_service_host():
 
 class EnvHolder:
     ENV_NAME = constant.PROD_ENV
-    STRESS_FLAG = os.environ.get("VOLC_ML_PLATFORM_STRESS", "")
-    CANARY_FLAG = os.environ.get("VOLC_MLP_CANARY", "")
+    STRESS_ENV = os.environ.get("x-mlplatform-stress", "")
+    MLPLATFORM_ENV = os.environ.get("x-mlplatform-env", "")
     GLOBAL_CREDENTIALS = None
     SESSION_TOKEN: Optional[str] = None
 

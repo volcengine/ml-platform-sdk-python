@@ -40,7 +40,7 @@ repos:
     -   id: flake8
         additional_dependencies: [flake8-typing-imports==1.10.0]
         args:
-            - --ignore=E501,E228,E226,E261,E266,E128,E402,W503,E203
+            - --ignore=E501,E228,E226,E261,E266,E128,E402,W503,E203,F401,F403,F405
             - --max-line-length=120
 -   repo: https://github.com/pre-commit/pre-commit
     rev: v2.14.0

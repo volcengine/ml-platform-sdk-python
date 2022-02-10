@@ -74,7 +74,8 @@ class Model:
 
     def register(
         self,
-        local_path: str,
+        local_path: str = None,
+        remote_path: str = None,
         model_id: Optional[str] = None,
         model_name: Optional[str] = None,
         model_format: Optional[str] = None,
@@ -92,7 +93,8 @@ class Model:
         将存储在本地的模型包，上传到模型仓库
 
         Args:
-            local_path (str): 模型在本地的存放路径
+            local_path (str): 模型在本地的存放路径，将此本地路径注册为一个模型
+            remote_path (str): 模型包在TOS的存放路径，将此TOS路径注册为一个模型
             model_id (str, optional): 模型在仓库中的唯一标识。默认为None
                 指定该参数时，会在`model_id`对应的模型下，注册一个新的模型版本
                 不指定该参数时，会在模型仓库中创建一个新的模型
@@ -138,19 +140,25 @@ class Model:
         Raises:
             Exception: 模型创建异常
         """
-        self._register_validate_and_preprocess(
-            local_path,
-            model_id,
-            model_name,
-            model_format,
-            model_type,
-            tensor_config,
-            model_metrics,
-            model_category,
-            source_type,
-        )
-        bucket, prefix = self._require_model_tos_storage()
-        tos_path = self.tos_client.upload(local_path, bucket, prefix)
+        if local_path:
+            self._register_validate_and_preprocess(
+                local_path,
+                model_id,
+                model_name,
+                model_format,
+                model_type,
+                tensor_config,
+                model_metrics,
+                model_category,
+                source_type,
+            )
+            bucket, prefix = self._require_model_tos_storage()
+            tos_path = self.tos_client.upload(local_path, bucket, prefix)
+        elif remote_path:
+            tos_path = remote_path
+        else:
+            logging.error("either `local_path` or `remote_path` is needed")
+            return
 
         return self.model_client.create_model(
             model_name=model_name,
@@ -513,6 +521,7 @@ class Model:
         envs=None,
         replica: Optional[int] = 1,
         description: Optional[str] = None,
+        resource_group_id: Optional[str] = None,
     ) -> InferenceService:
         """将模型部署为在线推理服务
 
@@ -525,6 +534,7 @@ class Model:
             envs (dict, optional): 推理服务需要注入的环境变量。默认为None
             replica (int, optional): 推理服务实例数量。默认为1
             description(str, optional): 推理服务描述信息。默认为None
+            resource_group_id (str, optional): 推理服务使用的资源组唯一标识。默认为None
 
         Returns:
             返回InferenceService对象，包含推理服务相关信息
@@ -546,6 +556,7 @@ class Model:
             envs=envs,
             replica=replica,
             description=description,
+            resource_group_id=resource_group_id,
         )
         inference_service.create()
         return inference_service
