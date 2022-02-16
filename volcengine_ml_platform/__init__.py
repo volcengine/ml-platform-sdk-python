@@ -1,4 +1,4 @@
-import json
+import configparser
 import os
 from typing import Optional
 
@@ -76,36 +76,59 @@ class EnvHolder:
 
     @classmethod
     def init(cls, ak, sk, region, env_name, init_aws_env):
-        conf = {}
+        config = {}
+        credentials = {}
         if os.environ.get("HOME", None) is not None:
-            path = os.environ["HOME"] + "/.volc/config"
-            if os.path.isfile(path):
-                with open(path, encoding="utf-8") as f:
-                    conf = json.load(f)
+            config_path = os.environ["HOME"] + "/.volc/config"
+            credentials_path = os.environ["HOME"] + "/.volc/credentials"
+            # config 和 credentials 为 ini 格式
+            if os.path.isfile(config_path):
+                config = configparser.ConfigParser()
+                config.read(config_path)
+            if os.path.isfile(credentials_path):
+                credentials = configparser.ConfigParser()
+                credentials.read(credentials_path)
+
+        default_section, ml_platform_section = "default", "ml_platform"
+        ak_option, sk_option, region_option, env_option = (
+            "access_key_id",
+            "secret_access_key",
+            "region",
+            "env",
+        )
+        conf_ak, conf_sk, conf_region = None, None, None
+        if config.has_section(default_section):
+            if config.has_option(default_section, region_option):
+                conf_region = config.get(default_section, region_option)
+        if credentials.has_section(default_section):
+            if credentials.has_option(default_section, ak_option):
+                conf_ak = credentials.get(default_section, ak_option)
+            if credentials.has_option(default_section, sk_option):
+                conf_sk = credentials.get(default_section, sk_option)
 
         final_ak = cls.pickup_non_blank_value(
             ak,
             os.environ.get("VOLC_ACCESSKEY", None),
-            conf.get("ak", None),
+            conf_ak,
         )
         final_sk = cls.pickup_non_blank_value(
             sk,
             os.environ.get("VOLC_SECRETKEY", None),
-            conf.get("sk", None),
+            conf_sk,
         )
         final_region = cls.pickup_non_blank_value(
             region,
             os.environ.get("VOLC_REGION", None),
-            conf.get(
-                "region",
-                None,
-            ),
+            conf_region,
         )
-        ml_platform_conf = conf.get("ml_platform", {})
+        ml_platform_conf_env = None
+        if config.has_section(ml_platform_section):
+            if config.has_option(ml_platform_section, env_option):
+                ml_platform_conf_env = config.get(ml_platform_section, env_option)
         final_env_name = cls.pickup_non_blank_value(
             env_name,
             os.environ.get("VOLC_ML_PLATFORM_ENV", None),
-            ml_platform_conf.get("env", None),
+            ml_platform_conf_env,
         )
 
         if final_env_name is not None and len(final_env_name) > 0:
