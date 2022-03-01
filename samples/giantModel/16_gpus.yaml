@@ -1,0 +1,33 @@
+#运行命令: volc ml_task submit --job_config=*.yaml
+
+# self define e.g text_classfication
+TaskName: "giantModel_2_pretrain"
+# description for this task
+Description: "2个节点，每个节点8块GPU"
+# entry point command
+Entrypoint: "sh /root/code/veGiantModel/examples/gpt/pretrain_gpt2_distributed.sh"
+Args: "--model-parallel-size 8 --num-stages 2 --gradient_accumulation_steps 24 --batch-size 8 --train-batch-size 192 --log-interval 10"
+# Args: ""
+Tags: []
+# user code path
+UserCodePath: ""
+# remote path mount in container
+RemoteMountCodePath: "/root/code/"
+Image: "ml-platform-q6r4bhp2mj9zlw2kf7/torch_with_bps:torch1.9.0"
+ResourceGroupID: ""
+
+# AI framework, support: TensorFlow PS,PyTorch DDP,Horovod,BytePS
+Framework: "Custom"
+# Flavor代表机型，去 https://www.volcengine.com/docs/6459/72363 查询
+TaskRoleSpecs:
+    - RoleName: "worker"
+      RoleReplicas: 2
+      Flavor: "ml.hpcg1v.21xlarge"
+
+ActiveDeadlineSeconds: 432000
+# enable tensor board or not
+EnableTensorBoard: false
+# Storages:
+#   - Type: "Tos"
+#     MountPath: "/data00/"
+#     Bucket: ""

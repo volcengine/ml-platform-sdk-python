@@ -9,6 +9,7 @@ SUPPORTED_MODEL_CATEGORY = [
     "TabularClassification",
     "TabularRegression",
     "ImageClassification",
+    "TextEntity",
 ]
 
 SUPPORTED_SOURCE_TYPE = ["TOS", "Local", "AutoML", "Perf"]
@@ -105,6 +106,7 @@ _metrics_schema = {
                 "TextClassification",
                 "TabularClassification",
                 "TabularRegression",
+                "TextEntity",
                 "Perf",
             ],
         },

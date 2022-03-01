@@ -76,8 +76,8 @@ class EnvHolder:
 
     @classmethod
     def init(cls, ak, sk, region, env_name, init_aws_env):
-        config = {}
-        credentials = {}
+        config = configparser.ConfigParser()
+        credentials = configparser.ConfigParser()
         if os.environ.get("HOME", None) is not None:
             config_path = os.environ["HOME"] + "/.volc/config"
             credentials_path = os.environ["HOME"] + "/.volc/credentials"
