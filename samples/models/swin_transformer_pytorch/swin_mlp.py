@@ -141,8 +141,8 @@ class SwinMLPBlock(nn.Module):
         self.norm1 = norm_layer(dim)
         # use group convolution to implement multi-head MLP
         self.spatial_mlp = nn.Conv1d(
-            self.num_heads * self.window_size ** 2,
-            self.num_heads * self.window_size ** 2,
+            self.num_heads * self.window_size**2,
+            self.num_heads * self.window_size**2,
             kernel_size=1,
             groups=self.num_heads,
         )
@@ -569,10 +569,10 @@ class SwinMLP(nn.Module):
         self.layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
             layer = BasicLayer(
-                dim=int(embed_dim * 2 ** i_layer),
+                dim=int(embed_dim * 2**i_layer),
                 input_resolution=(
-                    patches_resolution[0] // (2 ** i_layer),
-                    patches_resolution[1] // (2 ** i_layer),
+                    patches_resolution[0] // (2**i_layer),
+                    patches_resolution[1] // (2**i_layer),
                 ),
                 depth=depths[i_layer],
                 num_heads=num_heads[i_layer],
@@ -641,7 +641,7 @@ class SwinMLP(nn.Module):
             self.num_features
             * self.patches_resolution[0]
             * self.patches_resolution[1]
-            // (2 ** self.num_layers)
+            // (2**self.num_layers)
         )
         flops += self.num_features * self.num_classes
         return flops

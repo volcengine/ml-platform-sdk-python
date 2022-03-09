@@ -129,7 +129,7 @@ class WindowAttention(tf.keras.layers.Layer):
         self.window_size = window_size
         self.num_heads = num_heads
         head_dim = dim // num_heads
-        self.scale = qk_scale or head_dim ** -0.5
+        self.scale = qk_scale or head_dim**-0.5
         self.prefix = prefix
 
         self.qkv = Dense(
@@ -643,10 +643,10 @@ class SwinTransformerModel(tf.keras.Model):
         self.basic_layers = tf.keras.Sequential(
             [
                 BasicLayer(
-                    dim=int(embed_dim * 2 ** i_layer),
+                    dim=int(embed_dim * 2**i_layer),
                     input_resolution=(
-                        patches_resolution[0] // (2 ** i_layer),
-                        patches_resolution[1] // (2 ** i_layer),
+                        patches_resolution[0] // (2**i_layer),
+                        patches_resolution[1] // (2**i_layer),
                     ),
                     depth=depths[i_layer],
                     num_heads=num_heads[i_layer],
