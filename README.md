@@ -6,7 +6,7 @@
 ### 1. Install package
 * From TOS
 ```
-pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing.volces.com/python_sdk_installer/volcengine_ml_platform-1.0.4-py3-none-any.whl -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing.volces.com/python_sdk_installer/volcengine_ml_platform-1.0.7-py3-none-any.whl -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 * From Pypi

@@ -82,7 +82,7 @@ class ModelInnerApiClient(InnerApiBaseClient):
                 body["VersionInfo"].update({"MetricsList": model_metrics})
 
             if model_category is not None:
-                body.update({"ModelCategory": model_category})
+                body["VersionInfo"].update({"ModelCategory": model_category})
 
             if dataset_id is not None:
                 body.update({"DatasetID": dataset_id})

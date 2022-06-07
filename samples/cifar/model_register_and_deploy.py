@@ -28,7 +28,7 @@ def deploy_model(client, args, model_id, model_version):
         service_name=args.service_name,
         flavor=args.flavor,
         replica=args.replica,
-        resource_group_id=args.resource_group_id,
+        resource_queue_id=args.resource_queue_id,
         image_id=args.image_id,
     )
     inference_service.print()
@@ -40,7 +40,7 @@ def main():
     parser.add_argument(
         "--local-path",
         type=str,
-        default=None,
+        required=True,
         help="local storage path of the model",
     )
     parser.add_argument(
@@ -59,16 +59,16 @@ def main():
         "--model-format",
         type=str,
         default="TorchScript",
-        help="model format, values in SavedModel, GraphDef, TorchScript, TensorRT, ONNX, CaffeModel, "
-        + "NetDef, MXNetParams, Scikit_Learn, XGBoost, LightGBM, MATX, Custom",
+        help="model format, values in SavedModel, GraphDef, TorchScript, TensorRT, ONNX, CaffeModel, " +
+        "NetDef, MXNetParams, Scikit_Learn, XGBoost, LightGBM, MATX, Custom",
     )
     parser.add_argument(
         "--model-type",
         type=str,
         default="PyTorch:1.7",
-        help="model framework name and framework version, format: <framework-name>:<framework-version>, "
-        + "for example: TensorFlow:2.0 Framework values limited in "
-        + "TensorFlow, PyTorch, TensorRT, ONNX, Caffe, Caffe2, MXNet, Scikit_Learn, XGBoost, LightGBM, MATX, Custom",
+        help="model framework name and framework version, format: <framework-name>:<framework-version>, " +
+        "for example: TensorFlow:2.0 Framework values limited in " +
+        "TensorFlow, PyTorch, TensorRT, ONNX, Caffe, Caffe2, MXNet, Scikit_Learn, XGBoost, LightGBM, MATX, Custom",
     )
     parser.add_argument(
         "--tensor-config",
@@ -91,7 +91,7 @@ def main():
     parser.add_argument(
         "--flavor",
         type=str,
-        default="ml.g1e.2xlarge",
+        default="ml.g1ie.large",
         help="flavor",
     )
     parser.add_argument(
@@ -101,10 +101,10 @@ def main():
         help="inferece service replica",
     )
     parser.add_argument(
-        "--resource-group-id",
+        "--resource-queue-id",
         type=str,
-        default=None,
-        help="resource group id",
+        required=True,
+        help="resource queue id",
     )
     parser.add_argument(
         "--image-id",

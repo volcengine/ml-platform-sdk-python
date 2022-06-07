@@ -1,0 +1,36 @@
+# self define e.g text_classfication
+TaskName: "tf-vepfs-large-test"
+# description for this task
+Description: "demo task"
+# entry point command
+Entrypoint: "cd /root/code/ml_tf_benchmark/image_classification/tensorflow2 && sh run_8gpus_training_on_posix_data_large.sh"
+Args: ""
+Tags:
+    - "demo"
+    - "hello-word"
+# the code path you want to upload locally
+UserCodePath: "./ml_tf_benchmark"
+# remote path mount in training container
+RemoteMountCodePath: "/root/code/"
+# user define env var
+Envs:
+    - Name: "VOLC_AML_TEST_KEY_1"
+      Value: "v1"
+    - Name: "VOLC_AML_TEST_KEY_2"
+      Value: "v2"
+Image: "ml_platform/tensorflow:2.4"
+# group define in /ml-platform/resourceGroup, empty as default group
+ResourceGroupID: "r-20220316181239-h8zhh"
+# distributed framework, support: TensorFlow PS,PyTorch DDP,Horovod,BytePS
+Framework: "PyTorchDDP"
+TaskRoleSpecs:
+    - RoleName: "worker"
+      RoleReplicas: 1
+      Flavor: "ml.hpcg1v.21xlarge"
+ActiveDeadlineSeconds: 432000
+# enable tensor board or not
+EnableTensorBoard: false
+Storages:
+    - Type: "Vepfs"
+      MountPath: "/vepfsdata"
+

@@ -14,6 +14,8 @@ def get_content(annotation_line):
     data = annotation_line["Data"]
     with open(data["FilePath"], mode="rb") as fd:
         content = fd.read()
+        if data.get("Position") is not None:
+            content = content[data["Position"]["start"] : data["Position"]["end"]]
         return content
 
 

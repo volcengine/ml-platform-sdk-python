@@ -44,14 +44,10 @@ class Model:
 
         if model_id is None:
             if model_name is None or model_format is None or model_type is None:
-                logging.warning(
-                    "Model register new model need model_name/model_format/model_type",
-                )
+                logging.warning("Model register new model need model_name/model_format/model_type",)
                 raise ValueError
         else:
-            raw_model_name = self.model_client.get_model(model_id=model_id)["Result"][
-                "ModelName"
-            ]
+            raw_model_name = self.model_client.get_model(model_id=model_id)["Result"]["ModelName"]
             if raw_model_name != model_name:
                 logging.warning("model name is diff from origin, use old model_name")
 
@@ -195,9 +191,7 @@ class Model:
             logging.warning("Model can not be download, model_id is empty")
             raise ValueError
 
-        response = self.model_client.get_model_version(
-            self._model_version_id(model_id, model_version)
-        )
+        response = self.model_client.get_model_version(self._model_version_id(model_id, model_version))
         remote_path = response["Result"]["Path"]
 
         self._download_model(remote_path, local_path)
@@ -233,9 +227,7 @@ class Model:
         Raises:
             Exception: 删除模型版本异常
         """
-        return self.model_client.delete_model_version(
-            self._model_version_id(model_id, model_version)
-        )
+        return self.model_client.delete_model_version(self._model_version_id(model_id, model_version))
 
     def unregister_all_versions(self, model_id: str):
         """删除模型及其所有模型版本
@@ -397,29 +389,25 @@ class Model:
             sort_by=sort_by,
             sort_order=sort_order,
         )
-        table = PrettyTable(
-            [
-                "ModelID",
-                "Version",
-                "Format",
-                "Type",
-                "RemotePath",
-                "Description",
-                "CreateTime",
-            ],
-        )
+        table = PrettyTable([
+            "ModelID",
+            "Version",
+            "Format",
+            "Type",
+            "RemotePath",
+            "Description",
+            "CreateTime",
+        ],)
         for model in response["Result"]["List"]:
-            table.add_row(
-                [
-                    model_id,
-                    model["ModelVersion"],
-                    model["ModelFormat"],
-                    model["ModelType"],
-                    model["Path"],
-                    model["Description"],
-                    model["CreateTime"],
-                ],
-            )
+            table.add_row([
+                model_id,
+                model["ModelVersion"],
+                model["ModelFormat"],
+                model["ModelType"],
+                model["Path"],
+                model["Description"],
+                model["CreateTime"],
+            ],)
         print(table)
         return response
 
@@ -516,12 +504,12 @@ class Model:
         model_id: str,
         model_version: str,
         service_name: str,
+        resource_queue_id: str,
         flavor: str = "ml.g1e.large",
         image_id: str = "machinelearning/tfserving:tf-cuda10.1",
         envs=None,
         replica: Optional[int] = 1,
         description: Optional[str] = None,
-        resource_group_id: Optional[str] = None,
     ) -> InferenceService:
         """将模型部署为在线推理服务
 
@@ -529,12 +517,12 @@ class Model:
             model_id (str): 模型在仓库中的唯一标识
             model_version (str): 模型版本号
             service_name (str): 推理服务名称
+            resource_queue_id (str): 推理服务使用的队列唯一标识。默认为None
             flavor (str, optional): 推理服务使用的套餐。默认为`ml.g1e.large`
             image_id (str, optional): 推理服务使用的镜像。默认为`machinelearning/tfserving:tf-cuda10.1`
             envs (dict, optional): 推理服务需要注入的环境变量。默认为None
             replica (int, optional): 推理服务实例数量。默认为1
             description(str, optional): 推理服务描述信息。默认为None
-            resource_group_id (str, optional): 推理服务使用的资源组唯一标识。默认为None
 
         Returns:
             返回InferenceService对象，包含推理服务相关信息
@@ -549,14 +537,13 @@ class Model:
                 self.resource_client.list_resource(
                     name=flavor,
                     sort_by="vCPU",
-                ),
-            ),
+                ),),
             model_id=model_id,
             model_version_id=self._model_version_id(model_id, model_version),
             envs=envs,
             replica=replica,
             description=description,
-            resource_group_id=resource_group_id,
+            resource_queue_id=resource_queue_id,
         )
         inference_service.create()
         return inference_service
