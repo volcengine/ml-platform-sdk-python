@@ -9,6 +9,7 @@ import shutil
 from typing import List
 from typing import Optional
 from typing import Tuple
+from urllib.parse import urlparse
 
 import numpy as np
 
@@ -163,8 +164,9 @@ class _Dataset:
                     break
 
         print("Downloading datasets ...")
-        paths = self.tos_client.download_files(
-            tos_urls=urls,
+        _ = self.tos_client.download_files(
+            # url 去重
+            tos_urls=list(set(urls)),
             target_dir_path=self.local_path,
             parallelism=10,
         )
@@ -172,8 +174,10 @@ class _Dataset:
         # create a new thread to consume new local maifest file
         print("Generating the local mainfest file...")
         manifest_str = ""
-        for idx, path in enumerate(paths):
-            manifest_line[idx]["Data"]["FilePath"] = path
+        for idx, url in enumerate(urls):
+            manifest_line[idx]["Data"]["FilePath"] = os.path.join(
+                self.local_path, urlparse(url).path[1:]
+            )
             manifest_str += json.dumps(manifest_line[idx]) + "\n"
         with open(
             self._manifest_path(),

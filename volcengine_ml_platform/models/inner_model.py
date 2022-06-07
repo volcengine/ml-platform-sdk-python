@@ -23,12 +23,8 @@ class Model:
         self.inner_sts_client = sts_token.STSApiClient()
         self.secure_token_client = secure_token_client.SecureTokenClient()
         self.module_name = constant.MODULE_MODEL_REPO
-        self.target_account_id = (
-            int(target_account_id) if target_account_id is not None else None
-        )
-        self.target_user_id = (
-            int(target_user_id) if target_user_id is not None else None
-        )
+        self.target_account_id = (int(target_account_id) if target_account_id is not None else None)
+        self.target_user_id = (int(target_user_id) if target_user_id is not None else None)
 
     def set_target_account_id(self, target_account_id):
         self.target_account_id = target_account_id
@@ -226,12 +222,8 @@ class Model:
         model_category: Optional[str] = None,
         source_type: Optional[str] = None,
     ):
-        if model_id is None and (
-            model_name is None or model_format is None or model_type is None
-        ):
-            logging.warning(
-                "Register new model need parameter model_name,model_format,model_type",
-            )
+        if model_id is None and (model_name is None or model_format is None or model_type is None):
+            logging.warning("Register new model need parameter model_name,model_format,model_type",)
             raise ValueError
         validation.validate_local_path(local_path)
         validation.validate_model_tensor_config(tensor_config)

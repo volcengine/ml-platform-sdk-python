@@ -67,6 +67,22 @@ class AnnotationStatus:
     }
 
 
+class Position:
+    """
+    Attributes:
+     - Start
+     - End
+    """
+
+    def __init__(
+        self,
+        Start=None,
+        End=None,
+    ):
+        self.Start = Start
+        self.End = End
+
+
 class Data:
     """
     Attributes:
@@ -77,16 +93,13 @@ class Data:
     """
 
     def __init__(
-        self,
-        ImageURL=None,
-        VideoURL=None,
-        TextURL=None,
-        FilePath=None,
+        self, ImageURL=None, VideoURL=None, TextURL=None, FilePath=None, Position=None
     ):
         self.ImageURL = ImageURL
         self.VideoURL = VideoURL
         self.TextURL = TextURL
         self.FilePath = FilePath
+        self.Position = Position
 
 
 class TextSelector:

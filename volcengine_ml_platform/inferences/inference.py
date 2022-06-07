@@ -19,7 +19,7 @@ class InferenceService:
         envs=None,
         replica: Optional[int] = 1,
         description: Optional[str] = None,
-        resource_group_id: Optional[str] = None,
+        resource_queue_id: Optional[str] = None,
     ):
         self.service_name = service_name
         self.service_id = None
@@ -38,10 +38,8 @@ class InferenceService:
         self.envs = envs or {}
         self.replica = replica
         self.description = description
-        self.resource_group_id = resource_group_id
-        self.inference_service_client = (
-            inference_service_client.InferenceServiceClient()
-        )
+        self.resource_queue_id = resource_queue_id
+        self.inference_service_client = (inference_service_client.InferenceServiceClient())
 
     def create(self):
         if self.model_id is None or self.model_version_id is None:
@@ -59,16 +57,14 @@ class InferenceService:
                 model_id=self.model_id,
                 description=self.description,
                 replica=self.replica,
-                resource_group_id=self.resource_group_id,
+                resource_queue_id=self.resource_queue_id,
             )["Result"]["ServiceID"]
         except Exception as e:
             logging.warning("Inference failed to create")
             raise Exception("Inference is invalid") from e
 
     def _sync(self):
-        result = self.inference_service_client.get_service(service_id=self.service_id)[
-            "Result"
-        ]
+        result = self.inference_service_client.get_service(service_id=self.service_id)["Result"]
         self.service_id = result["ServiceID"]
         self.model_id = result["ServiceDeployment"]["Model"]["ModelID"]
         self.model_version_id = result["ServiceDeployment"]["Model"]["ModelVersionID"]
@@ -80,9 +76,7 @@ class InferenceService:
         self.endpoint_url = result["ServiceDeployment"]["EndpointURL"]
         self.replicas = result["ServiceDeployment"]["Replicas"]
         self.service_version_id = result["ServiceDeployment"]["ServiceVersionID"]
-        self.envs = self._envs_list_to_dict(
-            result["ServiceDeployment"].get("Envs", []),
-        )
+        self.envs = self._envs_list_to_dict(result["ServiceDeployment"].get("Envs", []),)
 
     def print(self):
         self._sync()
@@ -105,9 +99,7 @@ class InferenceService:
             logging.warning("service not exists")
             raise ValueError
         try:
-            self.inference_service_client.delete_service(
-                service_id=self.service_id,
-            )
+            self.inference_service_client.delete_service(service_id=self.service_id,)
         except Exception as e:
             logging.warning("Inference failed to undeploy")
             raise Exception("Inference is invalid") from e
@@ -117,9 +109,7 @@ class InferenceService:
             logging.warning("service not exists")
             raise ValueError
         try:
-            self.inference_service_client.stop_service(
-                service_id=self.service_id,
-            )
+            self.inference_service_client.stop_service(service_id=self.service_id,)
             self._sync()
         except Exception as e:
             logging.warning("Inference failed to stop")
@@ -130,9 +120,7 @@ class InferenceService:
             logging.warning("service not exists")
             raise ValueError
         try:
-            self.inference_service_client.start_service(
-                service_id=self.service_id,
-            )
+            self.inference_service_client.start_service(service_id=self.service_id,)
             self._sync()
         except Exception as e:
             logging.warning("Inference failed to start")

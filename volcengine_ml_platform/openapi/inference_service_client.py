@@ -21,6 +21,7 @@ define_api("ModifyService")
 
 
 class InferenceServiceClient(BaseClient):
+
     def __init__(self):
         super().__init__()
 
@@ -32,9 +33,9 @@ class InferenceServiceClient(BaseClient):
         image_id: str,
         flavor_id: str,
         envs: list,
+        resource_queue_id: str,
         replica: Optional[int] = 1,
         description: Optional[str] = None,
-        resource_group_id: Optional[str] = None,
     ) -> dict:
         """create inference service for models
 
@@ -44,9 +45,10 @@ class InferenceServiceClient(BaseClient):
             image_id (str): container image id
             flavor_id (str): hardward standard id
             envs (list): environment variables
+            resource_queue_id (str): id of the resource queue
             replica (int, optional): replica number. Defaults to 1.
             description (str, optional): description of service. Defaults to None.
-            resource_group_id (str, optional): id of the resource group
+            
 
         Raises:
             Exception: create_service failed
@@ -66,12 +68,11 @@ class InferenceServiceClient(BaseClient):
                     },
                     "ImageID": image_id,
                     "Envs": envs,
+                    "ResourceQueueID": resource_queue_id,
                 },
             }
             if description is not None:
                 body["ServiceDeployment"].update({"Description": description})
-            if resource_group_id is not None:
-                body["ServiceDeployment"].update({"ResourceGroupID": resource_group_id})
 
             res_json = self.common_json_handler(api="CreateService", body=body)
             return res_json
@@ -472,6 +473,4 @@ class InferenceServiceClient(BaseClient):
                 service_id,
                 e,
             )
-            raise Exception(
-                "get_inference_service_instance_status failed",
-            ) from e
+            raise Exception("get_inference_service_instance_status failed",) from e

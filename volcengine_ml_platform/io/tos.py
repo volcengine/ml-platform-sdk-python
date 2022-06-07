@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 
 import boto3
 import botocore
+from botocore.client import Config
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 from tqdm import tqdm
@@ -37,7 +38,7 @@ class TOSClient:
             session_token = volcengine_ml_platform.get_session_token()
         if session_token is not None and len(session_token.strip()) > 0:
             config["aws_session_token"] = session_token
-        self.s3_client = boto3.client("s3", **config)
+        self.s3_client = boto3.client("s3", config=Config(s3={'addressing_style': 'virtual'}), **config)
         self.dir_record = set()
 
     def bucket_exists(self, bucket_name):
@@ -80,7 +81,6 @@ class TOSClient:
             ClientError: 创建时发生错误
 
         """
-
         """Create an S3 bucket in a specified region
 
         param bucket_name: Bucket to create
@@ -116,7 +116,6 @@ class TOSClient:
             ClientError: 删除发生错误
 
         """
-
         """Delete a bucket, an error will be raised if it is not empty"""
         try:
             _ = self.s3_client.delete_bucket(Bucket=bucket)
@@ -132,7 +131,6 @@ class TOSClient:
             返回一个 ``list[str]`` , 每个元素都是一个桶名。
 
         """
-
         """List S3 buckets
 
         return a list of Bucket infos
@@ -148,7 +146,6 @@ class TOSClient:
             bucket(str): 创建时的桶名
 
         """
-
         """Delete all of object in the bucket"""
         while True:
             object_info = self.list_objects(
@@ -160,14 +157,7 @@ class TOSClient:
                 prefix="",
             )
 
-            if (
-                object_info is None
-                or "Contents" not in object_info
-                or len(
-                    object_info["Contents"],
-                )
-                == 0
-            ):
+            if (object_info is None or "Contents" not in object_info or len(object_info["Contents"],) == 0):
                 break
             for item in object_info["Contents"]:
                 key = item["Key"]
@@ -184,7 +174,6 @@ class TOSClient:
             key(str): 上传对象的 key
 
         """
-
         """Delete S3 objects with"""
         return self.s3_client.delete_object(
             Bucket=bucket,
@@ -244,7 +233,6 @@ class TOSClient:
                 }
 
         """
-
         """List S3 objects with given object
 
             return a list of Object infos
@@ -350,12 +338,10 @@ class TOSClient:
                         Body=body,
                     )
 
-                    uploaded_parts["Parts"].append(
-                        {
-                            "PartNumber": i,
-                            "ETag": rsp["ETag"],
-                        },
-                    )
+                    uploaded_parts["Parts"].append({
+                        "PartNumber": i,
+                        "ETag": rsp["ETag"],
+                    },)
             # upload complete
             rsp = self.s3_client.complete_multipart_upload(
                 Bucket=bucket,
@@ -550,12 +536,10 @@ class TOSClient:
                 download_dicts[idx]["target_file_path"] = target_file_path
 
         for idx in range(data_count):
-            async_res.append(
-                pool.apply_async(
-                    self.download_file,
-                    kwds=download_dicts[idx],
-                ),
-            )
+            async_res.append(pool.apply_async(
+                self.download_file,
+                kwds=download_dicts[idx],
+            ),)
 
         pool.close()
         ret = [res.get() for res in tqdm(async_res)]
@@ -578,9 +562,7 @@ class TOSClient:
 
             for d in dirs:
                 debug(f"processing dir: {d}")
-                dest_pathname = os.path.join(
-                    local_dir, os.path.relpath(d, prefix) + "/"
-                )
+                dest_pathname = os.path.join(local_dir, os.path.relpath(d, prefix) + "/")
                 debug(f"dest_pathname: {dest_pathname}")
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
