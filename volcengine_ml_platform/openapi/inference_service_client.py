@@ -28,51 +28,149 @@ class InferenceServiceClient(BaseClient):
     def create_service(
         self,
         service_name: str,
-        model_id: str,
-        model_version_id: str,
-        image_id: str,
+        replicas: int,
         flavor_id: str,
         envs: list,
-        resource_queue_id: str,
-        replica: Optional[int] = 1,
-        description: Optional[str] = None,
+        service_description: Optional[str] = None,
+        model_id: Optional[str] = None,
+        model_version_id: Optional[str] = None,
+        image_id: Optional[str] = None,
+        image_version: Optional[str] = None,
+        image_type: Optional[str] = None,
+        image_url: Optional[str] = None,
+        registry_username: Optional[str] = None,
+        registry_token: Optional[str] = None,
+        command: Optional[str] = None,
+        ports: Optional[list] = None,
+        vpc_id: Optional[str] = None,
+        subnet_id: Optional[str] = None,
+        enable_eip: Optional[bool] = False,
+        eip_id: Optional[str] = None,
+        readiness_enabled: Optional[bool] = False,
+        readiness_command: Optional[str] = None,
+        failure_threshold: Optional[int] = 3,
+        period_seconds: Optional[int] = 10,
+        resource_group_id: Optional[str] = None,
+        resource_queue_id: Optional[str] = None,
     ) -> dict:
         """create inference service for models
 
         Args:
-            service_name (str): service name
-            models (Model): Model object
-            image_id (str): container image id
-            flavor_id (str): hardward standard id
-            envs (list): environment variables
-            resource_queue_id (str): id of the resource queue
-            replica (int, optional): replica number. Defaults to 1.
-            description (str, optional): description of service. Defaults to None.
+            service_name (str): 推理服务名字
+            replicas (int): 服务实例数量
+            flavor_id (str): 服务所使用的计算规格ID。
+            envs (list): 服务环境变量列表。
+                列表每个元素格式: {"Name": str, "Value": str}
+            service_description (str, optional): 服务描述信息。默认为None
+            model_id (str, optinal): 服务部署的模型ID。默认为None
+            model_version_id (str, optinal): 服务部署的模型版本ID。默认为None
+            image_id (str, optional): 服务所使用的镜像ID。 默认为None
+            image_version (str, optional): 服务所使用的镜像版本。 默认为None
+            image_type (str, optional): 服务所使用的镜像版本。
+                可选值: 'Preset', 'Custom', 'VolcEngine', 'Public'
+            image_url (str, optional): 服务所使用的镜像URL。默认为None
+            registry_username (str, optional): 服务所使用的镜像仓库的用户名。默认为None
+            registry_token (str, optional): 服务所使用的镜像仓库的token。默认为None
+            command (str, optional): 服务容器的入口命令。默认为None
+            ports (list, optional): 服务监听端口列表。默认为None
+                列表每个元素格式:
+                {
+                    "ListenPort": str,
+                    "ExposePort": str,
+                    "Type": str,
+                }
+                Type可选值: "HTTP", "RPC", "Metrics", "Other"
+            vpc_id (str, optional): 对于需要跨VPC访问的服务, 服务客户端所在的VPC ID。默认为None
+            subnet_id (str, optional): 对于需要跨VPC访问的服务, 服务客户端所在的子网ID。默认为None
+            enable_eip (bool, optional): 对于需要跨VPC访问的服务, 是否开启公网访问。默认为False
+            eip_id (str, optional): 对于需要跨VPC访问并且开启公网访问的服务, EIP ID。默认为None
+            readiness_enabled (bool, optional): 是否开启健康检查。默认为False
+            readiness_command (str, optional): 自定义健康检查命令。默认为None
+            failure_threshold (int, optional): 自定义健康检查失败次数阈值。默认为3
+            period_seconds (int, optional): 自定义健康检查间隔时间。默认为10s
+            resource_group_id (str, optional): 资源组ID。默认为None
+            resource_queue_id (str, optional): 资源组队列ID。默认为None
             
 
         Raises:
             Exception: create_service failed
 
         Returns:
-            json response
+            返回json格式的response, 包含模型相关信息。
+            比如: ::
+                {
+                    "ResponseMetadata": {
+                        "RequestId": "20220815174947010225145152058E51BE",
+                        "Action": "CreateService",
+                        "Version": "2021-10-01",
+                        "Service": "ml_platform",
+                        "Region": "cn-beijing"
+                    },
+                    "Result": {
+                        "ServiceID": "s-20220815174947-n99pk",
+                        "CurrentVersionID": 100000743
+                    }
+                }
         """
         try:
             body = {
                 "ServiceName": service_name,
                 "ServiceDeployment": {
-                    "Replicas": replica,
+                    "Replicas": replicas,
                     "FlavorID": flavor_id,
-                    "Model": {
-                        "ModelID": model_id,
-                        "ModelVersionID": model_version_id,
-                    },
-                    "ImageID": image_id,
+                    "Image": {},
                     "Envs": envs,
-                    "ResourceQueueID": resource_queue_id,
                 },
             }
-            if description is not None:
-                body["ServiceDeployment"].update({"Description": description})
+            if service_description is not None:
+                body["ServiceDeployment"].update({"Description": service_description})
+            if model_id:
+                body["ServiceDeployment"].update({"Model": {
+                    "ModelID": model_id,
+                    "ModelVersionID": model_version_id,
+                }})
+            if image_id:
+                body["ServiceDeployment"]["Image"].update({"Id": image_id})
+            if image_version:
+                body["ServiceDeployment"]["Image"].update({"Version": image_version})
+            if image_type:
+                body["ServiceDeployment"]["Image"].update({"Type": image_type})
+            if image_url:
+                body["ServiceDeployment"]["Image"].update({"Url": image_url})
+            if registry_username:
+                body["ServiceDeployment"]["Image"].update(
+                    {"ImageCredential": {
+                        "RegistryUsername": registry_username,
+                        "RegistryToken": registry_token,
+                    }})
+            if resource_group_id:
+                body["ServiceDeployment"].update({"ResourceGroupID": resource_group_id})
+            if resource_queue_id:
+                body["ServiceDeployment"].update({"ResourceQueueId": resource_queue_id})
+            if command:
+                body["ServiceDeployment"].update({"Command": command})
+            if ports:
+                body["ServiceDeployment"].update({"Ports": ports})
+            if vpc_id:
+                body["ServiceDeployment"].update(
+                    {"Network": {
+                        "VpcId": vpc_id,
+                        "SubnetId": subnet_id,
+                        "EnableEip": enable_eip,
+                    }})
+                if eip_id:
+                    body["ServiceDeployment"]["Network"].update({"EipId": eip_id})
+            if readiness_enabled or readiness_command or failure_threshold or period_seconds:
+                body["ServiceDeployment"].update({"ReadinessProbe": {}})
+                if readiness_enabled:
+                    body["ServiceDeployment"]["ReadinessProbe"].update({"Enabled": readiness_enabled})
+                if readiness_command:
+                    body["ServiceDeployment"]["ServiceDeployment"]["ReadinessProbe"].update(
+                        {"Command": readiness_command})
+                if failure_threshold:
+                    body["ServiceDeployment"]["ReadinessProbe"].update({"FailureThreshold": failure_threshold})
+                if period_seconds:
+                    body["ServiceDeployment"]["ReadinessProbe"].update({"PeriodSeconds": period_seconds})
 
             res_json = self.common_json_handler(api="CreateService", body=body)
             return res_json
@@ -218,29 +316,136 @@ class InferenceServiceClient(BaseClient):
     def update_service(
         self,
         service_id: str,
-        replicas: int,
-        flavor_id: str,
-        model_id: str,
-        model_version_id: str,
-        image_id: str,
-        envs: list,
-        change_type: str,
-        service_description: str = None,
+        service_description: Optional[str] = None,
+        flavor_id: Optional[str] = None,
+        model_id: Optional[str] = None,
+        model_version_id: Optional[str] = None,
+        image_id: Optional[str] = None,
+        image_version: Optional[str] = None,
+        image_type: Optional[str] = None,
+        image_url: Optional[str] = None,
+        registry_username: Optional[str] = None,
+        registry_token: Optional[str] = None,
+        envs: Optional[list] = None,
+        command: Optional[str] = None,
+        ports: Optional[list] = None,
+        vpc_id: Optional[str] = None,
+        subnet_id: Optional[str] = None,
+        enable_eip: Optional[bool] = False,
+        eip_id: Optional[str] = None,
+        readiness_enabled: Optional[bool] = False,
+        readiness_command: Optional[str] = None,
+        failure_threshold: Optional[int] = 3,
+        period_seconds: Optional[int] = 10,
     ):
+        """更新推理服务
+
+        Args:
+            service_id (str): 推理服务ID
+            service_description (str, optional): 服务描述信息。默认为None
+            flavor_id (str, optional): 服务所使用的计算规格ID。默认为None
+            model_id (str, optional): 服务部署的模型ID。默认为None
+            model_version_id (str, optional): 服务部署的模型版本ID。默认为None
+            image_id (str, optional): 服务所使用的镜像ID。 默认为None
+            image_version (str, optional): 服务所使用的镜像版本。 默认为None
+            image_type (str, optional): 服务所使用的镜像版本。
+                可选值: 'Preset', 'Custom', 'VolcEngine', 'Public'
+            image_url (str, optional): 服务所使用的镜像URL。默认为None
+            registry_username (str, optional): 服务所使用的镜像仓库的用户名。默认为None
+            registry_token (str, optional): 服务所使用的镜像仓库的token。默认为None
+            envs (list): 服务环境变量列表。
+                列表每个元素格式: {"Name": str, "Value": str}
+            command (str, optional): 服务容器的入口命令。默认为None
+            ports (list, optional): 服务监听端口列表。默认为None
+                列表每个元素格式:
+                {
+                    "ListenPort": str,
+                    "ExposePort": str,
+                    "Type": str,
+                }
+                Type可选值: "HTTP", "RPC", "Metrics", "Other"
+            vpc_id (str, optional): 对于需要跨VPC访问的服务, 服务客户端所在的VPC ID。默认为None
+            subnet_id (str, optional): 对于需要跨VPC访问的服务, 服务客户端所在的子网ID。默认为None
+            enable_eip (bool, optional): 对于需要跨VPC访问的服务, 是否开启公网访问。默认为False
+            eip_id (str, optional): 对于需要跨VPC访问并且开启公网访问的服务, EIP ID。默认为None
+            readiness_enabled (bool, optional): 是否开启健康检查。默认为False
+            readiness_command (str, optional): 自定义健康检查命令。默认为None
+            failure_threshold (int, optional): 自定义健康检查失败次数阈值。默认为3
+            period_seconds (int, optional): 自定义健康检查间隔时间。默认为10s
+
+        Raises:
+            Exception: 推理服务更新异常
+
+        Returns:
+            返回json格式的response, 包含模型相关信息。
+            比如: ::
+                {
+                    "ResponseMetadata": {
+                        "RequestId": "2022081517555501022509900802F561E4",
+                        "Action": "UpdateService",
+                        "Version": "2021-10-01",
+                        "Service": "ml_platform",
+                        "Region": "cn-beijing"
+                    },
+                    "Result": {
+                        "ServiceID": "s-20220815174947-n99pk",
+                        "CurrentVersionID": 100000744,
+                        "PreviousVersionID": 100000743
+                    }
+                }
+        """
         body = {
             "ServiceID": service_id,
-            "Replicas": replicas,
             "FlavorID": flavor_id,
-            "Model": {
-                "ModelID": model_id,
-                "ModelVersionID": model_version_id,
-            },
-            "ImageID": image_id,
-            "Envs": envs,
-            "ChangeType": change_type,
+            "Image": {},
         }
         if service_description:
             body.update({"Description": service_description})
+        if flavor_id:
+            body.update({"FlavorID": flavor_id})
+        if model_id:
+            body.update({"Model": {
+                "ModelID": model_id,
+                "ModelVersionID": model_version_id,
+            }})
+        if image_id:
+            body["Image"].update({"Id": image_id})
+        if image_version:
+            body["Image"].update({"Version": image_version})
+        if image_type:
+            body["Image"].update({"Type": image_type})
+        if image_url:
+            body["Image"].update({"Url": image_url})
+        if registry_username:
+            body["Image"].update(
+                {"ImageCredential": {
+                    "RegistryUsername": registry_username,
+                    "RegistryToken": registry_token,
+                }})
+        if envs:
+            body.update({"Envs": envs})
+        if command:
+            body.update({"Command": command})
+        if ports:
+            body.update({"Ports": ports})
+        if vpc_id:
+            body.update({"Network": {
+                "VpcId": vpc_id,
+                "SubnetId": subnet_id,
+                "EnableEip": enable_eip,
+            }})
+            if eip_id:
+                body["Network"].update({"EipId": eip_id})
+        if readiness_enabled or readiness_command or failure_threshold or period_seconds:
+            body.update({"ReadinessProbe": {}})
+            if readiness_enabled:
+                body["ReadinessProbe"].update({"Enabled": readiness_enabled})
+            if readiness_command:
+                body["ReadinessProbe"].update({"Command": readiness_command})
+            if failure_threshold:
+                body["ReadinessProbe"].update({"FailureThreshold": failure_threshold})
+            if period_seconds:
+                body["ReadinessProbe"].update({"PeriodSeconds": period_seconds})
         try:
             res_json = self.common_json_handler(api="UpdateService", body=body)
             return res_json
@@ -280,6 +485,10 @@ class InferenceServiceClient(BaseClient):
         self,
         service_name: str = None,
         service_name_contains: str = None,
+        resource_group_id: str = None,
+        resource_queue_id: str = None,
+        status: str = None,
+        states: list = None,
         offset=0,
         page_size=10,
         sort_by="CreateTime",
@@ -291,6 +500,10 @@ class InferenceServiceClient(BaseClient):
             service_name (str, optional): service name
             service_name_contains (str, optional): filter option, check if
                                 service name contains given string. Defaults to None.
+            resource_group_id (str, optional): id of the resource group
+            resource_queue_id (str, optional): id of the resource queue
+            status (str, optional): status of the service
+            states (list, optional): list of states of the service
             offset (int, optional): offset of database. Defaults to 0.
             page_size (int, optional): number of results to fetch. Defaults to 10.
             sort_by (str, optional): sort by 'ServiceName' or 'CreateTime'. Defaults to 'CreateTime'.
@@ -312,6 +525,14 @@ class InferenceServiceClient(BaseClient):
             body.update({"ServiceName": service_name})
         if service_name_contains:
             body.update({"ServiceNameContains": service_name_contains})
+        if resource_group_id:
+            body.update({"ResourceGroupId": resource_group_id})
+        if resource_queue_id:
+            body.update({"ResourceQueueId": resource_queue_id})
+        if status:
+            body.update({"Status": status})
+        if states:
+            body.update({"States": states})
 
         try:
             res_json = self.common_json_handler(api="ListServices", body=body)

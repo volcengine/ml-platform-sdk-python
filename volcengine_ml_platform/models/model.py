@@ -77,11 +77,15 @@ class Model:
         model_format: Optional[str] = None,
         model_type: Optional[str] = None,
         description: Optional[str] = None,
+        version_description: Optional[str] = None,
         tensor_config: Optional[dict] = None,
         model_metrics: Optional[list] = None,
         model_category: Optional[str] = None,
         dataset_id: Optional[str] = None,
         source_type: Optional[str] = "TOS",
+        base_model_version_id: Optional[str] = None,
+        source_id: Optional[str] = None,
+        source_version: Optional[str] = None,
         model_tags: Optional[list] = None,
     ):
         """注册模型到模型仓库
@@ -104,13 +108,17 @@ class Model:
                 框架可选值：'TensorFlow', 'PyTorch', 'ONNX', 'Caffe', 'Caffe2', 'MXNet', 'TensorRT',
                 'Scikit_Learn', 'XGBoost', 'LightGBM',
             description (str, optional): 模型描述信息。 默认为None
-            tensor_config (dict, optional): 模型的Tensor配置。 默认为None
+            version_description (str, optional): 模型版本描述信息。默认为None
+            tensor_config (dict, optional): 模型的Tensor配置。 默认为None·
             model_metrics (list, optional): 模型的指标数据。默认为None
             model_category (str, optional): 模型类别
                 可选值: 'TextClassification', 'TabularClassification', 'TabularRegression', 'ImageClassification'
             dataset_id (str, optional): 训练模型所使用的数据集唯一标示
             source_type (str, optional): 模型来源, 默认为TOS
                 可选值: 'TOS', 'Local', 'AutoML', 'Perf'
+            base_model_version_id (str, optional): 转化为此模型的原模型信息，仅用于Perf生成的模型
+            source_id(str, optional): 模型来源的id
+            source_version(str, optional): 模型来源的版本
             model_tags: (list, optional): 模型标签。默认为None。 e.g. [{"Key": "tag_key", "Value": "tag_key_value"}]
 
         Returns:
@@ -163,11 +171,15 @@ class Model:
             model_id=model_id,
             path=tos_path,
             description=description,
+            version_description=version_description,
             tensor_config=tensor_config,
             model_metrics=model_metrics,
             model_category=model_category,
             dataset_id=dataset_id,
             source_type=source_type,
+            base_model_version_id=base_model_version_id,
+            source_id=source_id,
+            source_version=source_version,
             model_tags=model_tags,
         )
 
@@ -328,6 +340,7 @@ class Model:
         self,
         model_id: str,
         model_version: str = None,
+        source_type: str = None,
         offset=0,
         page_size=10,
         sort_by="CreateTime",
@@ -338,6 +351,7 @@ class Model:
         Args:
             model_id (str): 模型在仓库中的唯一标识
             model_version (str, optional): 模型版本号。默认为None
+            source_type (str, optional): 模型来源种类。默认为None
             offset (int, optional): 标识检索模型版本时，起始偏移量位置。默认为0
             page_size (int, optional): 标识每个分页的大小。默认为10
             sort_by (str, optional): 标识按照哪个字段进行排序。默认为"CreateTime"
@@ -358,17 +372,19 @@ class Model:
                         "Total": 14,
                         "List": [
                             {
-                                "ModelVersionID": "m-20210812150750-w54j6-14",
-                                "ModelVersion": 14,
+                                "ModelVersionID": "m-20220705162132-gf47n-v6.0",
+                                "ModelVersion": "V6.0",
                                 "ModelFormat": "SavedModel",
-                                "ModelType": "TensorFlow:2.4",
-                                "Path": "tos://ml-platform-auto-created-required-2100000050-cn-north-4/modelrepo/from-sdk-repo/1631236594036/1/",
+                                "ModelType": "TensorFlow:2.0",
+                                "Path": "tos://ml-platform-auto-created-required-2100000050-cn-guilin-boe/modelrepo/1657009119382/1/",
                                 "Description": "test remark 2",
                                 "SourceType": "TOS",
-                                "CreateTime": "2021-09-10T09:37:14+08:00",
+                                "CreateTime": "2022-08-05T06:49:17Z",
                                 "TensorConfig": {
                                     "Inputs": []
-                                }
+                                },
+                                "SourceId": "test111",
+                                "SourceVersion": "V21.0"
                             }
                         ]
                     }
@@ -384,6 +400,7 @@ class Model:
         response = self.model_client.list_model_versions(
             model_id=model_id,
             model_version=model_version,
+            source_type=source_type,
             offset=offset,
             page_size=page_size,
             sort_by=sort_by,
@@ -408,7 +425,7 @@ class Model:
                 model["Description"],
                 model["CreateTime"],
             ],)
-        print(table)
+        # print(table)
         return response
 
     def update_model(
@@ -501,28 +518,69 @@ class Model:
 
     def deploy(
         self,
-        model_id: str,
-        model_version: str,
         service_name: str,
-        resource_queue_id: str,
-        flavor: str = "ml.g1e.large",
-        image_id: str = "machinelearning/tfserving:tf-cuda10.1",
-        envs=None,
-        replica: Optional[int] = 1,
-        description: Optional[str] = None,
+        replicas: int,
+        flavor_id: str,
+        envs: list,
+        service_description: Optional[str] = None,
+        model_id: Optional[str] = None,
+        model_version_id: Optional[str] = None,
+        image_id: Optional[str] = None,
+        image_version: Optional[str] = None,
+        image_type: Optional[str] = None,
+        image_url: Optional[str] = None,
+        registry_username: Optional[str] = None,
+        registry_token: Optional[str] = None,
+        command: Optional[str] = None,
+        ports: Optional[list] = None,
+        vpc_id: Optional[str] = None,
+        subnet_id: Optional[str] = None,
+        enable_eip: Optional[bool] = False,
+        eip_id: Optional[str] = None,
+        readiness_enabled: Optional[bool] = False,
+        readiness_command: Optional[str] = None,
+        failure_threshold: Optional[int] = 3,
+        period_seconds: Optional[int] = 10,
+        resource_group_id: Optional[str] = None,
+        resource_queue_id: Optional[str] = None,
     ) -> InferenceService:
         """将模型部署为在线推理服务
 
         Args:
-            model_id (str): 模型在仓库中的唯一标识
-            model_version (str): 模型版本号
-            service_name (str): 推理服务名称
-            resource_queue_id (str): 推理服务使用的队列唯一标识。默认为None
-            flavor (str, optional): 推理服务使用的套餐。默认为`ml.g1e.large`
-            image_id (str, optional): 推理服务使用的镜像。默认为`machinelearning/tfserving:tf-cuda10.1`
-            envs (dict, optional): 推理服务需要注入的环境变量。默认为None
-            replica (int, optional): 推理服务实例数量。默认为1
-            description(str, optional): 推理服务描述信息。默认为None
+            service_name (str): 推理服务名字
+            replicas (int): 服务实例数量
+            flavor_id (str): 服务所使用的计算规格ID。
+            envs (list): 服务环境变量列表。
+                列表每个元素格式: {"Name": str, "Value": str}
+            service_description (str, optional): 服务描述信息。默认为None
+            model_id (str, optinal): 服务部署的模型ID。默认为None
+            model_version_id (str, optinal): 服务部署的模型版本ID。默认为None
+            image_id (str, optional): 服务所使用的镜像ID。 默认为None
+            image_version (str, optional): 服务所使用的镜像版本。 默认为None
+            image_type (str, optional): 服务所使用的镜像版本。
+                可选值: 'Preset', 'Custom', 'VolcEngine', 'Public'
+            image_url (str, optional): 服务所使用的镜像URL。默认为None
+            registry_username (str, optional): 服务所使用的镜像仓库的用户名。默认为None
+            registry_token (str, optional): 服务所使用的镜像仓库的token。默认为None
+            command (str, optional): 服务容器的入口命令。默认为None
+            ports (list, optional): 服务监听端口列表。默认为None
+                列表每个元素格式:
+                {
+                    "ListenPort": str,
+                    "ExposePort": str,
+                    "Type": str,
+                }
+                Type可选值: "HTTP", "RPC", "Metrics", "Other"
+            vpc_id (str, optional): 对于需要跨VPC访问的服务, 服务客户端所在的VPC ID。默认为None
+            subnet_id (str, optional): 对于需要跨VPC访问的服务, 服务客户端所在的子网ID。默认为None
+            enable_eip (bool, optional): 对于需要跨VPC访问的服务, 是否开启公网访问。默认为False
+            eip_id (str, optional): 对于需要跨VPC访问并且开启公网访问的服务, EIP ID。默认为None
+            readiness_enabled (bool, optional): 是否开启健康检查。默认为False
+            readiness_command (str, optional): 自定义健康检查命令。默认为None
+            failure_threshold (int, optional): 自定义健康检查失败次数阈值。默认为3
+            period_seconds (int, optional): 自定义健康检查间隔时间。默认为10s
+            resource_group_id (str, optional): 资源组ID。默认为None
+            resource_queue_id (str, optional): 资源组队列ID。默认为None
 
         Returns:
             返回InferenceService对象，包含推理服务相关信息
@@ -530,22 +588,34 @@ class Model:
         Raise:
             Exception: 模型部署异常
         """
-        inference_service = InferenceService(
-            service_name=service_name,
-            image_id=image_id,
-            flavor_id=self.model_client.get_unique_flavor(
-                self.resource_client.list_resource(
-                    name=flavor,
-                    sort_by="vCPU",
-                ),),
-            model_id=model_id,
-            model_version_id=self._model_version_id(model_id, model_version),
-            envs=envs,
-            replica=replica,
-            description=description,
-            resource_queue_id=resource_queue_id,
+        inference_service = InferenceService()
+        inference_service.create(
+            service_name,
+            replicas,
+            flavor_id,
+            envs,
+            service_description,
+            model_id,
+            model_version_id,
+            image_id,
+            image_version,
+            image_type,
+            image_url,
+            registry_username,
+            registry_token,
+            command,
+            ports,
+            vpc_id,
+            subnet_id,
+            enable_eip,
+            eip_id,
+            readiness_enabled,
+            readiness_command,
+            failure_threshold,
+            period_seconds,
+            resource_group_id,
+            resource_queue_id
         )
-        inference_service.create()
         return inference_service
 
     def create_perf_job(
