@@ -34,11 +34,15 @@ class ModelClient(BaseClient):
         path: str,
         model_id=None,
         description=None,
+        version_description=None,
         tensor_config=None,
         model_metrics=None,
         model_category=None,
         dataset_id=None,
         source_type="TOS",
+        base_model_version_id=None,
+        source_id=None,
+        source_version=None,
         model_tags=None,
     ):
         """create models
@@ -47,16 +51,20 @@ class ModelClient(BaseClient):
             model_name (str): models's name
             model_format (str): models's format, can be 'SavedModel', 'GraphDef','TorchScript','PTX',
                     'CaffeModel','NetDef','MXNetParams','Scikit_Learn','XGBoost','TensorRT','ONNX',or 'Custom'
-            model_type (str): The type of the ModelVersion, examples: 'TensorFlow:2.0'
+            model_type (str): the type of the ModelVersion, examples: 'TensorFlow:2.0'
             path (str): source storage path
             model_id (str, optional): model_id, a new models will be created if not given. Defaults to None.
             description (str, optional): description to the models. Defaults to None.
+            version_description (str, optional): description to the model version. Defaults to None.
             tensor_config (dict, optional): tensor config of the models.
             model_metrics (list, optional): list of models metrics.
             model_category (str, optional): category of the model.
                 values can be 'TextClassification', 'TabularClassification', 'TabularRegression', 'ImageClassification'
             dataset_id (str, optional): id of the dataset based on which the model is trained
             source_type (str, optional): storage type. Defaults to 'TOS'.
+            base_model_version_id (str, optional): modelVersionID which the model is converted from, only for perf generated model
+            source_id (str, optional): SourceId of the model
+            source_version (str, optional): SourceVersion of the model
             model_tags (list, optional): model tags. e.g. [{"Key": "tag_key", "Value": "tag_key_value"}]
 
         Raises:
@@ -76,7 +84,7 @@ class ModelClient(BaseClient):
                 },
             }
             if description is not None:
-                body["VersionInfo"].update({"Description": description})
+                body.update({"Description": description})
 
             if model_id is not None:
                 body.update({"ModelID": model_id})
@@ -88,13 +96,25 @@ class ModelClient(BaseClient):
                 body["VersionInfo"].update({"MetricsList": model_metrics})
 
             if model_category is not None:
-                body.update({"ModelCategory": model_category})
+                body["VersionInfo"].update({"ModelCategory": model_category})
 
             if dataset_id is not None:
-                body.update({"DatasetID": dataset_id})
+                body["VersionInfo"].update({"DatasetID": dataset_id})
+
+            if base_model_version_id is not None:
+                body["VersionInfo"].update({"BaseModelVersion": base_model_version_id})
+
+            if source_id is not None:
+                body["VersionInfo"].update({"SourceId": source_id})
+
+            if source_version is not None:
+                body["VersionInfo"].update({"SourceVersion": source_version})
 
             if model_tags is not None:
                 body["VersionInfo"].update({"ModelTags": model_tags})
+
+            if version_description is not None:
+                body["VersionInfo"].update({"Description": version_description})
 
             res_json = self.common_json_handler(api="CreateModel", body=body)
             return res_json
@@ -235,6 +255,7 @@ class ModelClient(BaseClient):
         self,
         model_id: str,
         model_version: str = None,
+        source_type: str = None,
         offset=0,
         page_size=10,
         sort_by="CreateTime",
@@ -245,6 +266,7 @@ class ModelClient(BaseClient):
         Args:
             model_id (str): The unique ID of the Model
             model_version: filter option, the certain ModelVersion of Model. Defaults to None.
+            source_type: The source of the ModelVersion
             offset (int, optional): offset of database. Defaults to 0.
             page_size (int, optional): number of results to fetch. Defaults to 10.
             sort_by (str, optional): sort by 'ModelVersion' or 'CreateTime'. Defaults to 'CreateTime'.
@@ -265,6 +287,9 @@ class ModelClient(BaseClient):
         }
         if model_version:
             body.update({"ModelVersion": model_version})
+
+        if source_type:
+            body.update({"SourceType": source_type})
 
         try:
             res_json = self.common_json_handler(

@@ -18,20 +18,20 @@ def register_model(client, args):
         tensor_config=tensor_config,
     )
     print(resp)
-    return resp["Result"]["ModelID"], resp["Result"]["VersionInfo"]["ModelVersion"]
+    return resp["Result"]["ModelID"], resp["Result"]["VersionInfo"]["ModelVersionID"]
 
 
-def deploy_model(client, args, model_id, model_version):
-    inference_service = client.deploy(
+def deploy_model(client, args, model_id, model_version_id):
+    client.deploy(
         model_id=model_id,
-        model_version=model_version,
+        model_version_id=model_version_id,
         service_name=args.service_name,
-        flavor=args.flavor,
-        replica=args.replica,
+        flavor_id=args.flavor_id,
+        replicas=args.replicas,
         resource_queue_id=args.resource_queue_id,
         image_id=args.image_id,
+        envs=args.env
     )
-    inference_service.print()
 
 
 def main():
@@ -89,16 +89,16 @@ def main():
         help="service name",
     )
     parser.add_argument(
-        "--flavor",
+        "--flavor_id",
         type=str,
         default="ml.g1ie.large",
-        help="flavor",
+        help="flavor_id",
     )
     parser.add_argument(
-        "--replica",
+        "--replicas",
         type=int,
         default=1,
-        help="inferece service replica",
+        help="inferece service replicas",
     )
     parser.add_argument(
         "--resource-queue-id",
@@ -112,14 +112,20 @@ def main():
         default="ml_platform/tritonserver:21.02",
         help="image id",
     )
+    parser.add_argument(
+        "--env",
+        type=str,
+        default=[],
+        help="environment variable",
+    )
 
     args = parser.parse_args()
 
     client = model.Model()
-    model_id, model_version = register_model(client, args)
+    model_id, model_version_id = register_model(client, args)
 
     if args.enable_deploy:
-        deploy_model(client, args, model_id, model_version)
+        deploy_model(client, args, model_id, model_version_id)
 
 
 if __name__ == "__main__":

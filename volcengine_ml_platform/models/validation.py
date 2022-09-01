@@ -12,7 +12,7 @@ SUPPORTED_MODEL_CATEGORY = [
     "TextEntity",
 ]
 
-SUPPORTED_SOURCE_TYPE = ["TOS", "Local", "AutoML", "Perf"]
+SUPPORTED_SOURCE_TYPE = ["TOS", "Local", "AutoML", "Perf", "ModelHub"]
 
 _shape_schema = {"type": "array", "items": {"type": "integer"}, "minItems": 1}
 
