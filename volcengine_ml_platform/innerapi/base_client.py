@@ -20,14 +20,6 @@ BodyDict = Dict[str, Union[str, int]]
 
 def define_inner_api(name, method="POST"):
     header = {"Content-Type": "application/json"}
-    stress_env = volcengine_ml_platform.get_stress_env()
-    if stress_env:
-        header.update({"x-mlplatform-stress": stress_env})
-
-    mlplatform_env = volcengine_ml_platform.get_mlplatform_env()
-    if mlplatform_env:
-        header.update({"x-mlplatform-env": mlplatform_env})
-
     api_info = ApiInfo(
         method,
         "/",

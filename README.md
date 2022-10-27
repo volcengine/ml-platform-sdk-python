@@ -1,116 +1,66 @@
-# Volcano Engine ML Platform Python SDK
+# ML Platform Python SDK 使用手册
 
+机器学习平台提供了 Python SDK `volcengine-ml-platform` 供用户在任何网络通畅的机器上访问机器学习平台，该 SDK 当前支持模型注册、服务部署、实验管理等功能。
 
-## To start using SDK
+## 相关概念
 
-### 1. Install package
-* From TOS
-```
-pip install --user https://ml-platform-public-examples-cn-beijing.tos-cn-beijing.volces.com/python_sdk_installer/volcengine_ml_platform-1.0.7-py3-none-any.whl -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
+- [AK / SK]()
+- [Region]()
+- [命令行工具（volc）]()
 
-* From Pypi
-```
-敬请期待
-```
+## 安装
 
-### 2. Run Samples
+可以通过如下指令安装最新版本的 SDK：
 
-Volcengine Region List
-
-|  name   | endpoint  |
-|  ----    | ----  |
-| cn-beijing  | xxxx |
-| cn-qingdao  | xxxx |
-
-2.1 Setting up the environment
-
-There are two ways to set up. In WebIDE, you can use both, but in Customtask, you are required to do this by setting environment variable.
-
-
-* set environment variable
-```
-export VOLC_ACCESSKEY="replace_with_your_ak"
-export VOLC_SECRETKEY="replace_with_your_sk"
-export VOLC_REGION="replace_with_region_the_region_you_use_the_most"
+```shell
+git clone http://github.com/volcengine/ml-platform-sdk-python
+cd ml-platform-sdk-python && python -m pip install .
 ```
 
-​	ps: for more details about this in CustomTask, invite [CustomTask](https://www.volcengine.com/docs/6459/72350).
+## 配置 AK / SK
 
-* edit ~/.volc/config
+在正式使用 SDK 之前需要先完成火山引擎账号的 AK / SK 的本地配置，否则在使用 SDK 访问机器学习平台时无法通过身份校验。
 
-```json
-{
-    "ak": "replace_with_your_ak",
-    "sk": "replace_with_your_sk",
-    "region": "replace_with_region_the_region_you_use_the_most"
-}
+1. 登录火山引擎控制台并前往【密钥管理】查看当前账号的 AK / SK。
+  - 若当前账号为子账号，需要具备 `AccessKeyFullAccess` 的 IAM 策略。
+2. 配置 AK / SK 推荐使用 volc 命令行工具。同 SDK 一样，该工具也是一种脱离控制台页面访问机器学习平台的方式。该工具的安装详见命令行工具（volc），完成命令行工具的安装后通过 `volc configure` 交互地配置 AK / SK 及 region。
+
+```shell
+volc configure
+volc access key [********yM2I]:           填写用户的 AK
+volc secret access key [********TQ==]:    填写用户的 SK
+volc region [cn-beijing]: █              填写所在地域，目前仅支持 cn-beijing
 ```
 
-* call method: volcengine_ml_platform.init()
+  - 方式 2：若不想额外安装命令行工具，可在 `~/.volc` 目录下手动创建 `config` 及 `credentials` 两个文件并正确填写 region 及 AK / SK。
+```ini
+# ~/.volc/config
 
-> You can refer to samples/env.py.template
-
-```
-import volcengine_ml_platform
-
-AK = "replace_with_your_ak"
-SK = "replace_with_your_sk=="
-REGION_NAME = "replace_with_region_the_region_you_use_the_most"
-
-volcengine_ml_platform.init(ak=AK, sk=SK, region=REGION_NAME)
+[default]
+region       = cn-beijing           填写所在地域，目前仅支持 cn-beijing
 ```
 
-- here are some samples in *mlplatform-sdk-python/samples* , to run these samples, using the follow commands:
+```ini
+# ~/.volc/credentials
 
-| sample                                   | run in WebIDE                                                | run in Customtask                                            |
-| ---------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| flower_classification_tensorflow         | cd mlplatform-sdk-python/samples/flower_classification_tensorflow && bash run.sh | cd mlplatform-sdk-python/samples/flower_classification_tensorflow && bash run.sh |
-| flower_classification_tensorflow_horovod | cd mlplatform-sdk-python/samples/flower_classification_tensorflow && bash run_horovod_webide.sh | cd mlplatform-sdk-python/samples/flower_classification_tensorflow && bash run_horovod_customtask.sh |
-| flower_classification_pytorch            | cd mlplatform-sdk-python/samples/flower_classification_pytorch&& bash run_webide.sh | cd mlplatform-sdk-python/samples/flower_classification_pytorch && bash run_customtask.sh |
-| house_price_prediction_xgboost           | cd mlplatform-sdk-python/samples/house_price_prediction_xgboost&& bash run_webide.sh | cd mlplatform-sdk-python/samples/house_price_prediction_xgboost&& bash run_customtask.sh |
-
-- What can you learn by this samples?
-
-| sample                                   | what can you learn                                           |
-| ---------------------------------------- | ------------------------------------------------------------ |
-| flower_classification_tensorflow         | How to load datasets from TOS and build dataset by tf.io.gfile.glob() and load_dataset()<br />How to load pretrained model from TOS<br />How to save checkpoints and upload to TOS by callbacks<br />How to load checkpoints from TOS |
-| flower_classification_tensorflow_horovod | How to use horovod in  WebIDE and CustomTask                  |
-| flower_classification_pytorch            | How to load datasets from TOS and build dataset by our SDK<br />How to load checkpoint from TOS and upload checkpoint to TOS<br />How to use pytorch DDP in WebIDE and Customtask |
-
-### 3. Usage
-reference samples code: https://github.com/volcengine/ml-platform-sdk-python/tree/main/samples
-
-
-### 4. Document
-reference sdk api docs: https://github.com/volcengine/ml-platform-sdk-python/tree/main/docs/build/markdown
-
-
-## To start developing SDK
-### Installation dependencies
-```
-python setup.py install
-pip install -r requirements.txt
-```
-### Code style
-```
-pip install pre-commit
-pre-commit install           # install pre-commit hook to git
-```
-You can also manually check all files with the following command
-```
-pre-commit run --all-files
+[default]
+access_key_id     = ******          填写用户的 AK
+secret_access_key = ******          填写用户的 SK
 ```
 
-### Unittest
-```
-make test
+  - 方式 3：通过环境变量配置 AK / SK 及 region。
+```shell
+export VOLC_ACCESSKEY=****          填写用户的 AK
+export VOLC_SECRETKEY=****          填写用户的 SK
+export VOLC_REGION=****             填写所在地域，目前仅支持 cn-beijing
 ```
 
-### end2end test
-```
-make end2end_test
-```
-### Write Comment
+## 使用 SDK
 
-[look it](./docs/README.md)
+如何使用 SDK 访问机器学习平台，完成模型注册、服务部署、实验管理等操作详见如下示例。
+
+- 模型管理与服务部署：
+  - [示例代码](https://github.com/volcengine/ml-platform-sdk-python/tree/main/samples)
+- 实验管理：
+  - [README](https://github.com/volcengine/ml-platform-sdk-python/tree/main/volcengine_ml_platform/tracking/README.md)
+  - [示例代码](https://github.com/volcengine/ml-platform-sdk-python/tree/main/samples/tracking)

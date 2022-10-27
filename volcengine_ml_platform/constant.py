@@ -2,34 +2,18 @@ import os
 
 from volcengine_ml_platform.util import volce_util
 
-BOE_ENV = "BOE"
 PROD_ENV = "PROD"
-ONLINE_ENV = "ONLINE"
 
 DEFAULT_REGION = "cn-beijing"
 SERVICE_NAME = "ml_platform"
 SERVICE_VERSION = "2021-10-01"
 
 SERVICE_HOSTS = {
-    BOE_ENV: os.getenv("VOLC_SERVICE_HOST_BOE", "open-boe-stable.volcengineapi.com"),
     PROD_ENV: "open.volcengineapi.com",
-    ONLINE_ENV: "open.volcengineapi.com",
 }
 
 TOS_REGION_ENDPOINT_URLS = {
-    BOE_ENV: {
-        "cn-north-1": "http://boe-s3-official-test.volces.com",
-        "cn-north-4": "http://boe-s3-official-test.volces.com",
-        "cn-guilin-boe": "http://tos-s3-cn-boe.volces.com",
-    },
     PROD_ENV: {
-        "cn-qingdao": volce_util.get_tos_endpoint("cn-qingdao"),
-        "cn-north-1": volce_util.get_tos_endpoint("cn-qingdao"),
-        "cn-beijing": volce_util.get_tos_endpoint("cn-beijing"),
-    },
-    ONLINE_ENV: {
-        "cn-qingdao": volce_util.get_tos_endpoint("cn-qingdao"),
-        "cn-north-1": volce_util.get_tos_endpoint("cn-qingdao"),
         "cn-beijing": volce_util.get_tos_endpoint("cn-beijing"),
     },
 }
