@@ -38,7 +38,8 @@ class TOSClient:
             session_token = volcengine_ml_platform.get_session_token()
         if session_token is not None and len(session_token.strip()) > 0:
             config["aws_session_token"] = session_token
-        self.s3_client = boto3.client("s3", config=Config(s3={'addressing_style': 'virtual'}), **config)
+        self.s3_client = boto3.client("s3", config=Config(
+            s3={'addressing_style': 'virtual'}), **config)
         self.dir_record = set()
 
     def bucket_exists(self, bucket_name):
@@ -558,11 +559,13 @@ class TOSClient:
                 Prefix=key,
             )
             keys = [content["Key"] for content in res.get("Contents", list())]
-            dirs = [content["Prefix"] for content in res.get("CommonPrefixes", list())]
+            dirs = [content["Prefix"]
+                    for content in res.get("CommonPrefixes", list())]
 
             for d in dirs:
                 debug(f"processing dir: {d}")
-                dest_pathname = os.path.join(local_dir, os.path.relpath(d, prefix) + "/")
+                dest_pathname = os.path.join(
+                    local_dir, os.path.relpath(d, prefix) + "/")
                 debug(f"dest_pathname: {dest_pathname}")
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))
@@ -571,7 +574,8 @@ class TOSClient:
 
             for k in keys:
                 debug(f"processing file: {k}")
-                dest_pathname = os.path.join(local_dir, os.path.relpath(k, prefix))
+                dest_pathname = os.path.join(
+                    local_dir, os.path.relpath(k, prefix))
                 debug(f"dest_pathname: {dest_pathname}")
                 if not os.path.exists(os.path.dirname(dest_pathname)):
                     os.makedirs(os.path.dirname(dest_pathname))

@@ -42,6 +42,9 @@ def get_service_name():
 def get_credentials():
     return EnvHolder.get_credentials()
 
+def get_inner_api_token():
+    return EnvHolder.get_inner_api_token()
+
 
 def get_encrypted_key():
     return os.getenv(constant.ENCRYPTED_KEY_ENV_NAME)
@@ -62,9 +65,9 @@ def get_mlplatform_env():
 def get_session_token():
     return EnvHolder.SESSION_TOKEN
 
-
 def get_inner_api_service_host():
     return os.getenv(constant.INNER_API_SERVICE_HOST_ENV_NAME)
+
 
 
 class EnvHolder:
@@ -72,6 +75,7 @@ class EnvHolder:
     STRESS_ENV = os.environ.get("x-mlplatform-stress", "")
     MLPLATFORM_ENV = os.environ.get("x-mlplatform-env", "")
     GLOBAL_CREDENTIALS = None
+    INNER_API_TOKEN = None
     SESSION_TOKEN: Optional[str] = None
 
     @classmethod
@@ -124,7 +128,8 @@ class EnvHolder:
         ml_platform_conf_env = None
         if config.has_section(ml_platform_section):
             if config.has_option(ml_platform_section, env_option):
-                ml_platform_conf_env = config.get(ml_platform_section, env_option)
+                ml_platform_conf_env = config.get(
+                    ml_platform_section, env_option)
         final_env_name = cls.pickup_non_blank_value(
             env_name,
             os.environ.get("VOLC_ML_PLATFORM_ENV", None),
@@ -146,10 +151,23 @@ class EnvHolder:
             os.environ["S3_ENDPOINT"] = get_tos_endpoint_url()
 
     @classmethod
+    def init_inner_token(cls):
+        token_path = "/root/.volc/access_token"
+        if os.path.isfile(token_path):
+            with open(token_path,"r") as f:
+                cls.INNER_API_TOKEN = f.read()
+    
+    @classmethod
     def get_credentials(cls):
         if cls.GLOBAL_CREDENTIALS is None:
             cls.init(None, None, None, None, True)
         return cls.GLOBAL_CREDENTIALS
+    
+    @classmethod
+    def get_inner_api_token(cls):
+        if cls.INNER_API_TOKEN is None:
+            cls.init_inner_token()
+        return cls.INNER_API_TOKEN
 
     @classmethod
     def pickup_non_blank_value(cls, *args):

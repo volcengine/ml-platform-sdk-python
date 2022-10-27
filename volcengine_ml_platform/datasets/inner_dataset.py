@@ -27,7 +27,8 @@ class InnerDataset(TabularDataset):
         target_user_id=None,
         target_account_id=None,
     ):
-        _Dataset.__init__(self, dataset_id, annotation_id, local_path, tos_source)
+        _Dataset.__init__(self, dataset_id, annotation_id,
+                          local_path, tos_source)
         # new info
         self.dataset_type = dataset_type
         self.target_user_id = (
@@ -49,7 +50,8 @@ class InnerDataset(TabularDataset):
 
     def get_target_account_id(self):
         if self.target_account_id is None:
-            self.target_account_id = int(os.getenv(constant.ACCOUNT_ID_ENV_NAME))
+            self.target_account_id = int(
+                os.getenv(constant.ACCOUNT_ID_ENV_NAME))
         return self.target_account_id
 
     def get_target_user_id(self):
@@ -73,7 +75,8 @@ class InnerDataset(TabularDataset):
     def _get_tos_client(self):
         ak, sk, session_token = self._get_sts_token()
         region = volcengine_ml_platform.get_credentials().region
-        credentials = Credentials.Credentials(ak, sk, constant.SERVICE_NAME, region)
+        credentials = Credentials.Credentials(
+            ak, sk, constant.SERVICE_NAME, region)
         return tos.TOSClient(credentials, session_token)
 
     def _get_dataset_detail(self):
