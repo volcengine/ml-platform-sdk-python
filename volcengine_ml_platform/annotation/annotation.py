@@ -12,6 +12,12 @@ def get_annotation_section(annotation_line):
 
 def get_content(annotation_line):
     data = annotation_line["Data"]
+    if data.get('ImageURL') is not None:
+        return data.get('ImageURL')
+    elif data.get('VideoURL') is not None:
+        return data.get('VideURL')
+    elif data.get('TextURL') is not None:
+        return data.get('TextURL')
     with open(data["FilePath"], mode="rb") as fd:
         content = fd.read()
         if data.get("Position") is not None:
